@@ -504,6 +504,43 @@ html, body {
   gap: 8px;
 }
 
+.thought-summary-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.thought-summary-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.thought-tag-badge {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.thought-action-mini-btn {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  line-height: 1.3;
+  background: var(--bg-btn);
+  color: var(--text-main);
+  border: 1px solid var(--border-rule);
+  padding: 1px 6px;
+  cursor: pointer;
+  outline: none;
+}
+
+.thought-action-mini-btn:hover {
+  background: #1A1816;
+  color: #FFFFFF;
+  border-color: #1A1816;
+}
+
 .reasoning-content {
   font-family: var(--font-mono);
   font-size: 12px;
@@ -3009,16 +3046,10 @@ html, body {
     const content = details.querySelector('.reasoning-content');
     if (content) {
       navigator.clipboard.writeText(content.innerText || content.textContent).then(() => {
-        btn.classList.add('copied');
-        const origHtml = btn.innerHTML;
-        btn.innerHTML = `
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
-          <span>Copied!</span>
-        `;
+        btn.innerText = 'Copied!';
         setTimeout(() => {
-          btn.classList.remove('copied');
-          btn.innerHTML = origHtml;
-        }, 2000);
+          btn.innerText = 'Copy';
+        }, 1500);
         showToast('Thought process copied to clipboard', 'info');
       });
     }
@@ -3027,16 +3058,10 @@ html, body {
   window.copySnippet = function(btn) {
     const code = btn.closest('.code-container').querySelector('code').innerText;
     navigator.clipboard.writeText(code).then(() => {
-      const origHtml = btn.innerHTML;
-      btn.innerHTML = `
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-1px;margin-right:3px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
-        <span>Copied!</span>
-      `;
-      btn.style.color = 'var(--success)';
+      btn.innerText = 'Copied!';
       setTimeout(() => {
-        btn.innerHTML = origHtml;
-        btn.style.color = '';
-      }, 2000);
+        btn.innerText = 'Copy';
+      }, 1500);
       showToast('Code snippet copied to clipboard', 'info');
     });
   };
