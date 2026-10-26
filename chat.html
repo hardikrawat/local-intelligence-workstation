@@ -3285,14 +3285,19 @@ html, body {
     let modelLoadedTimestamp = modelDetectedInRam ? performance.now() : null;
 
     
+    const updateLiveThoughtTimer = () => {
+      if (!thoughtTimer || !isInsideThink || !thoughtStartTime) return;
+      const elapsed = ((performance.now() - thoughtStartTime) / 1000).toFixed(1);
+      const tCount = estimateTokens(accumulatedThought).toLocaleString();
+      thoughtTimer.innerText = `Thinking... ${elapsed}s (${tCount} tokens)`;
+    };
+
     const stopwatchInterval = setInterval(() => {
       if (!isGenerating) return;
       const totalElapsedSec = ((performance.now() - requestStartTime) / 1000).toFixed(1);
       metricStreamTime.innerText = `${totalElapsedSec}s`;
 
-      if (isInsideThink && thoughtStartTime) {
-        thoughtTimer.innerText = `${((performance.now() - thoughtStartTime) / 1000).toFixed(1)}s`;
-      }
+      updateLiveThoughtTimer();
 
       
       if (!firstTokenTime) {
@@ -3334,11 +3339,7 @@ html, body {
       if (accumulatedThought) {
         reasoningBox.style.display = 'block';
         thoughtBody.innerHTML = marked.parse(accumulatedThought);
-        if (isInsideThink && thoughtStartTime && thoughtTimer) {
-          const elapsed = ((performance.now() - thoughtStartTime) / 1000).toFixed(1);
-          const tCount = estimateTokens(accumulatedThought).toLocaleString();
-          thoughtTimer.innerText = `Thinking... ${elapsed}s (${tCount} tokens)`;
-        }
+        updateLiveThoughtTimer();
         if (!accumulatedAnswer && streamLoader) {
           streamLoader.innerHTML = '<span class="typing-caret-block">▌</span>';
         }
