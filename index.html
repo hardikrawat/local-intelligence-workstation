@@ -611,10 +611,10 @@ html, body {
         <option value="json">Mode: JSON</option>
         <option value="raw">Mode: Raw</option>
       </select>
-      <button class="top-btn" id="newChatBtn">[New Session]</button>
-      <button class="top-btn" id="modelsLibraryBtn">[Models (3)]</button>
-      <button class="top-btn" id="vramPurgeQuickBtn">[Evict VRAM]</button>
-      <button class="top-btn" id="settingsBtn">[Settings ⚙]</button>
+      <button class="top-btn" id="newChatBtn">New Session</button>
+      <button class="top-btn" id="modelsLibraryBtn">Models</button>
+      <button class="top-btn" id="vramPurgeQuickBtn">Evict VRAM</button>
+      <button class="top-btn" id="settingsBtn">Settings ⚙</button>
 
       <button id="refreshModelsBtn" style="display:none;"></button>
       <button id="themeToggle" style="display:none;"></button>
@@ -646,16 +646,16 @@ html, body {
           <img id="attachedThumbnail" style="height:20px; vertical-align:middle;">
           <span id="attachedFileName">image.png</span>
           <span id="attachedFileSize"></span>
-          <span id="removeImgBtn" style="cursor:pointer; margin-left:4px;">[×]</span>
+          <span id="removeImgBtn" style="cursor:pointer; margin-left:4px;">✕</span>
         </div>
 
         <div class="composer-row">
           <textarea id="promptInput" class="composer-input" placeholder="Type prompt... (Enter or Ctrl+Enter to send)" rows="1"></textarea>
           <input type="file" id="imageInput" accept="image/*" style="display:none;">
-          <button class="composer-btn secondary" id="triggerImageBtn" title="Attach Image">[ Attach ]</button>
-          <button class="composer-btn" id="sendBtn">[ SEND (Ctrl+Enter) ]</button>
-          <button class="composer-btn stream-stop-btn" id="streamInlineStopBtn" style="display:none;">[ ABORT ]</button>
-          <button class="composer-btn stream-purge-btn" id="streamInlinePurgeBtn" style="display:none;">[ EVICT ]</button>
+          <button class="composer-btn secondary" id="triggerImageBtn" title="Attach Image">Attach</button>
+          <button class="composer-btn" id="sendBtn">Send</button>
+          <button class="composer-btn stream-stop-btn" id="streamInlineStopBtn" style="display:none;">Abort</button>
+          <button class="composer-btn stream-purge-btn" id="streamInlinePurgeBtn" style="display:none;">Evict</button>
           <span id="promptTokenCounter" style="display:none;">0</span>
         </div>
       </div>
@@ -699,7 +699,7 @@ html, body {
   <div class="drawer-card">
     <div class="drawer-header">
       <span>SETTINGS & CONFIGURATION</span>
-      <button class="top-btn" id="closeSettingsModalX">[✕]</button>
+      <button class="top-btn" id="closeSettingsModalX">✕</button>
     </div>
     <div class="modal-tab-bar" id="settingsTabBar">
       <button class="modal-tab-btn active" data-tab="serverTab">Server & Hardware</button>
@@ -710,7 +710,7 @@ html, body {
         <label for="settingOllamaHost">Ollama Host URL:</label>
         <input type="text" id="settingOllamaHost" class="form-input" value="http://127.0.0.1:11434">
         <div style="display:flex; gap:6px; margin-top:4px;">
-          <button class="composer-btn" id="testConnBtn">[Test Connection]</button>
+          <button class="composer-btn" id="testConnBtn">Test Connection</button>
           <span id="hostTestResult" style="font-size:11px; align-self:center;"></span>
         </div>
       </div>
@@ -748,8 +748,8 @@ html, body {
       </div>
     </div>
     <div style="display:flex; justify-content:flex-end; gap:6px; margin-top:12px; border-top:1px solid var(--border-frame); padding-top:8px;">
-      <button class="composer-btn" id="closeSettingsBtn">[Cancel]</button>
-      <button class="composer-btn" id="saveSettingsBtn">[Save Configuration]</button>
+      <button class="composer-btn" id="closeSettingsBtn">Cancel</button>
+      <button class="composer-btn" id="saveSettingsBtn">Save Configuration</button>
     </div>
     <div id="specsTab" style="display:none;"></div>
     <div id="settingOperatingMode" style="display:none;"></div>
@@ -762,7 +762,7 @@ html, body {
   <div class="drawer-card" style="width:720px;">
     <div class="drawer-header">
       <span>INSTALLED MODELS LIBRARY</span>
-      <button class="top-btn" id="closeLibraryModalX">[✕]</button>
+      <button class="top-btn" id="closeLibraryModalX">✕</button>
     </div>
     <div style="overflow-x:auto; max-height:360px;">
       <table class="model-table">
@@ -782,8 +782,8 @@ html, body {
       </table>
     </div>
     <div style="display:flex; justify-content:space-between; margin-top:8px; border-top:1px solid var(--border-frame); padding-top:8px;">
-      <button class="composer-btn" id="refreshLibBtn">[Refresh]</button>
-      <button class="composer-btn" id="closeLibraryBtn">[Close]</button>
+      <button class="composer-btn" id="refreshLibBtn">Refresh</button>
+      <button class="composer-btn" id="closeLibraryBtn">Close</button>
     </div>
   </div>
 </div>
@@ -795,8 +795,8 @@ html, body {
     </div>
     <p id="confirmModalText" style="font-size:12px; margin:10px 0;"></p>
     <div style="display:flex; justify-content:flex-end; gap:8px;">
-      <button class="composer-btn" id="confirmCancelBtn">[Cancel]</button>
-      <button class="composer-btn" id="confirmProceedBtn">[Confirm]</button>
+      <button class="composer-btn" id="confirmCancelBtn">Cancel</button>
+      <button class="composer-btn" id="confirmProceedBtn">Confirm</button>
     </div>
   </div>
 </div>
@@ -2111,7 +2111,7 @@ html, body {
         const savedModel = localStorage.getItem(MODEL_KEY);
         modelSelect.innerHTML = installedModels.map(m => `<option value="${m.name}">${m.name}</option>`).join('');
         const libBtn = document.getElementById('modelsLibraryBtn');
-        if (libBtn) libBtn.innerText = `[Models (${installedModels.length})]`;
+        if (libBtn) libBtn.innerText = `Models (${installedModels.length})`;
         const disp = document.getElementById('statusModelDisplay');
         if (disp) disp.innerText = modelSelect.value || 'None';
 
@@ -2414,13 +2414,13 @@ html, body {
     const estTokens = estimateTokens(content).toLocaleString();
 
     if (role === 'user') {
-      header.innerHTML = `<span class="header-label">[USER] ${timeStr} · ${estTokens} tokens</span>`;
+      header.innerHTML = `<span class="header-label">USER ${timeStr} · ${estTokens} tokens</span>`;
     } else {
       const modelName = modelSelect ? modelSelect.value : 'Model';
       const tokStr = telemetry && telemetry.eval_tokens ? Number(telemetry.eval_tokens).toLocaleString() : estTokens;
       const tpsStr = telemetry && telemetry.tps ? ` · ${telemetry.tps} tok/s` : '';
       const ttftStr = telemetry && telemetry.ttft ? ` · TTFT: ${telemetry.ttft}ms` : '';
-      header.innerHTML = `<span class="header-label">[ASSISTANT · ${escapeHtml(modelName)}] · ${tokStr} tokens${tpsStr}${ttftStr}</span>`;
+      header.innerHTML = `<span class="header-label">ASSISTANT · ${escapeHtml(modelName)} · ${tokStr} tokens${tpsStr}${ttftStr}</span>`;
     }
 
     row.appendChild(header);
@@ -2515,12 +2515,12 @@ html, body {
           <details class="reasoning-box" ${config.expandThinking ? 'open' : ''}>
             <summary>
               <div class="thought-summary-left">
-                <span class="thought-bracket">[▼]</span>
+                <span class="thought-bracket">▼</span>
                 <span class="thought-title-text">Reasoning Scratchpad</span>
               </div>
               <div class="thought-summary-right">
                 <span class="thought-tag-badge">(${count} tokens)</span>
-                <button type="button" class="thought-action-mini-btn" onclick="copyThoughtText(this, event)" title="Copy thought process">[Copy]</button>
+                <button type="button" class="thought-action-mini-btn" onclick="copyThoughtText(this, event)" title="Copy thought process">Copy</button>
               </div>
             </summary>
             <div class="reasoning-content markdown-body">${parsedThought}</div>
@@ -2544,8 +2544,8 @@ html, body {
       wrapper.className = 'code-container';
       wrapper.innerHTML = `
         <div class="code-header">
-          <span>[Language: ${lang}]</span>
-          <button class="code-copy-btn" onclick="copySnippet(this)">[Copy]</button>
+          <span>Language: ${lang}</span>
+          <button class="code-copy-btn" onclick="copySnippet(this)">Copy</button>
         </div>
       `;
       pre.parentNode.insertBefore(wrapper, pre);
@@ -2687,7 +2687,7 @@ html, body {
 
     isGenerating = true;
     wasHardPurged = false;
-    sendBtn.innerText = '[ ABORT ]';
+    sendBtn.innerText = 'Abort';
     sendBtn.style.background = '#1A1816';
     sendBtn.style.color = '#FFFFFF';
     sendBtn.title = 'Abort current generation (Esc)';
@@ -2704,8 +2704,8 @@ html, body {
     botRow.innerHTML = `
       <div class="msg-header">
         <div class="msg-meta">
-          <span class="role-tag">[ASSISTANT · ${escapeHtml(modelSelect.value)}]</span>
-          <span class="mode-tag">[${currentMode.tag}]</span>
+          <span class="role-tag">ASSISTANT · ${escapeHtml(modelSelect.value)}</span>
+          <span class="mode-tag">${currentMode.tag}</span>
         </div>
         <div class="msg-stream-meta" style="font-size:10px; color:var(--text-muted); font-family:var(--font-mono); font-variant-numeric:tabular-nums;"></div>
       </div>
@@ -2724,7 +2724,7 @@ html, body {
           <details class="reasoning-box active-stream-reasoning" style="display:none;" ${config.expandThinking ? 'open' : ''}>
             <summary>
               <div class="thought-summary-left">
-                <span class="thought-bracket">[▼]</span>
+                <span class="thought-bracket">▼</span>
                 <span class="thought-title-text">Reasoning Scratchpad</span>
               </div>
               <div class="thought-summary-right">
@@ -2732,7 +2732,7 @@ html, body {
                   <span class="thought-pulse-dot"></span>
                   <span class="active-thought-timer">0.0s</span>
                 </span>
-                <button type="button" class="thought-action-mini-btn" onclick="copyThoughtText(this, event)" title="Copy thought process">[Copy]</button>
+                <button type="button" class="thought-action-mini-btn" onclick="copyThoughtText(this, event)" title="Copy thought process">Copy</button>
               </div>
             </summary>
             <div class="reasoning-content active-thought-body markdown-body"></div>
@@ -3272,7 +3272,7 @@ html, body {
       isGenerating = false;
       activeStreamReader = null;
       chatAbortController = null;
-      sendBtn.innerText = '[ SEND (Ctrl+Enter) ]';
+      sendBtn.innerText = 'Send';
       sendBtn.style.background = 'var(--bg-btn)';
       sendBtn.style.color = 'var(--text-main)';
       sendBtn.title = 'Send message (Enter or Ctrl+Enter)';
@@ -3291,12 +3291,12 @@ html, body {
 
     const copyBtn = document.createElement('button');
     copyBtn.className = 'msg-action-btn';
-    copyBtn.innerText = '[Copy]';
+    copyBtn.innerText = 'Copy';
     copyBtn.title = 'Copy message';
     copyBtn.addEventListener('click', () => {
       navigator.clipboard.writeText(content).then(() => {
-        copyBtn.innerText = '[Copied!]';
-        setTimeout(() => { copyBtn.innerText = '[Copy]'; }, 1500);
+        copyBtn.innerText = 'Copied!';
+        setTimeout(() => { copyBtn.innerText = 'Copy'; }, 1500);
         showToast('Message copied to clipboard', 'success');
       });
     });
@@ -3307,12 +3307,12 @@ html, body {
       if (answerOnly) {
         const copyAnsBtn = document.createElement('button');
         copyAnsBtn.className = 'msg-action-btn';
-        copyAnsBtn.innerText = '[Copy Answer]';
+        copyAnsBtn.innerText = 'Copy Answer';
         copyAnsBtn.title = 'Copy answer only (excluding reasoning)';
         copyAnsBtn.addEventListener('click', () => {
           navigator.clipboard.writeText(answerOnly).then(() => {
-            copyAnsBtn.innerText = '[Copied!]';
-            setTimeout(() => { copyAnsBtn.innerText = '[Copy Answer]'; }, 1500);
+            copyAnsBtn.innerText = 'Copied!';
+            setTimeout(() => { copyAnsBtn.innerText = 'Copy Answer'; }, 1500);
             showToast('Answer copied', 'success');
           });
         });
@@ -3322,7 +3322,7 @@ html, body {
 
     const ttsBtn = document.createElement('button');
     ttsBtn.className = 'msg-action-btn';
-    ttsBtn.innerText = '[Read Aloud]';
+    ttsBtn.innerText = 'Read Aloud';
     ttsBtn.title = 'Text to speech';
     ttsBtn.addEventListener('click', () => {
       toggleSpeech(content.replace(/<think>[\s\S]*?<\/think>/gi, ''), ttsBtn);
@@ -3331,7 +3331,7 @@ html, body {
 
     const regenBtn = document.createElement('button');
     regenBtn.className = 'msg-action-btn';
-    regenBtn.innerText = '[Regenerate]';
+    regenBtn.innerText = 'Regenerate';
     regenBtn.title = 'Re-generate response';
     regenBtn.addEventListener('click', () => {
       regenerateLastResponse();
@@ -3520,8 +3520,8 @@ html, body {
           <td>${sizeGB}</td>
           <td>${caps}</td>
           <td style="white-space:nowrap;">
-            <button class="top-btn" onclick="selectModelFromLib('${m.name}')">[Select]</button>
-            <button class="top-btn" style="color:var(--danger);" onclick="deleteModelFromLib('${m.name}')">[Delete]</button>
+            <button class="top-btn" onclick="selectModelFromLib('${m.name}')">Select</button>
+            <button class="top-btn" style="color:var(--danger);" onclick="deleteModelFromLib('${m.name}')">Delete</button>
           </td>
         </tr>
       `;
@@ -3698,7 +3698,7 @@ html, body {
     const session = getActiveSession();
     let text = `# ${session.title}\n\n`;
     session.messages.forEach(m => {
-      text += `[${m.role === 'user' ? 'User' : (modelSelect.value || 'Assistant')}]:\n${m.content}\n\n`;
+      text += `${m.role === 'user' ? 'USER' : (modelSelect.value || 'ASSISTANT')}:\n${m.content}\n\n`;
     });
     navigator.clipboard.writeText(text).then(() => {
       exportModal.classList.remove('open');
