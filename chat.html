@@ -187,6 +187,53 @@ html, body {
   font-weight: 700;
 }
 
+.session-item.renaming {
+  padding: 3px 6px;
+  display: flex;
+  align-items: center;
+  background: var(--bg-card);
+}
+
+.session-item.active.renaming {
+  background: #1A1816;
+}
+
+.session-date-prefix {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  opacity: 0.75;
+}
+
+.session-inline-rename-input {
+  flex: 1;
+  min-width: 60px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.2;
+  padding: 2px 4px;
+  background: #FFFFFF;
+  color: #1A1816;
+  border: 1px solid var(--border-dark);
+  border-radius: 0;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.session-item.active .session-inline-rename-input {
+  background: #2D2824;
+  color: #FFFFFF;
+  border-color: #777777;
+}
+
+.session-inline-rename-input:focus {
+  border-color: #000000;
+}
+
+.session-item.active .session-inline-rename-input:focus {
+  border-color: #FFFFFF;
+}
+
 .transcript-wrapper {
   flex: 1;
   display: flex;
@@ -2382,7 +2429,7 @@ html, body {
       item.addEventListener('click', () => switchSession(s.id));
       item.addEventListener('dblclick', (e) => {
         e.stopPropagation();
-        renameSessionPrompt(s.id);
+        inlineRenameSession(item, s.id);
       });
       item.addEventListener('contextmenu', (e) => {
         e.preventDefault();
@@ -2393,15 +2440,57 @@ html, body {
     });
   }
 
-  function renameSessionPrompt(id) {
+  function inlineRenameSession(item, id) {
     const s = sessions[id];
     if (!s) return;
-    const newTitle = prompt('Enter conversation title:', s.title);
-    if (newTitle && newTitle.trim()) {
-      s.title = newTitle.trim();
-      saveSessions();
-      showToast('Conversation renamed', 'info');
-    }
+
+    const d = new Date(s.timestamp || Date.now());
+    const dateStr = d.toISOString().slice(0, 10) + ' ' + d.toTimeString().slice(0, 5);
+
+    item.innerHTML = '';
+    item.classList.add('renaming');
+
+    const dateSpan = document.createElement('span');
+    dateSpan.className = 'session-date-prefix';
+    dateSpan.textContent = `${dateStr} | `;
+    item.appendChild(dateSpan);
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'session-inline-rename-input';
+    input.value = s.title || 'New Session';
+    item.appendChild(input);
+
+    let committed = false;
+    const commit = () => {
+      if (committed) return;
+      committed = true;
+      const val = input.value.trim();
+      if (val && val !== s.title) {
+        s.title = val;
+        saveSessions();
+        showToast('Conversation renamed', 'info');
+      }
+      renderSessionList();
+    };
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        commit();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        committed = true;
+        renderSessionList();
+      }
+    });
+
+    input.addEventListener('blur', commit);
+    input.addEventListener('click', (e) => e.stopPropagation());
+    input.addEventListener('dblclick', (e) => e.stopPropagation());
+
+    input.focus();
+    input.select();
   }
 
   sessionSearchInput.addEventListener('input', () => renderSessionList(sessionSearchInput.value));
