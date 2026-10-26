@@ -576,6 +576,31 @@ html, body {
   font-weight: 700;
 }
 
+.model-table tr.active-model-row td {
+  background: #F0EAE0;
+}
+
+.model-active-badge {
+  display: inline-block;
+  font-size: 9.5px;
+  font-family: var(--font-mono);
+  background: #1A1816;
+  color: #F8F6ED;
+  padding: 1px 5px;
+  margin-left: 6px;
+  font-weight: 700;
+  vertical-align: middle;
+  letter-spacing: 0.5px;
+}
+
+.active-model-btn {
+  background: #1A1816 !important;
+  color: #F8F6ED !important;
+  border-color: #1A1816 !important;
+  cursor: default !important;
+  font-weight: 600;
+}
+
 .toast-container {
   position: fixed;
   top: 38px;
@@ -2194,14 +2219,13 @@ html, body {
         modelSelect.innerHTML = installedModels.map(m => `<option value="${m.name}">${m.name}</option>`).join('');
         const libBtn = document.getElementById('modelsLibraryBtn');
         if (libBtn) libBtn.innerText = `Models (${installedModels.length})`;
-        const disp = document.getElementById('statusModelDisplay');
-        if (disp) disp.innerText = modelSelect.value || 'None';
-
         if (savedModel && installedModels.some(m => m.name === savedModel)) {
           modelSelect.value = savedModel;
         } else {
           localStorage.setItem(MODEL_KEY, modelSelect.value);
         }
+        const disp = document.getElementById('statusModelDisplay');
+        if (disp) disp.innerText = modelSelect.value || 'None';
         await inspectModelCapabilities(modelSelect.value);
       } else {
         modelSelect.innerHTML = '<option value="">No models found (Pull a model)</option>';
@@ -3588,21 +3612,30 @@ html, body {
       return;
     }
 
+    const currentModel = (modelSelect ? modelSelect.value : (localStorage.getItem(MODEL_KEY) || '')).toLowerCase();
+
     modelsLibraryBody.innerHTML = installedModels.map(m => {
+      const isCurrent = Boolean(currentModel && (m.name.toLowerCase() === currentModel || (m.model && m.model.toLowerCase() === currentModel)));
       const sizeGB = (m.size / (1024*1024*1024)).toFixed(2) + ' GB';
       const param = m.details?.parameter_size || '—';
       const quant = m.details?.quantization_level || '—';
       const caps = (m.capabilities || []).map(c => `<span class="model-tag-badge">${c}</span>`).join(' ') || '<span style="color:var(--text-muted);">text</span>';
 
       return `
-        <tr>
-          <td style="font-weight:600; color:var(--text-primary); font-family:var(--font-mono);">${m.name}</td>
+        <tr class="${isCurrent ? 'active-model-row' : ''}">
+          <td style="font-weight:600; color:var(--text-main); font-family:var(--font-mono);">
+            ${m.name}
+            ${isCurrent ? '<span class="model-active-badge">ACTIVE</span>' : ''}
+          </td>
           <td>${param}</td>
           <td>${quant}</td>
           <td>${sizeGB}</td>
           <td>${caps}</td>
           <td style="white-space:nowrap;">
-            <button class="top-btn" onclick="selectModelFromLib('${m.name}')">Select</button>
+            ${isCurrent ?
+              '<button class="top-btn active-model-btn" disabled>Active</button>' :
+              `<button class="top-btn" onclick="selectModelFromLib('${m.name}')">Select</button>`
+            }
             <button class="top-btn" style="color:var(--danger);" onclick="deleteModelFromLib('${m.name}')">Delete</button>
           </td>
         </tr>
@@ -3812,7 +3845,7 @@ html, body {
 
 
 
-    window.selectModelFromLib = function(name) {
+  window.selectModelFromLib = function(name) {
     if (modelSelect) {
       modelSelect.value = name;
       localStorage.setItem(MODEL_KEY, name);
@@ -3820,6 +3853,7 @@ html, body {
       if (disp) disp.innerText = name;
       inspectModelCapabilities(name);
     }
+    loadModelsLibrary();
     modelsLibraryModal.classList.remove('open');
     showToast(`Active model switched to ${name}`, 'success');
   };
