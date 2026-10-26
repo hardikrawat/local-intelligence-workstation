@@ -578,21 +578,87 @@ html, body {
 
 .toast-container {
   position: fixed;
-  bottom: 30px;
-  right: 20px;
+  top: 38px;
+  right: 14px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  z-index: 9999;
+  align-items: flex-end;
+  gap: 5px;
+  z-index: 99999;
+  pointer-events: none;
 }
 
 .toast {
-  border: 1px solid var(--border-dark);
-  background: #1A1816;
-  color: #FFFFFF;
-  padding: 6px 12px;
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 9px 5px 10px;
+  background: #181614;
+  color: #FAF8F2;
+  border: 1px solid #333330;
   font-family: var(--font-mono);
   font-size: 11px;
+  line-height: 1.25;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  max-width: 480px;
+  box-sizing: border-box;
+}
+
+.toast.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast-icon {
+  font-size: 11px;
+  line-height: 1;
+  flex-shrink: 0;
+  font-weight: 700;
+}
+
+.toast.success .toast-icon {
+  color: #73C991;
+}
+
+.toast.error .toast-icon {
+  color: #E06C75;
+}
+
+.toast.warning .toast-icon {
+  color: #E5C07B;
+}
+
+.toast.info .toast-icon {
+  color: #A8A398;
+}
+
+.toast-msg {
+  color: #FAF8F2;
+  font-size: 11px;
+  word-break: break-word;
+}
+
+.toast-close {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #7A756D;
+  cursor: pointer;
+  font-size: 11px;
+  line-height: 1;
+  padding: 0 0 0 4px;
+  margin: 0;
+  flex-shrink: 0;
+  font-family: inherit;
+  transition: color 0.1s ease;
+}
+
+.toast-close:hover {
+  color: #FAF8F2;
 }
 
 </style>
@@ -1169,7 +1235,7 @@ html, body {
 
       await checkVramStatus();
       updateDiagnosticsUI();
-      showToast(`✓ Model "${target}" evicted from VRAM.`, 'success');
+      showToast(`Model "${target}" evicted from VRAM.`, 'success');
     } catch (e) {
       showToast(`Eviction notice: ${e.message}`, 'error');
     }
@@ -1194,7 +1260,7 @@ html, body {
     }
     await checkVramStatus();
     updateDiagnosticsUI();
-    showToast('✓ All models evicted from VRAM.', 'success');
+    showToast('All models evicted from VRAM.', 'success');
   }
 
   
@@ -1732,31 +1798,47 @@ html, body {
   
   function showToast(message, type = 'info', title = '') {
     const container = document.getElementById('toastContainer');
+    if (!container) return;
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
 
-    let icon = '✦';
+    let icon = '·';
     if (type === 'success') icon = '✓';
     if (type === 'error') icon = '✕';
-    if (type === 'warning') icon = '⚠';
+    if (type === 'warning') icon = '▲';
+
+    const cleanMsg = String(message || '').replace(/^✓\s*/, '');
 
     toast.innerHTML = `
-      <div class="toast-icon">${icon}</div>
-      <div class="toast-content">
-        ${title ? `<div class="toast-title">${title}</div>` : ''}
-        <div class="toast-msg">${escapeHtml(message)}</div>
-      </div>
-      <button class="toast-close">✕</button>
+      <span class="toast-icon">${icon}</span>
+      <span class="toast-msg">${title ? `<strong>${escapeHtml(title)}: </strong>` : ''}${escapeHtml(cleanMsg)}</span>
+      <button type="button" class="toast-close" title="Dismiss">✕</button>
     `;
 
-    toast.querySelector('.toast-close').addEventListener('click', () => toast.remove());
+    const closeBtn = toast.querySelector('.toast-close');
+    let timer = null;
+
+    const dismiss = () => {
+      if (timer) clearTimeout(timer);
+      toast.classList.remove('visible');
+      setTimeout(() => toast.remove(), 160);
+    };
+
+    closeBtn.addEventListener('click', dismiss);
+    toast.addEventListener('mouseenter', () => {
+      if (timer) clearTimeout(timer);
+    });
+    toast.addEventListener('mouseleave', () => {
+      timer = setTimeout(dismiss, 1200);
+    });
+
     container.appendChild(toast);
 
-    setTimeout(() => {
-      toast.style.opacity = '0';
-      toast.style.transform = 'translateX(50px)';
-      setTimeout(() => toast.remove(), 250);
-    }, 4000);
+    requestAnimationFrame(() => {
+      toast.classList.add('visible');
+    });
+
+    timer = setTimeout(dismiss, 2800);
   }
 
   
