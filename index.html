@@ -397,40 +397,74 @@ html, body {
 
 .composer-row {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 8px;
-  margin-top: 6px;
+  margin-top: 8px;
   padding-top: 8px;
   border-top: 1px solid var(--border-frame);
+  background: var(--bg-transcript);
 }
 
 .composer-input {
   flex: 1;
-  height: 30px;
+  height: 32px;
+  min-height: 32px;
+  max-height: 120px;
   border: 1px solid var(--border-dark);
   background: #FFFFFF;
   color: var(--text-main);
   font-family: var(--font-mono);
   font-size: 13px;
-  padding: 4px 8px;
+  line-height: 20px;
+  padding: 5px 10px;
+  resize: none;
+  box-sizing: border-box;
   outline: none;
 }
 
+.composer-input:focus {
+  border-color: #000000;
+}
+
+.composer-input::placeholder {
+  color: #888888;
+}
+
 .composer-btn {
+  height: 32px;
+  min-height: 32px;
   border: 1px solid var(--border-dark);
   background: var(--bg-btn);
   color: var(--text-main);
   font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 700;
-  padding: 5px 12px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   white-space: nowrap;
+  box-sizing: border-box;
+  outline: none;
 }
 
 .composer-btn:hover {
   background: #1A1816;
   color: #FFFFFF;
+}
+
+.composer-btn.secondary {
+  border-color: var(--border-rule);
+  background: transparent;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.composer-btn.secondary:hover {
+  background: #E8E5D7;
+  color: #1A1816;
+  border-color: var(--border-dark);
 }
 
 .status-bar {
@@ -628,7 +662,7 @@ html, body {
         <div class="composer-row">
           <textarea id="promptInput" class="composer-input" placeholder="Type prompt... (Enter or Ctrl+Enter to send)" rows="1"></textarea>
           <input type="file" id="imageInput" accept="image/*" style="display:none;">
-          <button class="composer-btn" id="triggerImageBtn" title="Attach Image">[ Attach ]</button>
+          <button class="composer-btn secondary" id="triggerImageBtn" title="Attach Image">[ Attach ]</button>
           <button class="composer-btn" id="sendBtn">[ SEND (Ctrl+Enter) ]</button>
           <button class="composer-btn stream-stop-btn" id="streamInlineStopBtn" style="display:none;">[ ABORT ]</button>
           <button class="composer-btn stream-purge-btn" id="streamInlinePurgeBtn" style="display:none;">[ EVICT ]</button>
@@ -1778,8 +1812,10 @@ html, body {
   
   function setupTextarea() {
     function adjustHeight() {
-      promptInput.style.height = 'auto';
-      promptInput.style.height = `${Math.max(50, Math.min(promptInput.scrollHeight, 220))}px`;
+      promptInput.style.height = '32px';
+      if (promptInput.scrollHeight > 36) {
+        promptInput.style.height = `${Math.min(promptInput.scrollHeight, 120)}px`;
+      }
     }
 
     function updatePromptTokens() {
@@ -2645,7 +2681,7 @@ html, body {
 
     appendMessageToDOM('user', text, userMessage.images);
     promptInput.value = '';
-    promptInput.style.height = '52px';
+    promptInput.style.height = '32px';
     if (promptTokenCounter) promptTokenCounter.innerText = '0 TOKENS';
     removeAttachment();
 
@@ -2661,9 +2697,10 @@ html, body {
 
     isGenerating = true;
     wasHardPurged = false;
-    sendBtn.innerText = 'Stop ✕';
-    sendBtn.style.background = 'var(--danger)';
-    sendBtn.title = 'Stop generation (Esc)';
+    sendBtn.innerText = '[ ABORT ]';
+    sendBtn.style.background = '#1A1816';
+    sendBtn.style.color = '#FFFFFF';
+    sendBtn.title = 'Abort current generation (Esc)';
     streamProgressStrip.classList.add('active');
 
     
@@ -3245,9 +3282,10 @@ html, body {
       isGenerating = false;
       activeStreamReader = null;
       chatAbortController = null;
-      sendBtn.innerText = 'Send ⏎';
-      sendBtn.style.background = 'var(--accent-rubric)';
-      sendBtn.title = 'Send message (Enter, Shift+Enter for newline)';
+      sendBtn.innerText = '[ SEND (Ctrl+Enter) ]';
+      sendBtn.style.background = 'var(--bg-btn)';
+      sendBtn.style.color = 'var(--text-main)';
+      sendBtn.title = 'Send message (Enter or Ctrl+Enter)';
       streamProgressStrip.classList.remove('active');
       if (activeStreamBar) activeStreamBar.remove();
       checkVramStatus();
