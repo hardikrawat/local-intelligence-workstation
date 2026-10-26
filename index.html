@@ -2237,7 +2237,638 @@
       .telemetry-strip { font-size: 10px; gap: 10px; padding: 6px 12px; }
       .ctx-meter-container { min-width: 130px; }
     }
-  </style>
+  
+
+
+
+* {
+  border-radius: 0px !important;
+  box-shadow: none !important;
+}
+
+[data-theme="light"], :root {
+  --bg-base: #F8F6F0;
+  --bg-surface: #FFFFFF;
+  --bg-surface-elevated: #EFE9DF;
+  --bg-user-bubble: #FFFFFF;
+  --bg-bot-bubble: #FCFAF6;
+  --bg-hover: #E5DFC8;
+  --border-hairline: #D5CFBE;
+  --border-accent: #B8AFA0;
+  --border-crimson: #8E2424;
+  --text-primary: #121417;
+  --text-secondary: #3D424D;
+  --text-muted: #6B7280;
+  --accent-rubric: #8E2424;
+  --accent-rubric-hover: #731B1B;
+  --accent-subtle: rgba(142, 36, 36, 0.06);
+  --code-bg: #16181D;
+  --think-bg: #F4EFE6;
+  --think-border: #D0C7B6;
+  --success: #22643B;
+  --warning: #9A540E;
+  --danger: #8E2424;
+  --scroll-thumb: #D5CFBE;
+}
+
+[data-theme="dark"] {
+  --bg-base: #101216;
+  --bg-surface: #171A21;
+  --bg-surface-elevated: #1E222B;
+  --bg-user-bubble: #161920;
+  --bg-bot-bubble: #191D26;
+  --bg-hover: #262B37;
+  --border-hairline: #2D3340;
+  --border-accent: #40485B;
+  --border-crimson: #E05243;
+  --text-primary: #F3F4F6;
+  --text-secondary: #D1D5DB;
+  --text-muted: #8490A5;
+  --accent-rubric: #E05243;
+  --accent-rubric-hover: #F16858;
+  --accent-subtle: rgba(224, 82, 67, 0.12);
+  --code-bg: #111317;
+  --think-bg: #14171F;
+  --think-border: #2D3342;
+  --success: #34D399;
+  --warning: #FBBF24;
+  --danger: #F87171;
+  --scroll-thumb: #323847;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-base);
+  color: var(--text-primary);
+}
+
+.workspace-header {
+  height: 42px;
+  background: var(--bg-surface-elevated);
+  border-bottom: 1px solid var(--border-hairline);
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.model-selector-group, .mode-selector-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.model-select, .mode-select {
+  border: 1px solid var(--border-accent);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 3px 8px;
+  height: 28px;
+}
+
+.sidebar {
+  width: 270px;
+  background: var(--bg-surface-elevated);
+  border-right: 1px solid var(--border-hairline);
+}
+
+.brand-header {
+  border-bottom: 1px solid var(--border-hairline);
+  padding: 10px 14px;
+}
+
+.brand-title {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.brand-sub {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.2px;
+}
+
+.sidebar-actions {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-hairline);
+  gap: 6px;
+}
+
+.btn-key {
+  border: 1px solid var(--border-accent);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 10px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.btn-key:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-crimson);
+}
+
+.btn-key.primary {
+  background: var(--accent-rubric);
+  color: #FFFFFF;
+  border-color: var(--accent-rubric);
+}
+
+.btn-key.primary:hover {
+  background: var(--accent-rubric-hover);
+}
+
+.btn-icon-key {
+  border: 1px solid var(--border-accent);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  height: 28px;
+  width: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.btn-icon-key:hover {
+  background: var(--bg-hover);
+}
+
+.session-search-box {
+  border-bottom: 1px solid var(--border-hairline);
+  padding: 8px 12px;
+}
+
+.session-search-input {
+  border: 1px solid var(--border-accent);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 5px 8px;
+  width: 100%;
+}
+
+.session-item {
+  border-bottom: 1px solid var(--border-hairline);
+  padding: 8px 12px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  cursor: pointer;
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.session-item:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.session-item.active {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border-left: 3px solid var(--accent-rubric);
+  font-weight: 600;
+}
+
+.session-item-sub {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.telemetry-strip {
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-hairline);
+  padding: 4px 16px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.telemetry-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.telemetry-divider {
+  width: 1px;
+  height: 14px;
+  background: var(--border-hairline);
+}
+
+.telemetry-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.telemetry-badge-btn {
+  border: 1px solid var(--border-accent);
+  background: var(--bg-surface-elevated);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 2px 6px;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.telemetry-badge-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.chat-scroll {
+  background: var(--bg-base);
+  padding: 16px 0;
+}
+
+.chat-max-width {
+  max-width: 960px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.msg-row {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-hairline);
+  background: var(--bg-surface);
+  width: 100%;
+  position: relative;
+}
+
+.msg-row.user {
+  border-left: 3px solid var(--accent-rubric);
+}
+
+.msg-row.bot {
+  border-left: 3px solid var(--border-accent);
+}
+
+.msg-header {
+  background: var(--bg-surface-elevated);
+  border-bottom: 1px solid var(--border-hairline);
+  padding: 6px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+
+.msg-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.role-tag {
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+
+.mode-tag {
+  color: var(--text-muted);
+  font-size: 10px;
+  border: 1px solid var(--border-hairline);
+  padding: 1px 5px;
+  background: var(--bg-surface);
+}
+
+.aborted-pill {
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  padding: 1px 5px;
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.msg-bubble {
+  padding: 14px 18px;
+  font-family: var(--font-body);
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: var(--text-primary);
+  word-break: break-word;
+  background: transparent;
+  border: none;
+}
+
+.msg-row.bot .msg-bubble {
+  background: var(--bg-bot-bubble);
+}
+
+.msg-actions-bar {
+  display: flex;
+  gap: 6px;
+  padding: 5px 14px;
+  background: var(--bg-surface-elevated);
+  border-top: 1px solid var(--border-hairline);
+}
+
+.msg-tool-btn {
+  border: 1px solid var(--border-accent);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  padding: 2px 7px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.msg-tool-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  border-color: var(--border-crimson);
+}
+
+.reasoning-box {
+  margin: 8px 0 12px 0;
+  border: 1px solid var(--border-accent);
+  background: var(--think-bg);
+}
+
+.reasoning-box summary {
+  padding: 6px 12px;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+  background: var(--bg-surface-elevated);
+  border-bottom: 1px solid var(--border-hairline);
+  list-style: none;
+}
+
+.reasoning-box summary::-webkit-details-marker {
+  display: none;
+}
+
+.thought-summary-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-primary);
+}
+
+.thought-summary-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.thought-tag-badge {
+  font-size: 10.5px;
+  color: var(--text-muted);
+}
+
+.thought-action-mini-btn {
+  border: 1px solid var(--border-hairline);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 2px 6px;
+  cursor: pointer;
+}
+
+.thought-action-mini-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.reasoning-content {
+  padding: 12px 14px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  background: var(--bg-surface);
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.active-stream-control-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 14px;
+  background: var(--bg-surface-elevated);
+  border-bottom: 1px solid var(--border-hairline);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.stream-stop-btn {
+  border: 1px solid var(--danger);
+  background: var(--bg-surface);
+  color: var(--danger);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 8px;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.stream-stop-btn:hover {
+  background: var(--danger);
+  color: #FFFFFF;
+}
+
+.stream-purge-btn {
+  border: 1px solid var(--border-accent);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  padding: 2px 8px;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.stream-purge-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.composer-zone {
+  background: var(--bg-surface-elevated);
+  border-top: 1px solid var(--border-hairline);
+  padding: 10px 20px 14px 20px;
+}
+
+.composer-container {
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.input-box {
+  border: 1px solid var(--border-accent);
+  background: var(--bg-surface);
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.input-box textarea {
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  line-height: 1.5;
+  resize: vertical;
+  min-height: 54px;
+  width: 100%;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.input-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px dashed var(--border-hairline);
+  padding-top: 6px;
+}
+
+.btn-submit {
+  border: 1px solid var(--accent-rubric);
+  background: var(--accent-rubric);
+  color: #FFFFFF;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 6px 16px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-submit:hover {
+  background: var(--accent-rubric-hover);
+}
+
+.markdown-body table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--border-hairline);
+  margin: 14px 0;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+}
+
+.markdown-body th, .markdown-body td {
+  border: 1px solid var(--border-hairline);
+  padding: 7px 11px;
+  text-align: left;
+}
+
+.markdown-body th {
+  background: var(--bg-surface-elevated);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.code-container {
+  border: 1px solid var(--border-hairline);
+  background: var(--code-bg);
+  margin: 14px 0;
+}
+
+.code-header {
+  background: #1F232B;
+  border-bottom: 1px solid #2B313E;
+  padding: 4px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: #9CA3AF;
+}
+
+.code-copy-btn {
+  border: 1px solid #3B4252;
+  background: #282E3B;
+  color: #D1D5DB;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  padding: 2px 7px;
+  cursor: pointer;
+}
+
+.code-copy-btn:hover {
+  background: #3B4252;
+  color: #FFFFFF;
+}
+
+.drawer-card {
+  border: 2px solid var(--border-accent);
+  background: var(--bg-surface);
+  border-radius: 0px !important;
+}
+
+.drawer-header {
+  background: var(--bg-surface-elevated);
+  border-bottom: 1px solid var(--border-hairline);
+  padding: 8px 12px;
+  font-family: var(--font-mono);
+}
+
+.form-input {
+  border: 1px solid var(--border-accent);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 6px 8px;
+}
+
+</style>
 </head>
 <body>
 
@@ -4450,7 +5081,7 @@
 
     const meta = document.createElement('div');
     meta.className = 'msg-meta';
-    const roleLabel = role === 'user' ? 'User' : (modelSelect.value || 'Assistant');
+    const roleLabel = role === 'user' ? '[USER]' : `[ASSISTANT · ${modelSelect.value || 'Model'}]`;
     meta.innerHTML = `<span class="role-tag">${roleLabel}</span>`;
 
     if (telemetry && telemetry.modeTag) {
@@ -4469,11 +5100,16 @@
 
     header.appendChild(meta);
 
+    const stats = document.createElement('span');
+    stats.className = 'msg-stats';
     if (telemetry && telemetry.eval_tokens) {
-      const stats = document.createElement('span');
-      stats.innerText = `${Number(telemetry.eval_tokens).toLocaleString()} tokens`;
-      header.appendChild(stats);
+      const tpsStr = telemetry.tps ? ` · ${telemetry.tps} t/s` : '';
+      const ttftStr = telemetry.ttft ? ` · TTFT: ${telemetry.ttft}ms` : '';
+      stats.innerText = `${Number(telemetry.eval_tokens).toLocaleString()} tokens${tpsStr}${ttftStr}`;
+    } else if (role === 'user' && content) {
+      stats.innerText = `${estimateTokens(content).toLocaleString()} tokens`;
     }
+    header.appendChild(stats);
 
     row.appendChild(header);
 
@@ -4575,18 +5211,12 @@
           <details class="reasoning-box" ${config.expandThinking ? 'open' : ''}>
             <summary>
               <div class="thought-summary-left">
-                <svg class="thought-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                <svg class="thought-brain-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-2.04z"></path><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-2.04z"></path></svg>
-                <span class="thought-title-text">Thought Process</span>
+                <span class="thought-bracket">[▼]</span>
+                <span class="thought-title-text">Reasoning Scratchpad</span>
               </div>
               <div class="thought-summary-right">
-                <span class="thought-tag-badge">
-                  <span>${count} tokens</span>
-                </span>
-                <button type="button" class="thought-action-mini-btn" onclick="copyThoughtText(this, event)" title="Copy thought process">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                  <span>Copy</span>
-                </button>
+                <span class="thought-tag-badge">(${count} tokens)</span>
+                <button type="button" class="thought-action-mini-btn" onclick="copyThoughtText(this, event)" title="Copy thought process">[Copy]</button>
               </div>
             </summary>
             <div class="reasoning-content markdown-body">${parsedThought}</div>
@@ -4610,8 +5240,8 @@
       wrapper.className = 'code-container';
       wrapper.innerHTML = `
         <div class="code-header">
-          <span>${lang}</span>
-          <button class="code-copy-btn" onclick="copySnippet(this)">Copy</button>
+          <span>[Language: ${lang}]</span>
+          <button class="code-copy-btn" onclick="copySnippet(this)">[Copy]</button>
         </div>
       `;
       pre.parentNode.insertBefore(wrapper, pre);
@@ -4769,8 +5399,8 @@
     botRow.innerHTML = `
       <div class="msg-header">
         <div class="msg-meta">
-          <span class="role-tag">${escapeHtml(modelSelect.value)}</span>
-          <span class="mode-tag">${currentMode.tag}</span>
+          <span class="role-tag">[ASSISTANT · ${escapeHtml(modelSelect.value)}]</span>
+          <span class="mode-tag">[${currentMode.tag}]</span>
         </div>
         <div class="msg-stream-meta" style="font-size:10px; color:var(--text-muted); font-family:var(--font-mono); font-variant-numeric:tabular-nums;"></div>
       </div>
@@ -4789,19 +5419,15 @@
           <details class="reasoning-box active-stream-reasoning" style="display:none;" ${config.expandThinking ? 'open' : ''}>
             <summary>
               <div class="thought-summary-left">
-                <svg class="thought-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                <svg class="thought-brain-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-2.04z"></path><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-2.04z"></path></svg>
-                <span class="thought-title-text">Thought Process</span>
+                <span class="thought-bracket">[▼]</span>
+                <span class="thought-title-text">Reasoning Scratchpad</span>
               </div>
               <div class="thought-summary-right">
                 <span class="thought-tag-badge">
                   <span class="thought-pulse-dot"></span>
                   <span class="active-thought-timer">0.0s</span>
                 </span>
-                <button type="button" class="thought-action-mini-btn" onclick="copyThoughtText(this, event)" title="Copy thought process">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                  <span>Copy</span>
-                </button>
+                <button type="button" class="thought-action-mini-btn" onclick="copyThoughtText(this, event)" title="Copy thought process">[Copy]</button>
               </div>
             </summary>
             <div class="reasoning-content active-thought-body markdown-body"></div>
