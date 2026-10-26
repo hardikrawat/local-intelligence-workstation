@@ -1,0 +1,147 @@
+<!-- Top Application Bar -->
+<header class="top-header">
+  <div class="top-header-left">
+    <span class="app-title">Workstation Title · Tooling</span>
+  </div>
+  <div class="top-header-right" style="display:flex; align-items:center; gap:6px;">
+    <select class="top-select-btn">
+      <option value="model-a">Model A (Primary)</option>
+      <option value="model-b">Model B (Fast)</option>
+    </select>
+    <button class="top-btn" id="newSessionBtn">New Session</button>
+    <button class="top-btn" id="libraryBtn">Models</button>
+    <button class="top-btn" id="evictBtn">Evict VRAM</button>
+    <button class="top-btn" id="settingsBtn">Settings ⚙</button>
+  </div>
+</header>
+
+<!-- Session Ledger Item (Normal State) -->
+<div class="session-item active" data-session-id="s_1001">
+  <span class="session-label">
+    <span class="session-item-date">2026-10-26 21:45 | </span>
+    <span class="session-item-title">B-Tree Indexing Engine</span>
+  </span>
+  <span class="session-item-actions">
+    <button type="button" class="session-action-btn rename-btn" title="Rename session">Rename</button>
+    <button type="button" class="session-action-btn delete-btn" title="Delete session">✕</button>
+  </span>
+</div>
+
+<!-- Session Ledger Item (In-Place Renaming State) -->
+<div class="session-item active renaming" data-session-id="s_1001">
+  <span class="session-date-prefix">2026-10-26 21:45 | </span>
+  <input type="text" class="session-inline-rename-input" value="B-Tree Indexing Engine" spellcheck="false">
+</div>
+
+<!-- Message Row: User Entry -->
+<div class="msg-row user">
+  <div class="msg-header">
+    <div class="msg-meta">
+      <span class="role-tag">USER 22:20:59 · 38 tokens</span>
+    </div>
+  </div>
+  <div class="msg-bubble">
+    Analyze the concurrency semantics of SQLite WAL mode vs Postgres MVCC.
+  </div>
+</div>
+
+<!-- Message Row: Assistant Live Streaming Entry -->
+<div class="msg-row bot">
+  <div class="msg-header">
+    <div class="msg-meta">
+      <span class="role-tag">ASSISTANT · qwen3.5:9b</span>
+      <span class="mode-tag">🧠 Thinking</span>
+      <span class="stream-stage-tag" id="activeStreamStageLabel">Loading Model (11.5s)...</span>
+    </div>
+    <div class="msg-stream-actions" id="activeStreamControlBar">
+      <button type="button" class="stream-inline-btn" id="streamInlineStopBtn" title="Stop generating (Esc)">Abort</button>
+      <button type="button" class="stream-inline-btn danger" id="streamInlinePurgeBtn" title="Emergency Evict (Shift+Esc)">Evict</button>
+    </div>
+    <div class="msg-stream-meta"></div>
+  </div>
+  <div class="msg-bubble">
+    <div class="bot-stream-wrapper">
+      <!-- Reasoning Scratchpad -->
+      <details class="reasoning-box active-stream-reasoning" open>
+        <summary>
+          <div class="thought-summary-left">
+            <span class="thought-bracket">▼</span>
+            <span class="thought-title-text">Reasoning Scratchpad</span>
+          </div>
+          <div class="thought-summary-right">
+            <span class="thought-tag-badge active-thought-timer">Thinking... 12.4s (840 tokens)</span>
+            <button type="button" class="thought-action-mini-btn" onclick="copyThoughtText(this, event)" title="Copy thought process">Copy</button>
+          </div>
+        </summary>
+        <div class="reasoning-content active-thought-body markdown-body">
+          Examining write transaction locks, shared memory shm files, and reader isolation...
+        </div>
+      </details>
+      <!-- Streamed Answer Content -->
+      <div class="stream-answer-text active-answer-body">
+        <span class="thinking-loader active-stream-loader">
+          <span class="typing-caret-block">▌</span>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Message Row: Completed Assistant Entry with Actions -->
+<div class="msg-row bot">
+  <div class="msg-header">
+    <div class="msg-meta">
+      <span class="role-tag">ASSISTANT · qwen3.5:9b · 842 tokens · 48.2 tok/s · TTFT: 180ms</span>
+    </div>
+  </div>
+  <div class="msg-bubble">
+    In SQLite WAL mode, readers do not block writers and writers do not block readers...
+  </div>
+  <div class="msg-actions-bar">
+    <button class="msg-action-btn">Copy</button>
+    <button class="msg-action-btn">Copy Answer</button>
+    <button class="msg-action-btn">Read Aloud</button>
+    <button class="msg-action-btn">Regenerate</button>
+  </div>
+</div>
+
+<!-- Sleek Command Input Row -->
+<div class="composer-area">
+  <div class="composer-row">
+    <textarea id="promptInput" class="composer-input" placeholder="Enter prompt or command (Enter or Ctrl+Enter to send)..." rows="1"></textarea>
+    <button class="composer-btn secondary" id="triggerImageBtn" title="Attach Image">Attach</button>
+    <button class="composer-btn" id="sendBtn">Send</button>
+  </div>
+</div>
+
+<!-- Fixed Telemetry Strip -->
+<footer class="status-bar" id="telemetryStrip">
+  <span>STATUS: <b>READY</b></span>
+  <span>|</span>
+  <span>HOST: <span>127.0.0.1:11434</span></span>
+  <span>|</span>
+  <span>MODEL: <b>qwen3.5:9b</b></span>
+  <span>|</span>
+  <span>CTX: <span>1,840 / 32,768 (5.6%)</span></span>
+  <span>|</span>
+  <span>SPEED: <span>48.2 t/s</span></span>
+  <span>|</span>
+  <span>TTFT: <span>180 ms</span></span>
+  <span>|</span>
+  <span>VRAM: <span>6.2G GPU (100%)</span></span>
+</footer>
+
+<!-- Strategic Top-Right Toast Alerts -->
+<div class="toast-container" id="toastContainer">
+  <div class="toast success visible">
+    <span class="toast-icon">✓</span>
+    <span class="toast-msg">Settings saved successfully</span>
+    <button type="button" class="toast-close" title="Dismiss">✕</button>
+  </div>
+</div>
+
+<!-- Ledger Right-Click Context Menu -->
+<div id="sessionContextMenu" class="session-context-menu" style="display:none;">
+  <div class="session-context-item" id="ctxMenuRename">Rename</div>
+  <div class="session-context-item danger" id="ctxMenuDelete">Delete</div>
+</div>
