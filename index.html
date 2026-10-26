@@ -22,12 +22,14 @@
 
   
 
+
 <style>
 
 :root {
   --bg-top-bar: #ECEBE5;
   --bg-parchment: #F8F6ED;
   --bg-transcript: #FAF8F1;
+  --bg-btn: #EDEBE4;
   --border-frame: #C2B9A5;
   --border-transcript: #8E8A7E;
   --border-rule: #777777;
@@ -78,7 +80,7 @@ html, body {
 .top-header-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
 }
 
 .app-title {
@@ -88,46 +90,43 @@ html, body {
   letter-spacing: 0.2px;
 }
 
-.top-model-wrap {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 11px;
-}
-
-.top-model-select {
-  border: 1px solid var(--border-dark);
-  background: var(--bg-transcript);
-  color: var(--text-main);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 700;
-  padding: 1px 4px;
-  cursor: pointer;
-  outline: none;
-}
-
 .top-header-right {
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
-.top-btn {
-  background: transparent;
-  border: 1px solid transparent;
+.top-select-btn {
+  background: var(--bg-btn);
+  border: 1px solid var(--border-dark);
   color: var(--text-main);
   font-family: var(--font-mono);
-  font-size: 11.5px;
-  font-weight: 600;
-  padding: 2px 6px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
   cursor: pointer;
-  text-decoration: none;
+  outline: none;
+  height: 24px;
 }
 
-.top-btn:hover {
-  background: #E0DDD4;
-  border-color: var(--border-dark);
+.top-btn {
+  background: var(--bg-btn);
+  border: 1px solid var(--border-dark);
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  cursor: pointer;
+  text-decoration: none;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.top-btn:hover, .top-select-btn:hover {
+  background: #1A1816;
+  color: #FFFFFF;
 }
 
 .work-area {
@@ -138,8 +137,8 @@ html, body {
 }
 
 .session-ledger-pane {
-  width: 250px;
-  min-width: 220px;
+  width: 260px;
+  min-width: 240px;
   background: var(--bg-parchment);
   border-right: 1px solid var(--border-frame);
   display: flex;
@@ -148,12 +147,13 @@ html, body {
 }
 
 .ledger-header {
-  padding: 6px 10px 4px 10px;
+  padding: 6px 12px;
   font-family: var(--font-mono);
   font-size: 11.5px;
   font-weight: 700;
   color: var(--text-main);
   border-bottom: 1px solid var(--border-frame);
+  background: var(--bg-parchment);
 }
 
 .ledger-list {
@@ -161,14 +161,14 @@ html, body {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  padding: 4px 0;
+  padding: 2px 0;
 }
 
 .session-item {
   font-family: var(--font-mono);
   font-size: 11px;
   color: var(--text-main);
-  padding: 4px 8px;
+  padding: 5px 12px;
   line-height: 1.4;
   cursor: pointer;
   white-space: nowrap;
@@ -263,29 +263,66 @@ html, body {
   color: var(--text-main);
   background: transparent;
   border: none;
-  padding: 2px 0 8px 0;
+  padding: 2px 0 6px 0;
   word-break: break-word;
+}
+
+.msg-actions-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  padding-top: 4px;
+}
+
+.msg-action-btn {
+  background: transparent;
+  border: 1px solid var(--border-rule);
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 2px 7px;
+  cursor: pointer;
+  outline: none;
+}
+
+.msg-action-btn:hover {
+  background: #1A1816;
+  color: #FFFFFF;
+  border-color: #1A1816;
 }
 
 .reasoning-box {
   border: 1px solid var(--border-dark);
   background: var(--bg-transcript);
   margin: 6px 0 10px 0;
-  padding: 6px 10px;
 }
 
 .reasoning-box summary {
-  font-family: var(--font-mono);
-  font-size: 11.5px;
-  font-weight: 700;
-  color: var(--text-main);
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 5px 10px;
+  background: #EFEBDD;
+  border-bottom: 1px solid var(--border-dark);
   cursor: pointer;
   list-style: none;
   user-select: none;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-main);
 }
 
 .reasoning-box summary::-webkit-details-marker {
   display: none;
+}
+
+.thought-right-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .reasoning-content {
@@ -293,9 +330,9 @@ html, body {
   font-size: 12px;
   line-height: 1.5;
   color: #222222;
-  margin-top: 6px;
-  padding-left: 10px;
+  padding: 8px 12px;
   border-left: 2px solid #555555;
+  margin: 6px;
   max-height: 380px;
   overflow-y: auto;
 }
@@ -369,7 +406,7 @@ html, body {
 
 .composer-input {
   flex: 1;
-  height: 28px;
+  height: 30px;
   border: 1px solid var(--border-dark);
   background: #FFFFFF;
   color: var(--text-main);
@@ -381,12 +418,12 @@ html, body {
 
 .composer-btn {
   border: 1px solid var(--border-dark);
-  background: #EDEBE4;
+  background: var(--bg-btn);
   color: var(--text-main);
   font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 700;
-  padding: 5px 10px;
+  padding: 5px 12px;
   cursor: pointer;
   white-space: nowrap;
 }
@@ -429,7 +466,7 @@ html, body {
 .drawer-card {
   background: var(--bg-transcript);
   border: 2px solid var(--border-dark);
-  width: 650px;
+  width: 680px;
   max-width: 92vw;
   max-height: 85vh;
   display: flex;
@@ -540,26 +577,21 @@ html, body {
   <header class="top-header">
     <div class="top-header-left">
       <span class="app-title">Ollama Studio · Workstation</span>
-      <div class="top-model-wrap">
-        <span>[Model:</span>
-        <select id="modelSelect" class="top-model-select"></select>
-        <span>]</span>
-        <button id="refreshModelsBtn" class="top-btn" title="Refresh Models">↻</button>
-      </div>
     </div>
     <div class="top-header-right">
+      <select id="modelSelect" class="top-select-btn" title="Select Active Model"></select>
+      <select id="modelModeSelect" class="top-select-btn" title="Select Mode">
+        <option value="thinking">Mode: Thinking</option>
+        <option value="no_think">Mode: Fast</option>
+        <option value="json">Mode: JSON</option>
+        <option value="raw">Mode: Raw</option>
+      </select>
       <button class="top-btn" id="newChatBtn">[New Session]</button>
       <button class="top-btn" id="modelsLibraryBtn">[Models (3)]</button>
       <button class="top-btn" id="vramPurgeQuickBtn">[Evict VRAM]</button>
       <button class="top-btn" id="settingsBtn">[Settings ⚙]</button>
 
-      
-      <select id="modelModeSelect" style="display:none;">
-        <option value="thinking">Thinking Mode</option>
-        <option value="no_think">Fast Mode</option>
-        <option value="json">JSON Mode</option>
-        <option value="raw">Raw Passthrough</option>
-      </select>
+      <button id="refreshModelsBtn" style="display:none;"></button>
       <button id="themeToggle" style="display:none;"></button>
       <button id="pullModelOpenBtn" style="display:none;"></button>
       <button id="exportSessionBtn" style="display:none;"></button>
@@ -594,12 +626,12 @@ html, body {
         </div>
 
         <div class="composer-row">
-          <textarea id="promptInput" class="composer-input" placeholder="" rows="1"></textarea>
+          <textarea id="promptInput" class="composer-input" placeholder="Type prompt... (Enter or Ctrl+Enter to send)" rows="1"></textarea>
           <input type="file" id="imageInput" accept="image/*" style="display:none;">
           <button class="composer-btn" id="triggerImageBtn" title="Attach Image">[ Attach ]</button>
           <button class="composer-btn" id="sendBtn">[ SEND (Ctrl+Enter) ]</button>
-          <button class="composer-btn" id="streamInlineStopBtn" style="display:none;">[ ABORT ]</button>
-          <button class="composer-btn" id="streamInlinePurgeBtn" style="display:none;">[ EVICT ]</button>
+          <button class="composer-btn stream-stop-btn" id="streamInlineStopBtn" style="display:none;">[ ABORT ]</button>
+          <button class="composer-btn stream-purge-btn" id="streamInlinePurgeBtn" style="display:none;">[ EVICT ]</button>
           <span id="promptTokenCounter" style="display:none;">0</span>
         </div>
       </fieldset>
@@ -638,7 +670,6 @@ html, body {
     <span id="tpsTelemetryItem" style="display:none;"></span>
   </footer>
 </div>
-
 
 <div class="drawer-overlay" id="settingsModal">
   <div class="drawer-card">
@@ -703,7 +734,6 @@ html, body {
   </div>
 </div>
 
-
 <div class="drawer-overlay" id="modelsLibraryModal">
   <div class="drawer-card" style="width:720px;">
     <div class="drawer-header">
@@ -733,7 +763,6 @@ html, body {
     </div>
   </div>
 </div>
-
 
 <div class="drawer-overlay" id="confirmModal">
   <div class="drawer-card" style="width:380px;">
@@ -766,6 +795,7 @@ html, body {
 <span id="tempPresetLabel" style="display:none;"></span>
 
 <script>
+
 
 
   
@@ -3231,24 +3261,14 @@ html, body {
     const actionsBar = document.createElement('div');
     actionsBar.className = 'msg-actions-bar';
 
-    const copySvg = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
-    const checkSvg = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
-    const speakerSvg = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>';
-    const reloadSvg = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><polyline points="23 20 23 14 17 14"></polyline><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"></path></svg>';
-
     const copyBtn = document.createElement('button');
-    copyBtn.className = 'msg-tool-btn';
-    copyBtn.innerHTML = `${copySvg} <span>Copy</span>`;
+    copyBtn.className = 'msg-action-btn';
+    copyBtn.innerText = '[Copy]';
     copyBtn.title = 'Copy message';
     copyBtn.addEventListener('click', () => {
       navigator.clipboard.writeText(content).then(() => {
-        const origHtml = copyBtn.innerHTML;
-        copyBtn.classList.add('copied');
-        copyBtn.innerHTML = `${checkSvg} <span>Copied!</span>`;
-        setTimeout(() => {
-          copyBtn.classList.remove('copied');
-          copyBtn.innerHTML = origHtml;
-        }, 1800);
+        copyBtn.innerText = '[Copied!]';
+        setTimeout(() => { copyBtn.innerText = '[Copy]'; }, 1500);
         showToast('Message copied to clipboard', 'success');
       });
     });
@@ -3258,40 +3278,37 @@ html, body {
       const answerOnly = content.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
       if (answerOnly) {
         const copyAnsBtn = document.createElement('button');
-        copyAnsBtn.className = 'msg-tool-btn';
-        copyAnsBtn.innerHTML = `${copySvg} <span>Copy Answer</span>`;
-        copyAnsBtn.title = 'Copy answer only (excluding thought process)';
+        copyAnsBtn.className = 'msg-action-btn';
+        copyAnsBtn.innerText = '[Copy Answer]';
+        copyAnsBtn.title = 'Copy answer only (excluding reasoning)';
         copyAnsBtn.addEventListener('click', () => {
           navigator.clipboard.writeText(answerOnly).then(() => {
-            const origHtml = copyAnsBtn.innerHTML;
-            copyAnsBtn.classList.add('copied');
-            copyAnsBtn.innerHTML = `${checkSvg} <span>Copied!</span>`;
-            setTimeout(() => {
-              copyAnsBtn.classList.remove('copied');
-              copyAnsBtn.innerHTML = origHtml;
-            }, 1800);
-            showToast('Answer copied to clipboard', 'success');
+            copyAnsBtn.innerText = '[Copied!]';
+            setTimeout(() => { copyAnsBtn.innerText = '[Copy Answer]'; }, 1500);
+            showToast('Answer copied', 'success');
           });
         });
         actionsBar.appendChild(copyAnsBtn);
       }
     }
 
-    if (role === 'assistant' || role === 'bot') {
-      const ttsBtn = document.createElement('button');
-      ttsBtn.className = 'msg-tool-btn';
-      ttsBtn.innerHTML = `${speakerSvg} <span>Read Aloud</span>`;
-      ttsBtn.title = 'Listen to response';
-      ttsBtn.addEventListener('click', () => speakMessage(content));
-      actionsBar.appendChild(ttsBtn);
+    const ttsBtn = document.createElement('button');
+    ttsBtn.className = 'msg-action-btn';
+    ttsBtn.innerText = '[Read Aloud]';
+    ttsBtn.title = 'Text to speech';
+    ttsBtn.addEventListener('click', () => {
+      toggleSpeech(content.replace(/<think>[\s\S]*?<\/think>/gi, ''), ttsBtn);
+    });
+    actionsBar.appendChild(ttsBtn);
 
-      const regenBtn = document.createElement('button');
-      regenBtn.className = 'msg-tool-btn';
-      regenBtn.innerHTML = `${reloadSvg} <span>Regenerate</span>`;
-      regenBtn.title = 'Regenerate response';
-      regenBtn.addEventListener('click', () => regenerateLastAssistant());
-      actionsBar.appendChild(regenBtn);
-    }
+    const regenBtn = document.createElement('button');
+    regenBtn.className = 'msg-action-btn';
+    regenBtn.innerText = '[Regenerate]';
+    regenBtn.title = 'Re-generate response';
+    regenBtn.addEventListener('click', () => {
+      regenerateLastResponse();
+    });
+    actionsBar.appendChild(regenBtn);
 
     rowEl.appendChild(actionsBar);
   }
@@ -3696,6 +3713,7 @@ html, body {
     modelsLibraryModal.classList.remove('open');
     showToast(`Active model switched to ${name}`, 'success');
   };
+
 
 </script>
 </body>
