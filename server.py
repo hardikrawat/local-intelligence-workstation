@@ -312,6 +312,61 @@ def get_popular_ollama_models():
     ]
 
 
+def fetch_ollama_categories():
+    """Fetch live filter capabilities directly from ollama.com/search."""
+    cache_key = "ollama:categories"
+    cached = cache_get(cache_key)
+    if cached:
+        return cached
+
+    default_categories = [
+        {"id": "", "label": "All Models", "icon": "◈"},
+        {"id": "tools", "label": "Tools", "icon": "⚡"},
+        {"id": "thinking", "label": "Thinking", "icon": "🧠"},
+        {"id": "vision", "label": "Vision", "icon": "👁️"},
+        {"id": "embedding", "label": "Embedding", "icon": "🔗"},
+    ]
+
+    try:
+        req = urllib.request.Request("https://ollama.com/search", headers={
+            "User-Agent": "OllamaStudio/1.0",
+            "Accept": "text/html,application/xhtml+xml"
+        })
+        with urllib.request.urlopen(req, timeout=10, context=SSL_CTX) as resp:
+            body = resp.read().decode("utf-8", errors="replace")
+
+        pos = body.find('<h2 class="sr-only">Filters</h2>')
+        if pos != -1:
+            sub = body[pos:pos+6000]
+            inputs = re.findall(r'<label[^>]*>\s*<input[^>]+name=[\"\']c[\"\'][^>]+value=[\"\']([^\"]*)[\"\'][^>]*>(.*?)</label>', sub, re.DOTALL)
+            cats = [{"id": "", "label": "All Models", "icon": "◈"}]
+            icon_map = {
+                "tools": "⚡",
+                "thinking": "🧠",
+                "vision": "👁️",
+                "embedding": "🔗",
+                "decision": "🎯"
+            }
+            seen = {""}
+            for val, lbl in inputs:
+                val = val.strip()
+                if not val or val in seen or val in ("local", "cloud"):
+                    continue
+                seen.add(val)
+                clean = re.sub(r'<[^>]+>', '', lbl).strip()
+                cats.append({"id": val, "label": clean or val.capitalize(), "icon": icon_map.get(val, "◈")})
+            if len(cats) > 1:
+                result = {"categories": cats, "source": "ollama.com"}
+                cache_set(cache_key, result)
+                return result
+    except Exception:
+        pass
+
+    result = {"categories": default_categories, "source": "ollama.com"}
+    cache_set(cache_key, result)
+    return result
+
+
 def fetch_ollama_model_tags(model_name):
     """Fetch available tags for a specific Ollama model."""
     cache_key = f"ollama_tags:{model_name}"
@@ -747,6 +802,58 @@ def ping_hf_endpoint(endpoint=None):
         }
 
 
+def fetch_hf_categories(endpoint="https://huggingface.co", token=""):
+    """Fetch live pipeline tags / tasks directly from Hugging Face API."""
+    clean_ep = normalize_endpoint(endpoint) if endpoint else "https://huggingface.co"
+    cache_key = f"hf:categories:{clean_ep}"
+    cached = cache_get(cache_key)
+    if cached:
+        return cached
+
+    GGUF_TASKS = [
+        ("text-generation", "Text Generation", "💬"),
+        ("image-text-to-text", "Vision (VLM)", "👁️"),
+        ("automatic-speech-recognition", "Speech / Audio", "🎙️"),
+        ("feature-extraction", "Embeddings", "🔗"),
+        ("text-to-speech", "Text-to-Speech", "🔊"),
+        ("text-to-image", "Text-to-Image", "🎨"),
+        ("image-text-to-video", "Video", "🎬"),
+        ("any-to-any", "Multimodal", "🌐"),
+    ]
+
+    api_url = clean_ep.rstrip("/") + "/api/tasks"
+    cats = [{"id": "", "label": "All Modalities", "icon": "◈"}]
+
+    try:
+        headers = {
+            "User-Agent": "OllamaStudio/1.0",
+            "Accept": "application/json"
+        }
+        if token:
+            headers["Authorization"] = f"Bearer {token}"
+
+        req = urllib.request.Request(api_url, headers=headers)
+        with urllib.request.urlopen(req, timeout=10, context=SSL_CTX) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+
+        if isinstance(data, dict):
+            for tid, fallback_lbl, icon in GGUF_TASKS:
+                remote_lbl = data.get(tid, {}).get("label") or fallback_lbl
+                cats.append({"id": tid, "label": remote_lbl, "icon": icon})
+            result = {"categories": cats, "source": clean_ep}
+            cache_set(cache_key, result)
+            return result
+    except Exception:
+        pass
+
+    for tid, fallback_lbl, icon in GGUF_TASKS:
+        cats.append({"id": tid, "label": fallback_lbl, "icon": icon})
+
+    result = {"categories": cats, "source": clean_ep}
+    cache_set(cache_key, result)
+    return result
+
+
 def classify_hf_model_type(model_id, pipeline_tag, tags):
     """Classify HuggingFace model types from pipeline tag and tags."""
     types = set()
@@ -897,21 +1004,11 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
             elif path == "/hub/hf/ping":
                 result = ping_hf_endpoint(endpoint=hf_endpoint)
             elif path == "/hub/categories":
-                result = {
-                    "categories": [
-                        {"id": "text", "label": "Text / Chat", "icon": "💬", "desc": "General-purpose language models for conversation and text generation"},
-                        {"id": "reasoning", "label": "Reasoning", "icon": "🧠", "desc": "Chain-of-thought and advanced reasoning models"},
-                        {"id": "code", "label": "Code", "icon": "💻", "desc": "Programming and code generation models"},
-                        {"id": "vision", "label": "Vision", "icon": "👁️", "desc": "Multimodal models that understand images"},
-                        {"id": "embedding", "label": "Embedding", "icon": "🔗", "desc": "Text embedding models for search and retrieval"},
-                        {"id": "math", "label": "Math", "icon": "📐", "desc": "Mathematics and STEM-focused models"},
-                        {"id": "audio", "label": "Audio", "icon": "🎵", "desc": "Speech recognition, TTS, and audio processing models"},
-                        {"id": "video", "label": "Video", "icon": "🎬", "desc": "Video understanding and generation models"},
-                        {"id": "tool_use", "label": "Tool Use", "icon": "🔧", "desc": "Models optimized for function calling and tool use"},
-                        {"id": "medical", "label": "Medical", "icon": "🏥", "desc": "Healthcare and clinical knowledge models"},
-                        {"id": "creative", "label": "Creative", "icon": "✨", "desc": "Creative writing and uncensored models"},
-                    ]
-                }
+                source = params.get("source", "ollama")
+                if source == "huggingface":
+                    result = fetch_hf_categories(endpoint=hf_endpoint, token=hf_token)
+                else:
+                    result = fetch_ollama_categories()
             else:
                 result = {"error": f"Unknown hub endpoint: {path}"}
 

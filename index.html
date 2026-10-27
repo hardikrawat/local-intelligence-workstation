@@ -3930,18 +3930,11 @@ html, body {
     </div>
 
     <div class="hub-category-bar" id="hubCategoryBar">
-      <button class="hub-cat-chip active" data-cat="">All Models</button>
-      <button class="hub-cat-chip" data-cat="text">💬 Text</button>
-      <button class="hub-cat-chip" data-cat="reasoning">🧠 Reasoning</button>
-      <button class="hub-cat-chip" data-cat="code">💻 Code</button>
+      <button class="hub-cat-chip active" data-cat="">◈ All Models</button>
+      <button class="hub-cat-chip" data-cat="tools">⚡ Tools</button>
+      <button class="hub-cat-chip" data-cat="thinking">🧠 Thinking</button>
       <button class="hub-cat-chip" data-cat="vision">👁️ Vision</button>
       <button class="hub-cat-chip" data-cat="embedding">🔗 Embedding</button>
-      <button class="hub-cat-chip" data-cat="math">📐 Math</button>
-      <button class="hub-cat-chip" data-cat="audio">🎵 Audio</button>
-      <button class="hub-cat-chip" data-cat="video">🎬 Video</button>
-      <button class="hub-cat-chip" data-cat="tool_use">🔧 Tools</button>
-      <button class="hub-cat-chip" data-cat="medical">🏥 Medical</button>
-      <button class="hub-cat-chip" data-cat="creative">✨ Creative</button>
     </div>
 
     <div class="hub-results-area" id="hubResultsArea">
@@ -7550,18 +7543,14 @@ html, body {
         });
       });
 
-      // Category chips
-      categoryBar?.querySelectorAll('.hub-cat-chip').forEach(chip => {
-        chip.addEventListener('click', () => {
-          categoryBar.querySelectorAll('.hub-cat-chip').forEach(c => c.classList.remove('active'));
-          chip.classList.add('active');
-          currentCategory = chip.dataset.cat;
-          if (currentSource === 'huggingface') {
-            search();
-          } else {
-            renderResults();
-          }
-        });
+      // Category chips (event delegation so dynamically loaded chips work seamlessly)
+      categoryBar?.addEventListener('click', (e) => {
+        const chip = e.target.closest('.hub-cat-chip');
+        if (!chip) return;
+        categoryBar.querySelectorAll('.hub-cat-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        currentCategory = chip.dataset.cat || '';
+        search();
       });
 
       // Refresh
@@ -7587,8 +7576,35 @@ html, body {
       setupSettingsModalHfTab();
     }
 
-    function setSource(src) {
+    async function loadDynamicCategories(source) {
+      if (!categoryBar) return;
+      try {
+        const params = new URLSearchParams({ source });
+        if (source === 'huggingface' && hfConfig && hfConfig.endpoint) {
+          params.set('endpoint', hfConfig.endpoint);
+        }
+        if (source === 'huggingface' && hfConfig && hfConfig.token) {
+          params.set('token', hfConfig.token);
+        }
+        const res = await fetch(`/hub/categories?${params.toString()}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        const categories = data.categories || [];
+        if (categories.length > 0) {
+          categoryBar.innerHTML = categories.map(cat => `
+            <button class="hub-cat-chip ${cat.id === currentCategory ? 'active' : ''}" data-cat="${escapeHtml(cat.id)}">
+              ${cat.icon ? `<span class="cat-icon">${escapeHtml(cat.icon)}</span> ` : ''}${escapeHtml(cat.label)}
+            </button>
+          `).join('');
+        }
+      } catch (e) {
+        console.warn('Failed to load dynamic categories from source:', e);
+      }
+    }
+
+    async function setSource(src) {
       currentSource = src;
+      currentCategory = '';
       sourceTabs?.querySelectorAll('.hub-source-tab').forEach(t => {
         t.classList.toggle('active', t.dataset.source === src);
       });
@@ -7611,6 +7627,7 @@ html, body {
         hfConfigPanel.classList.remove('open');
       }
 
+      await loadDynamicCategories(src);
       search();
     }
 
@@ -8161,10 +8178,11 @@ html, body {
       modelfileModal.classList.add('open');
     }
 
-    function open() {
+    async function open() {
       updateInstalledSet();
       overlay?.classList.add('open');
       searchInput?.focus();
+      await loadDynamicCategories(currentSource);
       if (hubModels.length === 0) {
         search();
       }
@@ -8274,9 +8292,12 @@ html, body {
     function filterModels(models) {
       let filtered = models;
       if (currentCategory && currentSource === 'ollama') {
+        const cat = currentCategory.toLowerCase();
         filtered = filtered.filter(m => {
           const types = m.types || [];
-          return types.includes(currentCategory);
+          const caps = (m.capabilities || []).map(c => c.toLowerCase());
+          if (types.length === 0 && caps.length === 0) return true;
+          return types.includes(cat) || caps.includes(cat);
         });
       }
 
@@ -8359,7 +8380,7 @@ html, body {
       }
 
       let html = `<div class="hub-results-header">
-        <span>${sorted.length} model${sorted.length !== 1 ? 's' : ''} · ${currentCategory ? currentCategory.toUpperCase() : 'All Modalities'} ${currentSource === 'huggingface' ? `· Mirror: ${new URL(hfConfig.endpoint).host}` : ''}</span>
+        <span>${sorted.length} model${sorted.length !== 1 ? 's' : ''} · ${currentCategory ? currentCategory.toUpperCase() : (currentSource === 'huggingface' ? 'All Modalities' : 'All Models')} ${currentSource === 'huggingface' ? `· Mirror: ${new URL(hfConfig.endpoint).host}` : ''}</span>
       </div>`;
 
       sorted.forEach((model, idx) => {
