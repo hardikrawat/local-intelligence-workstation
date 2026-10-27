@@ -1738,10 +1738,16 @@ html, body {
 .hub-model-card {
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
+  min-height: fit-content;
+  height: auto;
+  width: 100%;
+  box-sizing: border-box;
   padding: 10px 14px;
   border-bottom: 1px solid var(--border-frame);
   cursor: pointer;
   transition: background 0.08s;
+  position: relative;
 }
 
 .hub-model-card:hover {
@@ -2627,34 +2633,82 @@ html, body {
     box-sizing: border-box !important;
   }
 
-  /* Model Cards & Pull Action */
+  /* Model Cards & Pull Action — Zero Overlap Architecture */
   .hub-model-card {
-    padding: 10px 12px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex-shrink: 0 !important;
+    min-height: fit-content !important;
+    height: auto !important;
+    padding: 11px 12px !important;
     width: 100% !important;
     box-sizing: border-box !important;
-    overflow-x: hidden !important;
+    position: relative !important;
+    overflow: visible !important;
+    border-bottom: 1px solid var(--border-frame) !important;
+    background: transparent !important;
   }
 
   .hub-model-card-top {
-    gap: 8px !important;
-    align-items: center !important;
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    flex-shrink: 0 !important;
+  }
+
+  .hub-model-info {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 3px !important;
   }
 
   .hub-model-name {
-    font-size: 12px !important;
+    font-size: 12.5px !important;
+    font-weight: 700 !important;
     word-break: break-word !important;
+    line-height: 1.35 !important;
   }
 
   .hub-model-desc {
     font-size: 11px !important;
     line-height: 1.4 !important;
+    color: var(--text-muted) !important;
+    margin-top: 3px !important;
+    margin-bottom: 2px !important;
+    word-break: break-word !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+  }
+
+  .hub-model-meta {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 4px 6px !important;
+    margin-top: 4px !important;
+  }
+
+  .hub-model-actions {
+    flex-shrink: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    gap: 4px !important;
   }
 
   .hub-pull-btn {
-    height: 32px !important;
-    min-height: 32px !important;
-    padding: 0 14px !important;
-    font-size: 11.5px !important;
+    height: 30px !important;
+    min-height: 30px !important;
+    padding: 0 12px !important;
+    font-size: 11px !important;
     font-weight: 700 !important;
     box-sizing: border-box !important;
     display: inline-flex !important;
@@ -2665,11 +2719,30 @@ html, body {
 
   .hub-tags-grid {
     gap: 4px !important;
+    margin-top: 6px !important;
   }
 
   .hub-tag-chip {
     font-size: 10px !important;
     padding: 4px 8px !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* CivitAI Card Grid on Mobile */
+  .civitai-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    padding: 10px 12px !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+  }
+
+  .civitai-card {
+    flex-shrink: 0 !important;
+    min-height: fit-content !important;
+    height: auto !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   /* Hugging Face Toolbar on Mobile (Clean 2-Column Grid) */
@@ -5920,7 +5993,10 @@ html, body {
 <div class="hub-overlay" id="modelHubOverlay">
   <div class="hub-panel">
     <div class="hub-top-bar">
-      <span class="hub-top-bar-title">MODEL HUB — Search & Download</span>
+      <span class="hub-top-bar-title">
+        <span class="desktop-text">MODEL HUB — Search & Download</span>
+        <span class="mobile-text">MODEL HUB</span>
+      </span>
       <div class="hub-top-bar-actions">
         <button type="button" class="top-btn" id="hubOpenLocalLibBtn" title="View Installed Models" style="height:26px; font-size:10.5px; padding:0 8px;">📁 Installed</button>
         <button class="hub-close-btn" id="hubCloseBtn">✕ CLOSE</button>
@@ -6087,7 +6163,7 @@ html, body {
         <span id="hubSourceLabel">Source: Ollama Registry</span>
       </div>
       <div class="hub-footer-actions">
-        <button class="hub-close-btn" style="font-size:10px; height:22px; padding:0 8px;" id="hubRefreshBtn">↻ Refresh</button>
+        <button class="hub-close-btn" style="font-size:10px; height:22px; padding:0 8px; display:inline-flex; align-items:center; gap:4px;" id="hubRefreshBtn"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>Refresh</button>
       </div>
     </div>
   </div>
