@@ -1997,16 +1997,95 @@ html, body {
 }
 
 /* Loading & Empty States */
+/* ==========================================================================
+   CLASSIC IOS STYLE ACTIVITY INDICATOR SPINNER
+   Iconic 12-blade stepped rotation & high-precision centered alignment
+   ========================================================================== */
+.ios-spinner {
+  display: inline-block;
+  vertical-align: middle;
+  color: var(--text-main);
+  flex-shrink: 0;
+}
+
+.ios-spinner.ios-spinner-sm {
+  width: 18px;
+  height: 18px;
+}
+
+.ios-spinner.ios-spinner-lg {
+  width: 36px;
+  height: 36px;
+}
+
+.ios-spinner rect {
+  fill: currentColor;
+  animation: ios-spinner-fade 1s steps(12, end) infinite;
+  opacity: 0.16;
+}
+
+.ios-spinner rect:nth-child(1)  { animation-delay: 0s; }
+.ios-spinner rect:nth-child(2)  { animation-delay: -0.9167s; }
+.ios-spinner rect:nth-child(3)  { animation-delay: -0.8333s; }
+.ios-spinner rect:nth-child(4)  { animation-delay: -0.75s; }
+.ios-spinner rect:nth-child(5)  { animation-delay: -0.6667s; }
+.ios-spinner rect:nth-child(6)  { animation-delay: -0.5833s; }
+.ios-spinner rect:nth-child(7)  { animation-delay: -0.5s; }
+.ios-spinner rect:nth-child(8)  { animation-delay: -0.4167s; }
+.ios-spinner rect:nth-child(9)  { animation-delay: -0.3333s; }
+.ios-spinner rect:nth-child(10) { animation-delay: -0.25s; }
+.ios-spinner rect:nth-child(11) { animation-delay: -0.1667s; }
+.ios-spinner rect:nth-child(12) { animation-delay: -0.0833s; }
+
+@keyframes ios-spinner-fade {
+  0% { opacity: 1; }
+  100% { opacity: 0.16; }
+}
+
+.hub-spinner-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1px solid var(--border-frame);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
 .hub-loading {
   flex: 1 1 auto;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
+  padding: 50px 20px;
+  gap: 14px;
+  min-height: 260px;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.hub-loading-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.hub-loading-text {
+  font-family: var(--font-mono);
   font-size: 12px;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: 0.3px;
+}
+
+.hub-loading-subtext {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
   color: var(--text-muted);
-  gap: 8px;
-  min-height: 240px;
 }
 
 .hub-empty {
@@ -5788,7 +5867,27 @@ html, body {
           </tr>
         </thead>
         <tbody id="modelsLibraryBody">
-          <tr><td colspan="6" style="text-align:center; padding:16px;">Scanning local models...</td></tr>
+          <tr>
+            <td colspan="6" style="text-align:center; padding:32px 16px;">
+              <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;">
+                <svg class="ios-spinner" viewBox="0 0 100 100" width="28" height="28" aria-hidden="true">
+                  <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(0 50 50)"/>
+                  <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(30 50 50)"/>
+                  <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(60 50 50)"/>
+                  <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(90 50 50)"/>
+                  <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(120 50 50)"/>
+                  <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(150 50 50)"/>
+                  <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(180 50 50)"/>
+                  <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(210 50 50)"/>
+                  <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(240 50 50)"/>
+                  <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(270 50 50)"/>
+                  <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(300 50 50)"/>
+                  <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(330 50 50)"/>
+                </svg>
+                <span style="font-family:var(--font-mono); font-size:11px; color:var(--text-muted);">Scanning local installed models...</span>
+              </div>
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -5958,7 +6057,26 @@ html, body {
 
     <div class="hub-results-area" id="hubResultsArea">
       <div class="hub-loading" id="hubLoadingState">
-        <span class="typing-caret-block">▌</span> Loading model registry...
+        <div class="hub-spinner-wrap">
+          <svg class="ios-spinner ios-spinner-lg" viewBox="0 0 100 100" width="36" height="36" aria-hidden="true">
+            <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(0 50 50)"/>
+            <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(30 50 50)"/>
+            <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(60 50 50)"/>
+            <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(90 50 50)"/>
+            <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(120 50 50)"/>
+            <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(150 50 50)"/>
+            <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(180 50 50)"/>
+            <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(210 50 50)"/>
+            <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(240 50 50)"/>
+            <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(270 50 50)"/>
+            <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(300 50 50)"/>
+            <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(330 50 50)"/>
+          </svg>
+        </div>
+        <div class="hub-loading-info">
+          <div class="hub-loading-text">Loading model registry...</div>
+          <div class="hub-loading-subtext">Initializing local catalog & remote discovery</div>
+        </div>
       </div>
     </div>
 
@@ -9356,7 +9474,7 @@ html, body {
   document.getElementById('refreshLibBtn').addEventListener('click', loadModelsLibrary);
 
   async function loadModelsLibrary() {
-    modelsLibraryBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:16px;">Scanning local models...</td></tr>';
+    modelsLibraryBody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:32px 16px;"><div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;">${getIosSpinnerSvg(28)}<span style="font-family:var(--font-mono); font-size:11px; color:var(--text-muted);">Scanning local installed models...</span></div></td></tr>`;
     await checkOllamaHealthAndModels();
 
     if (installedModels.length === 0) {
@@ -9627,6 +9745,25 @@ html, body {
   // Full Support: Text, Vision, Code, Audio, Video, Embedding, Reasoning, etc.
   // ══════════════════════════════════════════════════════════════════════════
 
+  // ─── Reusable Classic iOS Activity Indicator Spinner SVG Helper ────────
+  function getIosSpinnerSvg(size = 36, className = '') {
+    return `<svg class="ios-spinner ${className}" viewBox="0 0 100 100" width="${size}" height="${size}" aria-hidden="true">
+      <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(0 50 50)"/>
+      <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(30 50 50)"/>
+      <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(60 50 50)"/>
+      <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(90 50 50)"/>
+      <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(120 50 50)"/>
+      <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(150 50 50)"/>
+      <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(180 50 50)"/>
+      <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(210 50 50)"/>
+      <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(240 50 50)"/>
+      <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(270 50 50)"/>
+      <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(300 50 50)"/>
+      <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(330 50 50)"/>
+    </svg>`;
+  }
+  window.getIosSpinnerSvg = getIosSpinnerSvg;
+
   const HF_CONFIG_KEY = 'ollama_studio_hf_config';
 
   const HUB = (() => {
@@ -9846,6 +9983,9 @@ html, body {
       if (hfConfigPanel && currentSource !== 'huggingface') {
         hfConfigPanel.classList.remove('open');
       }
+
+      // Immediately render centered old iOS spinner for the selected tab!
+      showLoading();
 
       if (currentSource !== 'civitai') {
         await loadDynamicCategories(src);
@@ -10807,7 +10947,10 @@ html, body {
             </div>
           </div>
           <div class="hub-tags-section" id="hubTags_${idx}">
-            <div class="hub-loading" style="padding:12px; font-size:11px;">Loading variants...</div>
+            <div class="hub-loading" style="padding:14px; font-size:11px; min-height:60px; gap:8px;">
+              ${getIosSpinnerSvg(18, 'ios-spinner-sm')}
+              <span style="font-family:var(--font-mono); color:var(--text-muted);">Loading variants...</span>
+            </div>
           </div>
           ${dlHtml}
         </div>
@@ -11183,15 +11326,35 @@ html, body {
       }
     }
 
-    function showLoading() {
+    function showLoading(customMsg = null) {
+      let sourceName = 'Ollama Registry';
+      let subMsg = 'Fetching models from ollama.com index...';
+      if (currentSource === 'huggingface') {
+        sourceName = 'HuggingFace Hub';
+        let host = 'huggingface.co';
+        try { host = new URL(hfConfig.endpoint).host; } catch(e){}
+        subMsg = `Querying GGUF models on ${host}...`;
+      } else if (currentSource === 'civitai') {
+        sourceName = 'CivitAI Diffusion';
+        subMsg = 'Querying Stable Diffusion checkpoints & LoRAs...';
+      }
+
+      const msg = customMsg || (currentQuery ? `Searching "${currentQuery}" in ${sourceName}...` : `Fetching models from ${sourceName}...`);
+
       if (resultsArea) {
         resultsArea.innerHTML = `
           <div class="hub-loading">
-            <span class="typing-caret-block">▌</span> Searching ${currentSource === 'ollama' ? 'Ollama Registry' : 'HuggingFace Hub'}...
+            <div class="hub-spinner-wrap">
+              ${getIosSpinnerSvg(36, 'ios-spinner-lg')}
+            </div>
+            <div class="hub-loading-info">
+              <div class="hub-loading-text">${escapeHtml(msg)}</div>
+              <div class="hub-loading-subtext">${escapeHtml(subMsg)}</div>
+            </div>
           </div>
         `;
       }
-      if (resultCount) resultCount.textContent = 'Searching...';
+      if (resultCount) resultCount.textContent = 'Fetching...';
     }
 
     function showError(message) {
