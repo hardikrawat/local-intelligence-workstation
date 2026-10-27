@@ -11254,6 +11254,19 @@ html, body {
         });
       }
 
+      if (currentCategory && currentSource === 'huggingface') {
+        const cat = currentCategory.toLowerCase();
+        filtered = filtered.filter(m => {
+          const pTag = (m.pipeline_tag || '').toLowerCase();
+          const types = (m.types || []).map(t => String(t).toLowerCase());
+          const tags = (m.tags || []).map(t => String(t).toLowerCase());
+          if (cat === 'text-to-image') {
+            return pTag === 'text-to-image' || types.includes('image-generation') || tags.includes('text-to-image') || tags.includes('flux') || tags.includes('diffusion');
+          }
+          return pTag === cat || types.includes(cat) || tags.includes(cat);
+        });
+      }
+
       // HF Quantization filter
       const quantFilter = hfConfig.defaultQuant;
       if (currentSource === 'huggingface' && quantFilter) {
@@ -11471,12 +11484,17 @@ html, body {
         return false;
       }
 
+      if (currentCategory === 'text-to-image') {
+        return true;
+      }
+
       return (
         pTag === 'text-to-image' ||
         pTag === 'image-to-image' ||
         pTag === 'text-to-video' ||
         pTag === 'image-text-to-video' ||
         types.includes('image-generation') ||
+        tags.includes('image-generation') ||
         tags.includes('text-to-image') ||
         tags.includes('diffusion') ||
         tags.includes('diffusers') ||

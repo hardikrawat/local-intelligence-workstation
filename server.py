@@ -740,8 +740,9 @@ def fetch_hf_models(query="", model_type="", sort="downloads", limit=40,
             "image-generation": "text-to-image",
             "video": "text-to-video",
         }
-        if model_type and model_type in task_map:
-            params["pipeline_tag"] = task_map[model_type]
+        if model_type:
+            clean_type = model_type.strip().lower()
+            params["pipeline_tag"] = task_map.get(clean_type, clean_type)
 
         url = f"{base_endpoint}/api/models?{urllib.parse.urlencode(params)}"
         headers = {
