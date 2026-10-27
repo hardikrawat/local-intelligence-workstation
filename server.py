@@ -1,14 +1,19 @@
 #!/usr/bin/env python3
 """
-Ollama Studio Web Server & Reverse Proxy
-Serves static UI files and proxies /api/* requests to local Ollama daemon (127.0.0.1:11434).
-Allows secure remote access via ngrok/tunnels without CORS or Mixed Content errors.
+Local Intelligence Workstation — Unified Multi-Backend Gateway & Web Server
+Serves static UI files and orchestrates multiple local AI inference backends:
+  - Text LLMs & VLMs: Ollama (127.0.0.1:11434)
+  - Diffusion Image Generation: SD WebUI (127.0.0.1:7860) / ComfyUI (127.0.0.1:8188)
+  - Speech-to-Text ASR: whisper.cpp / faster-whisper (127.0.0.1:8178)
+  - Text-to-Speech TTS: Piper TTS (127.0.0.1:5000)
 
-Model Hub Backend:
+Model Hub Backends:
   /hub/ollama/search   – Scrapes ollama.com/search for model listings
   /hub/ollama/tags     – Fetches available tags for a specific ollama model
   /hub/hf/search       – Searches HuggingFace Hub API for GGUF models
-  /hub/hf/model        – Fetches detailed model info from HuggingFace
+  /hub/hf/model        – Fetches detailed model info from HuggingFace with split GGUF detection
+  /hub/civitai/search  – Searches CivitAI API for Checkpoints, LoRAs, and diffusion models
+  /api/backends        – Live status, latency probing, and configuration of all backends
 """
 
 import sys
@@ -22,10 +27,167 @@ import html
 import ssl
 import time
 import threading
+import base64
+import concurrent.futures
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 
-OLLAMA_BACKEND = "http://127.0.0.1:11434"
 DEFAULT_PORT = 3300
+BACKENDS_FILE = "backends.json"
+
+DEFAULT_BACKENDS = {
+    "ollama": {
+        "id": "ollama",
+        "name": "Ollama",
+        "type": "llm",
+        "url": "http://127.0.0.1:11434",
+        "health_path": "/api/tags",
+        "enabled": True,
+        "description": "Autoregressive LLMs & Vision-Language models (llama.cpp)"
+    },
+    "sd_webui": {
+        "id": "sd_webui",
+        "name": "Stable Diffusion WebUI",
+        "type": "image",
+        "url": "http://127.0.0.1:7860",
+        "health_path": "/sdapi/v1/sd-models",
+        "enabled": True,
+        "description": "Diffusion image synthesis (txt2img & img2img)"
+    },
+    "comfyui": {
+        "id": "comfyui",
+        "name": "ComfyUI",
+        "type": "image",
+        "url": "http://127.0.0.1:8188",
+        "health_path": "/system_stats",
+        "enabled": True,
+        "description": "Node-based generative diffusion workflows"
+    },
+    "whisper": {
+        "id": "whisper",
+        "name": "Whisper ASR",
+        "type": "asr",
+        "url": "http://127.0.0.1:8178",
+        "health_path": "/health",
+        "enabled": True,
+        "description": "Speech-to-Text transcription (whisper.cpp / faster-whisper)"
+    },
+    "piper": {
+        "id": "piper",
+        "name": "Piper TTS",
+        "type": "tts",
+        "url": "http://127.0.0.1:5000",
+        "health_path": "/api/voices",
+        "enabled": True,
+        "description": "Ultra-fast neural local Text-to-Speech"
+    }
+}
+
+_backends_lock = threading.Lock()
+_backends_cache = None
+
+
+def load_backends_config():
+    global _backends_cache
+    with _backends_lock:
+        if _backends_cache is not None:
+            return dict(_backends_cache)
+        backends = {k: dict(v) for k, v in DEFAULT_BACKENDS.items()}
+        if os.path.exists(BACKENDS_FILE):
+            try:
+                with open(BACKENDS_FILE, "r", encoding="utf-8") as f:
+                    saved = json.load(f)
+                    for k, v in saved.items():
+                        if k in backends and isinstance(v, dict):
+                            backends[k].update(v)
+                        elif isinstance(v, dict):
+                            backends[k] = v
+            except Exception as e:
+                print(f"[WARN] Failed to read {BACKENDS_FILE}: {e}")
+        _backends_cache = backends
+        return dict(backends)
+
+
+def save_backends_config(updated_dict):
+    global _backends_cache
+    with _backends_lock:
+        current = load_backends_config()
+        for k, v in updated_dict.items():
+            if k in current and isinstance(v, dict):
+                current[k].update(v)
+            elif isinstance(v, dict):
+                current[k] = v
+        _backends_cache = current
+        try:
+            with open(BACKENDS_FILE, "w", encoding="utf-8") as f:
+                json.dump(current, f, indent=2)
+        except Exception as e:
+            print(f"[ERROR] Failed to write {BACKENDS_FILE}: {e}")
+        return dict(current)
+
+
+def get_backend_url(backend_id):
+    cfg = load_backends_config()
+    b = cfg.get(backend_id)
+    if b and b.get("url"):
+        return b["url"].rstrip("/")
+    default = DEFAULT_BACKENDS.get(backend_id, {})
+    return default.get("url", "").rstrip("/")
+
+
+def probe_single_backend(backend_info):
+    bid = backend_info.get("id")
+    url = (backend_info.get("url") or "").rstrip("/")
+    hpath = backend_info.get("health_path") or "/"
+    if not url:
+        return {
+            "id": bid,
+            "status": "offline",
+            "online": False,
+            "latency_ms": None,
+            "error": "URL not configured"
+        }
+
+    target = f"{url}{hpath}"
+    start = time.time()
+    try:
+        req = urllib.request.Request(target, headers={"User-Agent": "LIW-Gateway/1.0"})
+        with urllib.request.urlopen(req, timeout=1.8) as resp:
+            elapsed = round((time.time() - start) * 1000)
+            is_ok = resp.status < 400 or resp.status in (401, 403, 404)
+            return {
+                "id": bid,
+                "status": "online" if is_ok else "standby",
+                "online": is_ok,
+                "latency_ms": elapsed,
+                "http_status": resp.status
+            }
+    except Exception as e:
+        elapsed = round((time.time() - start) * 1000)
+        return {
+            "id": bid,
+            "status": "standby",
+            "online": False,
+            "latency_ms": None,
+            "error": str(e)
+        }
+
+
+def probe_all_backends():
+    backends = load_backends_config()
+    results = {}
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        futures = {executor.submit(probe_single_backend, b): k for k, b in backends.items()}
+        for fut in concurrent.futures.as_completed(futures):
+            k = futures[fut]
+            try:
+                probe_res = fut.result()
+            except Exception as e:
+                probe_res = {"id": k, "status": "standby", "online": False, "error": str(e)}
+            backend_copy = dict(backends[k])
+            backend_copy.update(probe_res)
+            results[k] = backend_copy
+    return results
+
 
 # Cache with TTL
 _cache = {}
@@ -697,12 +859,25 @@ def fetch_hf_model_detail(model_id, token=None, endpoint=None):
             fname = s.get("rfilename", "")
             if fname.lower().endswith(".gguf"):
                 fsize = s.get("size", 0)
+                is_split = bool(re.search(r'(-\d{4,5}-of-\d{4,5}|-of-\d{4,5})\.gguf$', fname, re.IGNORECASE))
+                split_info = None
+                if is_split:
+                    m = re.search(r'-(\d{4,5})-of-(\d{4,5})\.gguf$', fname, re.IGNORECASE)
+                    if m:
+                        part_num = int(m.group(1))
+                        total_parts = int(m.group(2))
+                        split_info = f"Shard {part_num} of {total_parts}"
+                    else:
+                        split_info = "Multi-part Shard"
+
                 gguf_files.append({
                     "name": fname,
                     "size": format_bytes_py(fsize),
                     "size_bytes": fsize,
                     "quantization": extract_quant(fname),
-                    "parameters": extract_params(fname)
+                    "parameters": extract_params(fname),
+                    "is_split": is_split,
+                    "split_info": split_info
                 })
 
         result = {
@@ -903,6 +1078,92 @@ def classify_hf_model_type(model_id, pipeline_tag, tags):
     return sorted(types)
 
 
+# ─── CivitAI Model Hub Scraper ────────────────────────────────────────────────
+
+def fetch_civitai_models(query="", model_type="Checkpoint", sort="Highest Rated", limit=20, page=1):
+    """Fetch diffusion models, checkpoints, LoRAs from CivitAI API."""
+    cache_key = f"civitai:{query}:{model_type}:{sort}:{limit}:{page}"
+    cached = cache_get(cache_key)
+    if cached:
+        return cached
+
+    params = {
+        "limit": min(int(limit), 50),
+        "nsfw": "false"
+    }
+    if query:
+        params["query"] = query
+    elif page and int(page) > 1:
+        params["page"] = int(page)
+    if model_type and model_type not in ["All", "all", ""]:
+        params["types"] = model_type
+    if sort:
+        params["sort"] = sort
+
+    url = "https://civitai.com/api/v1/models?" + urllib.parse.urlencode(params)
+    req = urllib.request.Request(url, headers={
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+        "Accept": "application/json"
+    })
+    try:
+        with urllib.request.urlopen(req, timeout=12, context=SSL_CTX) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+
+        items = []
+        for raw in data.get("items", []):
+            versions = raw.get("modelVersions", [])
+            base_model = "Unknown"
+            preview_img = ""
+            download_url = ""
+            file_name = ""
+            file_size_bytes = 0
+
+            if versions:
+                v = versions[0]
+                base_model = v.get("baseModel", "Unknown")
+                images = v.get("images", [])
+                if images:
+                    preview_img = images[0].get("url", "")
+                files = v.get("files", [])
+                if files:
+                    primary = next((f for f in files if f.get("primary")), files[0])
+                    download_url = primary.get("downloadUrl", "")
+                    file_name = primary.get("name", "")
+                    file_size_bytes = int(primary.get("sizeKB", 0) * 1024)
+
+            stats = raw.get("stats", {})
+            items.append({
+                "id": raw.get("id"),
+                "name": raw.get("name", "Untitled"),
+                "type": raw.get("type", "Checkpoint"),
+                "creator": raw.get("creator", {}).get("username", "Anonymous"),
+                "downloads": stats.get("downloadCount", 0),
+                "rating": round(stats.get("rating", 5.0), 1) if stats.get("rating") else 5.0,
+                "thumbsUp": stats.get("thumbsUpCount", 0),
+                "baseModel": base_model,
+                "previewImage": preview_img,
+                "downloadUrl": download_url,
+                "fileName": file_name,
+                "size": format_bytes_py(file_size_bytes),
+                "tags": raw.get("tags", [])[:5],
+                "description": raw.get("description", "")
+            })
+
+        metadata = data.get("metadata", {})
+        result = {
+            "items": items,
+            "totalItems": metadata.get("totalItems", len(items)),
+            "currentPage": metadata.get("currentPage", page),
+            "pageSize": metadata.get("pageSize", limit),
+            "totalPages": metadata.get("totalPages", 1),
+            "source": "civitai.com"
+        }
+        cache_set(cache_key, result)
+        return result
+    except Exception as e:
+        return {"error": f"CivitAI API error: {str(e)}", "items": []}
+
+
 # ─── HTTP Request Handler ────────────────────────────────────────────────────
 
 class OllamaProxyHandler(SimpleHTTPRequestHandler):
@@ -922,6 +1183,12 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
             self.send_response(204)
             self.end_headers()
             return
+        elif self.path.startswith("/api/backends"):
+            self.handle_backends_request()
+        elif self.path.startswith("/api/image/"):
+            self.handle_image_request()
+        elif self.path.startswith("/api/audio/"):
+            self.handle_audio_request()
         elif self.path.startswith("/api/"):
             self.proxy_request("GET")
         elif self.path.startswith("/hub/"):
@@ -930,7 +1197,13 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
             super().do_GET()
 
     def do_POST(self):
-        if self.path.startswith("/api/"):
+        if self.path.startswith("/api/backends"):
+            self.handle_backends_request()
+        elif self.path.startswith("/api/image/"):
+            self.handle_image_request()
+        elif self.path.startswith("/api/audio/"):
+            self.handle_audio_request()
+        elif self.path.startswith("/api/"):
             self.proxy_request("POST")
         elif self.path.startswith("/hub/"):
             self.handle_hub_request()
@@ -942,6 +1215,328 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
             self.proxy_request("DELETE")
         else:
             self.send_error(404, "Not Found")
+
+    def handle_backends_request(self):
+        """Handle backend probe, status, and config management."""
+        parsed = urllib.parse.urlparse(self.path)
+        path = parsed.path
+
+        if self.command == "GET":
+            if path == "/api/backends":
+                status_dict = probe_all_backends()
+                self.send_json_response({"backends": status_dict})
+                return
+
+        elif self.command == "POST":
+            content_length = int(self.headers.get("Content-Length", 0))
+            body = self.rfile.read(content_length) if content_length > 0 else b"{}"
+            try:
+                payload = json.loads(body.decode("utf-8"))
+            except Exception:
+                payload = {}
+
+            if path == "/api/backends/config":
+                updated = save_backends_config(payload)
+                status_dict = probe_all_backends()
+                self.send_json_response({"backends": status_dict, "saved": True})
+                return
+
+            elif path == "/api/backends/probe":
+                bid = payload.get("id")
+                url = payload.get("url")
+                probe_res = probe_single_backend({"id": bid, "url": url, "health_path": payload.get("health_path", "/")})
+                self.send_json_response(probe_res)
+                return
+
+        self.send_error(404, f"Backends endpoint not found: {path}")
+
+    def handle_image_request(self):
+        """Route image generation, models, samplers, and progress requests."""
+        parsed = urllib.parse.urlparse(self.path)
+        path = parsed.path
+        sd_url = get_backend_url("sd_webui")
+        comfy_url = get_backend_url("comfyui")
+
+        if self.command == "GET":
+            if path == "/api/image/models":
+                target = f"{sd_url}/sdapi/v1/sd-models"
+                try:
+                    req = urllib.request.Request(target, headers={"User-Agent": "LIW-Gateway/1.0"})
+                    with urllib.request.urlopen(req, timeout=3) as resp:
+                        data = json.loads(resp.read().decode("utf-8"))
+                        models = []
+                        for m in data:
+                            models.append({
+                                "title": m.get("title", ""),
+                                "model_name": m.get("model_name", ""),
+                                "hash": m.get("hash", ""),
+                                "filename": m.get("filename", ""),
+                                "backend": "sd_webui"
+                            })
+                        self.send_json_response({"models": models, "backend": "sd_webui", "status": "online"})
+                        return
+                except Exception:
+                    self.send_json_response({"models": [], "backend": "none", "status": "standby"})
+                    return
+
+            elif path == "/api/image/samplers":
+                target = f"{sd_url}/sdapi/v1/samplers"
+                try:
+                    req = urllib.request.Request(target, headers={"User-Agent": "LIW-Gateway/1.0"})
+                    with urllib.request.urlopen(req, timeout=3) as resp:
+                        data = json.loads(resp.read().decode("utf-8"))
+                        samplers = [s.get("name") for s in data if isinstance(s, dict) and s.get("name")]
+                        self.send_json_response({"samplers": samplers})
+                        return
+                except Exception:
+                    default_samplers = ["Euler a", "Euler", "DPM++ 2M Karras", "DPM++ SDE Karras", "DDIM", "UniPC", "LCM"]
+                    self.send_json_response({"samplers": default_samplers})
+                    return
+
+            elif path == "/api/image/progress":
+                target = f"{sd_url}/sdapi/v1/progress?skip_current_image=false"
+                try:
+                    req = urllib.request.Request(target, headers={"User-Agent": "LIW-Gateway/1.0"})
+                    with urllib.request.urlopen(req, timeout=3) as resp:
+                        data = json.loads(resp.read().decode("utf-8"))
+                        self.send_json_response(data)
+                        return
+                except Exception:
+                    self.send_json_response({"progress": 0, "eta_relative": 0, "state": {}})
+                    return
+
+        elif self.command == "POST":
+            content_length = int(self.headers.get("Content-Length", 0))
+            body = self.rfile.read(content_length) if content_length > 0 else b"{}"
+
+            if path == "/api/image/generate":
+                target = f"{sd_url}/sdapi/v1/txt2img"
+                try:
+                    req = urllib.request.Request(
+                        target,
+                        data=body,
+                        headers={"Content-Type": "application/json", "User-Agent": "LIW-Gateway/1.0"},
+                        method="POST"
+                    )
+                    with urllib.request.urlopen(req, timeout=300) as resp:
+                        data = json.loads(resp.read().decode("utf-8"))
+                        self.send_json_response({
+                            "status": "success",
+                            "images": data.get("images", []),
+                            "parameters": data.get("parameters", {}),
+                            "info": data.get("info", "")
+                        })
+                        return
+                except urllib.error.HTTPError as e:
+                    self.send_json_response({"error": f"SD WebUI returned HTTP {e.code}: {e.read().decode('utf-8', errors='ignore')}"}, status=e.code)
+                    return
+                except Exception as e:
+                    self.send_json_response({
+                        "error": f"Image generation backend unavailable on {sd_url}. Launch Stable Diffusion WebUI with '--api' or configure backend endpoint in Settings > Backends.",
+                        "backend_url": sd_url,
+                        "status": "standby"
+                    }, status=503)
+                    return
+
+            elif path == "/api/image/img2img":
+                target = f"{sd_url}/sdapi/v1/img2img"
+                try:
+                    req = urllib.request.Request(
+                        target,
+                        data=body,
+                        headers={"Content-Type": "application/json", "User-Agent": "LIW-Gateway/1.0"},
+                        method="POST"
+                    )
+                    with urllib.request.urlopen(req, timeout=300) as resp:
+                        data = json.loads(resp.read().decode("utf-8"))
+                        self.send_json_response({
+                            "status": "success",
+                            "images": data.get("images", []),
+                            "parameters": data.get("parameters", {}),
+                            "info": data.get("info", "")
+                        })
+                        return
+                except Exception as e:
+                    self.send_json_response({
+                        "error": f"SD img2img failed: {str(e)}. Ensure SD WebUI is running on {sd_url} with '--api'.",
+                        "status": "standby"
+                    }, status=503)
+                    return
+
+        self.send_error(404, f"Image endpoint not found: {path}")
+
+    def handle_audio_request(self):
+        """Route speech-to-text (ASR) and text-to-speech (TTS) requests."""
+        parsed = urllib.parse.urlparse(self.path)
+        path = parsed.path
+        whisper_url = get_backend_url("whisper")
+        piper_url = get_backend_url("piper")
+
+        if self.command == "GET":
+            if path == "/api/audio/status":
+                w_probe = probe_single_backend({"id": "whisper", "url": whisper_url, "health_path": "/health"})
+                p_probe = probe_single_backend({"id": "piper", "url": piper_url, "health_path": "/api/voices"})
+                self.send_json_response({
+                    "whisper": w_probe,
+                    "piper": p_probe
+                })
+                return
+
+            elif path == "/api/audio/voices":
+                target = f"{piper_url}/api/voices"
+                try:
+                    req = urllib.request.Request(target, headers={"User-Agent": "LIW-Gateway/1.0"})
+                    with urllib.request.urlopen(req, timeout=3) as resp:
+                        voices = json.loads(resp.read().decode("utf-8"))
+                        self.send_json_response({"voices": voices, "backend": "piper", "status": "online"})
+                        return
+                except Exception:
+                    standard_voices = [
+                        {"id": "en_US-lessac-medium", "name": "English (US) - Lessac (Medium)", "language": "en_US"},
+                        {"id": "en_US-amy-medium", "name": "English (US) - Amy (Medium)", "language": "en_US"},
+                        {"id": "en_GB-alan-medium", "name": "English (UK) - Alan (Medium)", "language": "en_GB"},
+                        {"id": "browser-default", "name": "Browser System Voice (Web Speech)", "language": "system"}
+                    ]
+                    self.send_json_response({"voices": standard_voices, "backend": "browser_fallback", "status": "standby"})
+                    return
+
+        elif self.command == "POST":
+            content_length = int(self.headers.get("Content-Length", 0))
+            body = self.rfile.read(content_length) if content_length > 0 else b"{}"
+
+            if path == "/api/audio/transcribe":
+                audio_bytes = None
+                filename = "audio.wav"
+                language = "auto"
+
+                try:
+                    payload = json.loads(body.decode("utf-8"))
+                    b64_str = payload.get("audio", "")
+                    if "," in b64_str:
+                        b64_str = b64_str.split(",", 1)[1]
+                    audio_bytes = base64.b64decode(b64_str)
+                    filename = payload.get("filename", "audio.wav")
+                    language = payload.get("language", "auto")
+                except Exception:
+                    audio_bytes = body
+
+                if not audio_bytes:
+                    self.send_json_response({"error": "No audio data received"}, status=400)
+                    return
+
+                boundary = "----LIWFormBoundary" + str(int(time.time() * 1000))
+                form_data = bytearray()
+                form_data.extend(f"--{boundary}\r\n".encode())
+                form_data.extend(f'Content-Disposition: form-data; name="file"; filename="{filename}"\r\n'.encode())
+                form_data.extend(b"Content-Type: application/octet-stream\r\n\r\n")
+                form_data.extend(audio_bytes)
+                form_data.extend(b"\r\n")
+
+                if language and language != "auto":
+                    form_data.extend(f"--{boundary}\r\n".encode())
+                    form_data.extend(b'Content-Disposition: form-data; name="language"\r\n\r\n')
+                    form_data.extend(language.encode())
+                    form_data.extend(b"\r\n")
+
+                form_data.extend(f"--{boundary}--\r\n".encode())
+
+                # Try whisper.cpp /inference
+                target = f"{whisper_url}/inference"
+                try:
+                    req = urllib.request.Request(
+                        target,
+                        data=bytes(form_data),
+                        headers={
+                            "Content-Type": f"multipart/form-data; boundary={boundary}",
+                            "User-Agent": "LIW-Gateway/1.0"
+                        },
+                        method="POST"
+                    )
+                    with urllib.request.urlopen(req, timeout=60) as resp:
+                        resp_data = json.loads(resp.read().decode("utf-8"))
+                        text = resp_data.get("text", "")
+                        self.send_json_response({
+                            "status": "success",
+                            "text": text.strip(),
+                            "raw": resp_data
+                        })
+                        return
+                except Exception:
+                    # Try faster-whisper /v1/audio/transcriptions
+                    target_v1 = f"{whisper_url}/v1/audio/transcriptions"
+                    try:
+                        req_v1 = urllib.request.Request(
+                            target_v1,
+                            data=bytes(form_data),
+                            headers={
+                                "Content-Type": f"multipart/form-data; boundary={boundary}",
+                                "User-Agent": "LIW-Gateway/1.0"
+                            },
+                            method="POST"
+                        )
+                        with urllib.request.urlopen(req_v1, timeout=60) as resp_v1:
+                            resp_data = json.loads(resp_v1.read().decode("utf-8"))
+                            self.send_json_response({
+                                "status": "success",
+                                "text": resp_data.get("text", "").strip(),
+                                "raw": resp_data
+                            })
+                            return
+                    except Exception:
+                        self.send_json_response({
+                            "error": f"Whisper ASR backend offline on {whisper_url}. Start whisper.cpp server ('./server -m models/ggml-base.bin --port 8178') or configure endpoint in Settings > Backends.",
+                            "status": "standby"
+                        }, status=503)
+                        return
+
+            elif path == "/api/audio/speak":
+                try:
+                    payload = json.loads(body.decode("utf-8"))
+                except Exception:
+                    payload = {}
+                text = payload.get("text", "").strip()
+                voice = payload.get("voice", "")
+                if not text:
+                    self.send_json_response({"error": "Empty text for speech synthesis"}, status=400)
+                    return
+
+                target = f"{piper_url}/api/tts"
+                try:
+                    tts_body = json.dumps({"text": text, "voice": voice}).encode("utf-8")
+                    req = urllib.request.Request(
+                        target,
+                        data=tts_body,
+                        headers={"Content-Type": "application/json", "User-Agent": "LIW-Gateway/1.0"},
+                        method="POST"
+                    )
+                    with urllib.request.urlopen(req, timeout=30) as resp:
+                        audio_data = resp.read()
+                        self.send_response(200)
+                        self.send_header("Content-Type", resp.headers.get("Content-Type", "audio/wav"))
+                        self.send_header("Content-Length", str(len(audio_data)))
+                        self.end_headers()
+                        self.wfile.write(audio_data)
+                        return
+                except Exception:
+                    try:
+                        get_url = f"{piper_url}/?text={urllib.parse.quote(text)}"
+                        req = urllib.request.Request(get_url, headers={"User-Agent": "LIW-Gateway/1.0"})
+                        with urllib.request.urlopen(req, timeout=30) as resp:
+                            audio_data = resp.read()
+                            self.send_response(200)
+                            self.send_header("Content-Type", "audio/wav")
+                            self.send_header("Content-Length", str(len(audio_data)))
+                            self.end_headers()
+                            self.wfile.write(audio_data)
+                            return
+                    except Exception:
+                        self.send_json_response({
+                            "error": f"Piper TTS backend is offline on {piper_url}. The workstation UI will use client-side speech synthesis.",
+                            "status": "standby"
+                        }, status=503)
+                        return
+
+        self.send_error(404, f"Audio endpoint not found: {path}")
 
     def handle_hub_request(self):
         """Route Model Hub API requests."""
@@ -1003,6 +1598,14 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
                 result = verify_hf_token(hf_token, endpoint=hf_endpoint)
             elif path == "/hub/hf/ping":
                 result = ping_hf_endpoint(endpoint=hf_endpoint)
+            elif path == "/hub/civitai/search":
+                result = fetch_civitai_models(
+                    query=params.get("q", params.get("query", "")),
+                    model_type=params.get("type", "Checkpoint"),
+                    sort=params.get("sort", "Highest Rated"),
+                    limit=int(params.get("limit", 20)),
+                    page=int(params.get("page", 1))
+                )
             elif path == "/hub/categories":
                 source = params.get("source", "ollama")
                 if source == "huggingface":
@@ -1028,7 +1631,7 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
         self.wfile.write(body)
 
     def proxy_request(self, method):
-        target_url = f"{OLLAMA_BACKEND}{self.path}"
+        target_url = f"{get_backend_url('ollama')}{self.path}"
         content_length = int(self.headers.get("Content-Length", 0))
         body = self.rfile.read(content_length) if content_length > 0 else None
 
@@ -1061,7 +1664,7 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
             self.send_response(502)
             self.send_header("Content-Type", "application/json")
             self.end_headers()
-            err_data = json.dumps({"error": f"Ollama proxy error: {str(e)}"}).encode()
+            err_data = json.dumps({"error": f"Ollama proxy error ({target_url}): {str(e)}"}).encode()
             self.wfile.write(err_data)
 
     def log_message(self, format, *args):
@@ -1075,9 +1678,9 @@ def run():
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     HTTPServer.allow_reuse_address = True
     server = HTTPServer(("0.0.0.0", port), OllamaProxyHandler)
-    print(f"Ollama Studio server & proxy running on http://0.0.0.0:{port}")
-    print(f"Forwarding /api/* -> {OLLAMA_BACKEND} (CORS & HTTPS-tunnel safe)")
-    print(f"Model Hub API endpoints: /hub/ollama/search, /hub/hf/search, /hub/categories")
+    print(f"Local Intelligence Workstation Gateway running on http://0.0.0.0:{port}")
+    print(f"Backends: Ollama ({get_backend_url('ollama')}), SD WebUI ({get_backend_url('sd_webui')}), Whisper ({get_backend_url('whisper')}), Piper ({get_backend_url('piper')})")
+    print(f"Model Hub API endpoints: /hub/ollama/search, /hub/hf/search, /hub/civitai/search, /hub/categories")
     try:
         server.serve_forever()
     except KeyboardInterrupt:

@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="theme-color" content="#ECEBE5" id="metaThemeColor">
-  <title>Ollama Studio · Local AI Workstation</title>
+  <title>Local Intelligence Workstation · Universal AI System</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -3552,6 +3552,779 @@ html, body {
   }
 }
 
+/* ═══════════════════════════════════════════════════════════════════════
+   LOCAL INTELLIGENCE WORKSTATION — MULTI-MODAL STUDIOS (IMAGE & AUDIO)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Top Command Segmented Studio Switcher */
+.studio-nav-segmented {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border-dark);
+  background: var(--bg-parchment);
+  padding: 1px;
+  gap: 1px;
+  margin-left: 10px;
+}
+
+.studio-nav-btn {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 0;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.studio-nav-btn:hover {
+  color: var(--text-main);
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.studio-nav-btn.active {
+  background: var(--text-main);
+  color: var(--bg-parchment);
+}
+
+/* Studio Workspaces Base */
+.studio-workspace {
+  flex: 1 1 auto;
+  display: flex;
+  overflow: hidden;
+  background: var(--bg-transcript);
+  height: 100%;
+  min-height: 0;
+}
+
+/* ─── Image Generation Studio ────────────────────────────────────────── */
+.image-studio-grid {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  height: 100%;
+  width: 100%;
+}
+
+.image-studio-inspector {
+  background: var(--bg-parchment);
+  border-right: 1px solid var(--border-frame);
+  display: flex;
+  flex-direction: column;
+  padding: 14px;
+  overflow-y: auto;
+  gap: 12px;
+}
+
+.inspector-section-header {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border-frame);
+  padding-bottom: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.backend-status-indicator {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 600;
+  padding: 1px 5px;
+  border: 1px solid var(--border-frame);
+  background: var(--bg-btn);
+}
+
+.backend-status-indicator.online {
+  color: #1e7e34;
+  border-color: #28a745;
+  background: rgba(40, 167, 69, 0.08);
+}
+
+.inspector-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.inspector-field label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-main);
+  font-family: var(--font-mono);
+}
+
+.inspector-textarea {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  resize: vertical;
+  line-height: 1.4;
+}
+
+.inspector-aspect-presets {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+}
+
+.aspect-preset-btn {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 4px 2px;
+  background: var(--bg-btn);
+  border: 1px solid var(--border-frame);
+  color: var(--text-muted);
+  cursor: pointer;
+  text-align: center;
+  border-radius: 0;
+}
+
+.aspect-preset-btn.active {
+  background: var(--text-main);
+  color: var(--bg-parchment);
+  border-color: var(--border-dark);
+}
+
+.inspector-field-row {
+  display: flex;
+  gap: 10px;
+}
+
+.inspector-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.generate-btn {
+  background: #1A1816 !important;
+  color: #F8F6ED !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px;
+  flex: 1;
+  padding: 8px 12px !important;
+}
+
+[data-theme="dark"] .generate-btn {
+  background: #FAF8F2 !important;
+  color: #1A1816 !important;
+}
+
+.generation-progress-box {
+  background: var(--bg-btn);
+  border: 1px solid var(--border-frame);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.progress-bar-rail {
+  height: 6px;
+  background: var(--bg-transcript);
+  border: 1px solid var(--border-frame);
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: var(--count-update-color);
+  transition: width 0.2s ease;
+}
+
+.progress-text-row {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* Stage Canvas */
+.image-studio-stage {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background: #141312;
+}
+
+.stage-toolbar {
+  background: var(--bg-top-bar);
+  border-bottom: 1px solid var(--border-frame);
+  padding: 6px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.stage-meta-info {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.stage-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.stage-canvas-area {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: auto;
+  padding: 16px;
+  background: radial-gradient(circle, #252422 10%, #141312 90%);
+}
+
+.stage-placeholder {
+  text-align: center;
+  color: #8C877D;
+  font-family: var(--font-mono);
+  max-width: 420px;
+}
+
+.placeholder-icon {
+  font-size: 40px;
+  margin-bottom: 8px;
+}
+
+.placeholder-text {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+  color: #DDD8CD;
+}
+
+.placeholder-sub {
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.stage-active-image {
+  max-width: 100%;
+  max-height: 100%;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+  border: 1px solid #444;
+  image-rendering: -webkit-optimize-contrast;
+  cursor: zoom-in;
+}
+
+.stage-filmstrip-bar {
+  height: 96px;
+  background: var(--bg-parchment);
+  border-top: 1px solid var(--border-frame);
+  display: flex;
+  align-items: center;
+  padding: 6px 12px;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.filmstrip-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+}
+
+.filmstrip-scroll {
+  flex: 1;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  align-items: center;
+  height: 100%;
+}
+
+.filmstrip-thumb {
+  height: 76px;
+  width: 76px;
+  object-fit: cover;
+  border: 1px solid var(--border-frame);
+  cursor: pointer;
+  opacity: 0.85;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.filmstrip-thumb:hover, .filmstrip-thumb.active {
+  opacity: 1;
+  border-color: var(--text-main);
+  transform: scale(1.04);
+}
+
+.filmstrip-empty-text {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* ─── Audio Lab Studio ───────────────────────────────────────────────── */
+.audio-lab-grid {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  height: 100%;
+  width: 100%;
+}
+
+.audio-lab-inspector {
+  background: var(--bg-parchment);
+  border-right: 1px solid var(--border-frame);
+  display: flex;
+  flex-direction: column;
+  padding: 14px;
+  overflow-y: auto;
+  gap: 12px;
+}
+
+.audio-recorder-card {
+  border: 1px solid var(--border-frame);
+  background: var(--bg-transcript);
+  padding: 14px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.recorder-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.recorder-timer {
+  font-family: var(--font-mono);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: 1px;
+}
+
+.recorder-vu-rail {
+  width: 100%;
+  height: 6px;
+  background: var(--bg-btn);
+  border: 1px solid var(--border-frame);
+  overflow: hidden;
+}
+
+.recorder-vu-bar {
+  height: 100%;
+  background: #28a745;
+  transition: width 0.05s linear;
+}
+
+.recorder-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.mic-record-btn {
+  font-weight: 700;
+  font-family: var(--font-mono);
+}
+
+.mic-record-btn.recording {
+  background: #dc3545 !important;
+  color: #fff !important;
+  animation: pulse-red 1s infinite alternate;
+}
+
+@keyframes pulse-red {
+  0% { box-shadow: 0 0 0 rgba(220, 53, 69, 0.4); }
+  100% { box-shadow: 0 0 10px rgba(220, 53, 69, 0.8); }
+}
+
+.audio-dropzone {
+  border: 1px dashed var(--border-frame);
+  background: var(--bg-btn);
+  padding: 18px 10px;
+  text-align: center;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  transition: all 0.15s ease;
+}
+
+.audio-dropzone:hover {
+  border-color: var(--text-main);
+  background: var(--bg-transcript);
+}
+
+.audio-file-loaded-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-btn);
+  border: 1px solid var(--border-frame);
+  padding: 4px 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  margin-top: 4px;
+}
+
+.audio-lab-stage {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg-transcript);
+}
+
+.audio-player-bar {
+  background: var(--bg-parchment);
+  border-bottom: 1px solid var(--border-frame);
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.audio-scrub-slider {
+  flex: 1;
+}
+
+.audio-transcript-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.transcript-placeholder {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-style: italic;
+  text-align: center;
+  margin-top: 40px;
+}
+
+.transcript-content-text {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  color: var(--text-main);
+  outline: none;
+}
+
+.tts-synthesizer-card {
+  background: var(--bg-parchment);
+  border-top: 1px solid var(--border-frame);
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tts-card-header {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+.tts-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* ─── Backend Telemetry Cluster ──────────────────────────────────────── */
+.backend-telemetry-cluster {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.backend-indicator {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.backend-indicator b {
+  color: #777;
+  font-size: 11px;
+}
+
+.backend-indicator.online b {
+  color: #28a745;
+}
+
+/* ─── CivitAI Model Hub Card Grid ────────────────────────────────────── */
+.hub-civitai-toolbar {
+  padding: 6px 12px;
+  background: var(--bg-parchment);
+  border-bottom: 1px solid var(--border-frame);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.civitai-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+  padding: 12px;
+  overflow-y: auto;
+}
+
+.civitai-card {
+  border: 1px solid var(--border-frame);
+  background: var(--bg-parchment);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.civitai-card:hover {
+  border-color: var(--text-main);
+  transform: translateY(-2px);
+}
+
+.civitai-thumb-wrap {
+  position: relative;
+  width: 100%;
+  height: 160px;
+  background: #141312;
+  overflow: hidden;
+}
+
+.civitai-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.2s ease;
+}
+
+.civitai-card:hover .civitai-thumb {
+  transform: scale(1.04);
+}
+
+.civitai-badge-top {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  background: rgba(0, 0, 0, 0.75);
+  color: #FAF8F2;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 5px;
+  border: 1px solid #444;
+}
+
+.civitai-info {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.civitai-title {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.civitai-meta {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.civitai-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 6px;
+  border-top: 1px solid var(--border-frame);
+}
+
+/* ─── Split GGUF Shard Warning ────────────────────────────────────────── */
+.split-shard-badge {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
+  border: 1px solid #dc3545;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 1px 5px;
+  margin-left: 6px;
+}
+
+.split-disabled-btn {
+  opacity: 0.55;
+  cursor: not-allowed !important;
+  border-style: dashed !important;
+  color: var(--text-muted) !important;
+}
+
+/* ─── Generated Image Card in Chat ───────────────────────────────────── */
+.generated-image-card {
+  border: 1px solid var(--border-dark);
+  background: var(--bg-parchment);
+  margin: 10px 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  max-width: 540px;
+}
+
+.generated-image-header {
+  background: var(--bg-top-bar);
+  padding: 4px 8px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-frame);
+}
+
+.generated-image-prompt {
+  padding: 6px 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  background: var(--bg-transcript);
+  border-bottom: 1px solid var(--border-frame);
+  color: var(--text-main);
+}
+
+.generated-image-img {
+  width: 100%;
+  display: block;
+  cursor: zoom-in;
+  border-bottom: 1px solid var(--border-frame);
+}
+
+.generated-image-footer {
+  padding: 6px 8px;
+  display: flex;
+  gap: 6px;
+  background: var(--bg-top-bar);
+}
+
+/* ─── Inline TTS Button on Assistant Messages ────────────────────────── */
+.assistant-listen-btn {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  padding: 2px 6px;
+  border: 1px solid var(--border-frame);
+  background: var(--bg-btn);
+  color: var(--text-muted);
+  cursor: pointer;
+  margin-left: 6px;
+}
+
+.assistant-listen-btn:hover {
+  color: var(--text-main);
+  border-color: var(--text-main);
+}
+
+.assistant-listen-btn.playing {
+  color: #FAF8F2;
+  background: #1A1816;
+  border-color: #1A1816;
+}
+
+/* ─── Fullscreen Lightbox Modal ──────────────────────────────────────── */
+.lightbox-container {
+  width: 90vw;
+  max-width: 1100px;
+  height: 85vh;
+  background: #141312;
+  border: 1px solid var(--border-frame);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.lightbox-header {
+  background: #1e1d1b;
+  border-bottom: 1px solid #333;
+  padding: 8px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #FAF8F2;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.lightbox-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+  padding: 16px;
+}
+
+.lightbox-body img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* Mobile Responsiveness for Studios */
+@media (max-width: 768px) {
+  .image-studio-grid, .audio-lab-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    overflow-y: auto;
+  }
+  .image-studio-inspector, .audio-lab-inspector {
+    border-right: none;
+    border-bottom: 1px solid var(--border-frame);
+    max-height: 45vh;
+  }
+  .stage-canvas-area {
+    min-height: 280px;
+  }
+  .studio-nav-segmented {
+    margin-left: 4px;
+  }
+  .studio-nav-btn {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+}
+
 </style>
 <body>
 
@@ -3560,7 +4333,12 @@ html, body {
   <header class="top-header">
     <div class="top-header-left">
       <button class="top-btn mobile-ledger-toggle" id="mobileMenuToggle" title="Toggle Session Ledger">☰ Ledger</button>
-      <span class="app-title">Ollama Studio · Workstation</span>
+      <span class="app-title">Local Intelligence Workstation</span>
+      <div class="studio-nav-segmented" id="studioViewSwitcher">
+        <button type="button" class="studio-nav-btn active" data-view="chat" id="viewBtnChat" title="Chat & Reasoning Studio">💬 Chat</button>
+        <button type="button" class="studio-nav-btn" data-view="image" id="viewBtnImage" title="Diffusion Image Generation Studio">🎨 Image Studio</button>
+        <button type="button" class="studio-nav-btn" data-view="audio" id="viewBtnAudio" title="Speech Transcription & Voice Lab">🎙️ Audio Lab</button>
+      </div>
     </div>
     <div class="top-header-right">
       <select id="modelSelect" class="top-select-btn" title="Select Active Model"></select>
@@ -3575,7 +4353,7 @@ html, body {
         <span class="mobile-text">+ New</span>
       </button>
       <button class="top-btn" id="modelsLibraryBtn" title="Local Models Library">Models</button>
-      <button class="top-btn" id="modelHubBtn" title="Search & Download Models from Ollama & HuggingFace">Hub ↓</button>
+      <button class="top-btn" id="modelHubBtn" title="Search & Download Models from Ollama, HuggingFace & CivitAI">Hub ↓</button>
       <button class="top-btn" id="vramPurgeQuickBtn" title="Evict Model from VRAM">
         <span class="desktop-text">Evict VRAM</span>
         <span class="mobile-text">Evict</span>
@@ -3608,7 +4386,7 @@ html, body {
       <div class="ledger-list" id="sessionList"></div>
     </aside>
 
-    <main class="transcript-wrapper">
+    <main class="transcript-wrapper" id="chatWorkspace">
       <div class="transcript-area">
         <div class="transcript-scroll" id="chatScroll">
           <div class="chat-container" id="chatContainer"></div>
@@ -3625,9 +4403,10 @@ html, body {
         </div>
 
         <div class="composer-row">
-          <textarea id="promptInput" class="composer-input" placeholder="Type prompt..." rows="1"></textarea>
+          <textarea id="promptInput" class="composer-input" placeholder="Type prompt (or /imagine for diffusion images)..." rows="1"></textarea>
           <span id="promptTokenCounter" class="composer-token-counter" title="Prompt token estimate">0 tok</span>
           <input type="file" id="imageInput" accept="image/*,.txt,.md,.json,.csv,.py,.js,.ts,.html,.css,.yaml,.yml,.sh,.log,.sql,.xml" style="display:none;">
+          <button type="button" class="composer-btn secondary mic-dictate-btn" id="chatDictateBtn" title="Voice Dictation (Click to Speak, Click again to Transcribe)">🎙️</button>
           <button class="composer-btn secondary" id="triggerImageBtn" title="Attach Image or Document">Attach</button>
           <button class="composer-btn" id="sendBtn">Send</button>
           <button class="composer-btn stream-stop-btn" id="streamInlineStopBtn" style="display:none;">Abort</button>
@@ -3635,10 +4414,258 @@ html, body {
         </div>
       </div>
     </main>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         IMAGE GENERATION STUDIO WORKSPACE
+         ═══════════════════════════════════════════════════════════════════ -->
+    <main class="studio-workspace image-studio-grid" id="imageStudioWorkspace" style="display:none;">
+      <!-- Left Control Inspector -->
+      <aside class="image-studio-inspector">
+        <div class="inspector-section-header">
+          <span>DIFFUSION SYNTHESIS CONTROLS</span>
+          <span class="backend-status-indicator" id="sdBackendStatusBadge">○ STANDBY</span>
+        </div>
+
+        <div class="inspector-field">
+          <label for="imgModelSelect">Active Checkpoint / Model:</label>
+          <div style="display:flex; gap:4px;">
+            <select id="imgModelSelect" class="form-input" style="flex:1;">
+              <option value="">Detecting SD Checkpoints...</option>
+            </select>
+            <button type="button" class="composer-btn" id="refreshImgModelsBtn" title="Refresh local checkpoints">↻</button>
+          </div>
+        </div>
+
+        <div class="inspector-field">
+          <label for="imgPromptInput">Synthesis Prompt:</label>
+          <textarea id="imgPromptInput" class="form-input inspector-textarea" rows="4" placeholder="Detailed prompt describing subjects, lighting, artistic style, lens, composition..."></textarea>
+        </div>
+
+        <div class="inspector-field">
+          <label for="imgNegPromptInput">Negative Prompt:</label>
+          <textarea id="imgNegPromptInput" class="form-input inspector-textarea" rows="2" placeholder="blurry, distorted, artifacts, lowres, watermark..."></textarea>
+        </div>
+
+        <div class="inspector-field">
+          <label>Aspect Ratio & Dimensions:</label>
+          <div class="inspector-aspect-presets" id="imgAspectPresets">
+            <button type="button" class="aspect-preset-btn active" data-w="512" data-h="512">1:1 (512²)</button>
+            <button type="button" class="aspect-preset-btn" data-w="768" data-h="768">1:1 (768²)</button>
+            <button type="button" class="aspect-preset-btn" data-w="1024" data-h="1024">1:1 HD</button>
+            <button type="button" class="aspect-preset-btn" data-w="768" data-h="1024">3:4 Port</button>
+            <button type="button" class="aspect-preset-btn" data-w="1024" data-h="576">16:9 Land</button>
+          </div>
+          <div style="display:flex; gap:8px; margin-top:4px;">
+            <div style="flex:1;">
+              <span style="font-size:10px; color:var(--text-muted);">Width:</span>
+              <input type="number" id="imgWidthInput" class="form-input" value="512" min="256" max="2048" step="64">
+            </div>
+            <div style="flex:1;">
+              <span style="font-size:10px; color:var(--text-muted);">Height:</span>
+              <input type="number" id="imgHeightInput" class="form-input" value="512" min="256" max="2048" step="64">
+            </div>
+          </div>
+        </div>
+
+        <div class="inspector-field">
+          <label for="imgSamplerSelect">Sampling Method:</label>
+          <select id="imgSamplerSelect" class="form-input">
+            <option value="Euler a">Euler a</option>
+            <option value="Euler">Euler</option>
+            <option value="DPM++ 2M Karras">DPM++ 2M Karras</option>
+            <option value="DPM++ SDE Karras">DPM++ SDE Karras</option>
+            <option value="DDIM">DDIM</option>
+          </select>
+        </div>
+
+        <div class="inspector-field-row">
+          <div style="flex:1;">
+            <label for="imgStepsInput">Steps: <span id="imgStepsLabel">25</span></label>
+            <input type="range" id="imgStepsInput" min="10" max="100" value="25" step="1">
+          </div>
+          <div style="flex:1;">
+            <label for="imgCfgInput">CFG Scale: <span id="imgCfgLabel">7.0</span></label>
+            <input type="range" id="imgCfgInput" min="1.0" max="20.0" value="7.0" step="0.5">
+          </div>
+        </div>
+
+        <div class="inspector-field-row">
+          <div style="flex:1;">
+            <label for="imgSeedInput">Seed (-1 = Random):</label>
+            <input type="number" id="imgSeedInput" class="form-input" value="-1">
+          </div>
+          <div style="flex:1;">
+            <label for="imgBatchInput">Batch Size:</label>
+            <input type="number" id="imgBatchInput" class="form-input" value="1" min="1" max="4">
+          </div>
+        </div>
+
+        <div class="inspector-actions">
+          <button type="button" class="composer-btn generate-btn" id="imgGenerateBtn">⚡ GENERATE IMAGE</button>
+          <button type="button" class="composer-btn" id="imgRandomizePromptBtn" title="Randomize Seed & Add Quality Modifiers">🎲 Randomize</button>
+        </div>
+
+        <div id="imgGenerationProgress" class="generation-progress-box" style="display:none;">
+          <div class="progress-bar-rail">
+            <div class="progress-bar-fill" id="imgProgressBarFill" style="width:0%;"></div>
+          </div>
+          <div class="progress-text-row">
+            <span id="imgProgressText">Sampling steps...</span>
+            <span id="imgProgressEta">ETA: —</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Center Stage Canvas -->
+      <section class="image-studio-stage">
+        <div class="stage-toolbar">
+          <div class="stage-meta-info" id="stageMetaInfo">Ready for image synthesis</div>
+          <div class="stage-actions">
+            <button type="button" class="top-btn" id="stageZoomBtn" title="Lightbox Zoom Fullscreen">🔍 Lightbox</button>
+            <button type="button" class="top-btn" id="stageDownloadBtn" title="Download PNG">⬇ Download</button>
+            <button type="button" class="top-btn" id="stageCopyBtn" title="Copy Base64 / Image">📋 Copy</button>
+            <button type="button" class="top-btn" id="stageSendToChatBtn" title="Inject into Chat transcript">💬 Send to Chat</button>
+          </div>
+        </div>
+
+        <div class="stage-canvas-area" id="stageCanvasArea">
+          <div class="stage-placeholder" id="stagePlaceholder">
+            <div class="placeholder-icon">🎨</div>
+            <div class="placeholder-text">Local Diffusion Canvas</div>
+            <div class="placeholder-sub">Configure prompts & parameters on the left, then click Generate Image.<br>Requires Stable Diffusion WebUI or ComfyUI running locally.</div>
+          </div>
+          <img id="stageImage" class="stage-active-image" style="display:none;" alt="Generated Artwork">
+        </div>
+
+        <!-- Bottom History Filmstrip -->
+        <div class="stage-filmstrip-bar">
+          <span class="filmstrip-label">RECENT GENERATIONS</span>
+          <div class="filmstrip-scroll" id="imageFilmstripScroll">
+            <span class="filmstrip-empty-text">Past generated images will appear here.</span>
+          </div>
+          <button type="button" class="top-btn" id="clearFilmstripBtn" title="Clear gallery history">Clear</button>
+        </div>
+      </section>
+    </main>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         AUDIO LAB WORKSPACE (SPEECH-TO-TEXT & TEXT-TO-SPEECH)
+         ═══════════════════════════════════════════════════════════════════ -->
+    <main class="studio-workspace audio-lab-grid" id="audioLabWorkspace" style="display:none;">
+      <!-- Left Recording & ASR Panel -->
+      <aside class="audio-lab-inspector">
+        <div class="inspector-section-header">
+          <span>SPEECH-TO-TEXT (ASR) LAB</span>
+          <span class="backend-status-indicator" id="whisperBackendStatusBadge">○ STANDBY</span>
+        </div>
+
+        <!-- Live Microphone Recorder Box -->
+        <div class="audio-recorder-card">
+          <div class="recorder-title">MICROPHONE CAPTURE</div>
+          <div class="recorder-timer" id="audioRecordTimer">00:00</div>
+          <div class="recorder-vu-rail">
+            <div class="recorder-vu-bar" id="audioRecordVuBar" style="width:0%;"></div>
+          </div>
+          <div class="recorder-controls">
+            <button type="button" class="composer-btn mic-record-btn" id="audioRecordToggleBtn">● Record Audio</button>
+            <button type="button" class="composer-btn" id="audioRecordResetBtn" style="display:none;">Reset</button>
+          </div>
+        </div>
+
+        <!-- File Dropzone -->
+        <div class="inspector-field" style="margin-top:12px;">
+          <label>Or Upload Audio File:</label>
+          <div class="audio-dropzone" id="audioFileDropzone">
+            <input type="file" id="audioFileInput" accept="audio/*,.wav,.mp3,.m4a,.flac,.ogg,.webm" style="display:none;">
+            <div style="font-size:20px; margin-bottom:4px;">🎙️</div>
+            <div>Drag & drop audio here or <u>Browse</u></div>
+            <div style="font-size:10px; color:var(--text-muted); margin-top:4px;">Supported: WAV, MP3, M4A, FLAC, WEBM</div>
+          </div>
+          <div id="audioFileInfo" class="audio-file-loaded-info" style="display:none;">
+            <span id="audioFileNameDisplay">—</span>
+            <button type="button" class="attachment-remove-btn" id="clearAudioFileBtn">✕</button>
+          </div>
+        </div>
+
+        <div class="inspector-field">
+          <label for="audioLangSelect">Spoken Language:</label>
+          <select id="audioLangSelect" class="form-input">
+            <option value="auto">Auto-Detect Language</option>
+            <option value="en">English</option>
+            <option value="es">Spanish</option>
+            <option value="fr">French</option>
+            <option value="de">German</option>
+            <option value="it">Italian</option>
+            <option value="zh">Chinese</option>
+            <option value="ja">Japanese</option>
+            <option value="hi">Hindi</option>
+            <option value="ru">Russian</option>
+          </select>
+        </div>
+
+        <div class="inspector-actions">
+          <button type="button" class="composer-btn generate-btn" id="audioTranscribeBtn">⚡ TRANSCRIBE SPEECH</button>
+        </div>
+
+        <div id="audioTranscribeStatus" class="inline-status-badge" style="display:none; margin-top:8px;"></div>
+      </aside>
+
+      <!-- Center Transcript & TTS Synthesis Stage -->
+      <section class="audio-lab-stage">
+        <div class="stage-toolbar">
+          <div class="stage-meta-info" id="audioStageMetaInfo">Audio Document & Transcript Viewer</div>
+          <div class="stage-actions">
+            <button type="button" class="top-btn" id="copyAudioTranscriptBtn">📋 Copy Text</button>
+            <button type="button" class="top-btn" id="sendAudioToChatBtn">💬 Send to Chat</button>
+            <button type="button" class="top-btn" id="downloadAudioTranscriptBtn">⬇ Export TXT</button>
+          </div>
+        </div>
+
+        <!-- Audio Player Scrub Area -->
+        <div class="audio-player-bar" id="audioPlayerBar" style="display:none;">
+          <button type="button" class="top-btn" id="audioPlayPauseBtn">▶ Play</button>
+          <span id="audioCurrentTime" style="font-size:11px; font-family:var(--font-mono);">0:00</span>
+          <input type="range" id="audioScrubber" min="0" max="100" value="0" class="audio-scrub-slider">
+          <span id="audioDuration" style="font-size:11px; font-family:var(--font-mono);">0:00</span>
+          <audio id="audioElement" style="display:none;"></audio>
+        </div>
+
+        <!-- Transcript Display Box -->
+        <div class="audio-transcript-container">
+          <div class="transcript-placeholder" id="audioTranscriptPlaceholder">
+            Transcription text will appear here once audio is recorded or uploaded.
+          </div>
+          <div id="audioTranscriptContent" class="transcript-content-text" style="display:none;" contenteditable="true"></div>
+        </div>
+
+        <!-- Bottom TTS Voice Synthesizer Section -->
+        <div class="tts-synthesizer-card">
+          <div class="tts-card-header">
+            <span>TEXT-TO-SPEECH (TTS) SYNTHESIZER</span>
+            <span class="backend-status-indicator" id="piperBackendStatusBadge">○ STANDBY</span>
+          </div>
+          <div class="tts-input-row">
+            <input type="text" id="ttsInputText" class="form-input" placeholder="Type text to speak aloud using neural voice..." style="flex:1;">
+            <select id="ttsVoiceSelect" class="form-input" style="width:220px;">
+              <option value="browser-default">Browser Speech (Web Speech)</option>
+            </select>
+            <button type="button" class="composer-btn" id="ttsSpeakBtn">🔊 Speak</button>
+          </div>
+        </div>
+      </section>
+    </main>
   </div>
 
   <footer class="status-bar" id="telemetryStrip">
     <span>STATUS: <b id="metricStreamStatus">READY</b></span>
+    <span>|</span>
+    <span class="backend-telemetry-cluster" title="Active Inference Engines">
+      BACKENDS: 
+      <span class="backend-indicator online" id="beOllamaInd" title="Ollama (LLMs & Vision)">OLLAMA <b id="beOllamaDot">●</b></span>
+      <span class="backend-indicator" id="beSdInd" title="Stable Diffusion WebUI">SD <b id="beSdDot">○</b></span>
+      <span class="backend-indicator" id="beAsrInd" title="Whisper Speech-to-Text">ASR <b id="beAsrDot">○</b></span>
+      <span class="backend-indicator" id="beTtsInd" title="Piper Neural Text-to-Speech">TTS <b id="beTtsDot">○</b></span>
+    </span>
     <span>|</span>
     <span>HOST: <span id="serverStatusText">127.0.0.1:11434</span></span>
     <span>|</span>
@@ -3677,11 +4704,93 @@ html, body {
       <button class="top-btn" id="closeSettingsModalX">✕</button>
     </div>
     <div class="modal-tab-bar" id="settingsTabBar">
-      <button class="modal-tab-btn active" data-tab="serverTab">Server & Hardware</button>
+      <button class="modal-tab-btn active" data-tab="backendsTab">Backends & Engines</button>
+      <button class="modal-tab-btn" data-tab="serverTab">Hardware & Context</button>
       <button class="modal-tab-btn" data-tab="personaTab">System Persona</button>
       <button class="modal-tab-btn" data-tab="hfTab">Hugging Face</button>
+      <button class="modal-tab-btn" data-tab="audioTab">Voice & Speech</button>
     </div>
-    <div class="modal-tab-pane active" id="serverTab">
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         BACKENDS & INFERENCE ENGINES CONFIGURATION
+         ═══════════════════════════════════════════════════════════════════ -->
+    <div class="modal-tab-pane active" id="backendsTab">
+      <div style="font-size:11px; color:var(--text-muted); margin-bottom:10px;">
+        Local Intelligence Workstation coordinates multiple local engines. Configure daemon URLs and ping latency:
+      </div>
+
+      <!-- Ollama Backend -->
+      <div class="form-group" style="border:1px solid var(--border-frame); padding:8px; margin-bottom:8px; background:var(--bg-transcript);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <span style="font-family:var(--font-mono); font-size:11.5px; font-weight:700;">💬 Ollama Daemon (LLMs & VLMs)</span>
+          <span class="backend-status-indicator online" id="statusBeOllama">● ONLINE</span>
+        </div>
+        <div class="form-action-row">
+          <input type="text" id="settingBeOllamaUrl" class="form-input" value="http://127.0.0.1:11434">
+          <button type="button" class="composer-btn" id="pingBeOllamaBtn">Ping</button>
+        </div>
+        <div style="font-size:10px; color:var(--text-muted); margin-top:3px;">Launch command: <code>ollama serve</code> (Port 11434)</div>
+      </div>
+
+      <!-- SD WebUI Backend -->
+      <div class="form-group" style="border:1px solid var(--border-frame); padding:8px; margin-bottom:8px; background:var(--bg-transcript);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <span style="font-family:var(--font-mono); font-size:11.5px; font-weight:700;">🎨 Stable Diffusion WebUI (Image Gen)</span>
+          <span class="backend-status-indicator" id="statusBeSd">○ STANDBY</span>
+        </div>
+        <div class="form-action-row">
+          <input type="text" id="settingBeSdUrl" class="form-input" value="http://127.0.0.1:7860">
+          <button type="button" class="composer-btn" id="pingBeSdBtn">Ping</button>
+        </div>
+        <div style="font-size:10px; color:var(--text-muted); margin-top:3px;">Launch command: <code>./webui.sh --api</code> (AUTOMATIC1111 / Forge, Port 7860)</div>
+      </div>
+
+      <!-- ComfyUI Backend -->
+      <div class="form-group" style="border:1px solid var(--border-frame); padding:8px; margin-bottom:8px; background:var(--bg-transcript);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <span style="font-family:var(--font-mono); font-size:11.5px; font-weight:700;">🔮 ComfyUI API (Alternative Diffusion)</span>
+          <span class="backend-status-indicator" id="statusBeComfy">○ STANDBY</span>
+        </div>
+        <div class="form-action-row">
+          <input type="text" id="settingBeComfyUrl" class="form-input" value="http://127.0.0.1:8188">
+          <button type="button" class="composer-btn" id="pingBeComfyBtn">Ping</button>
+        </div>
+        <div style="font-size:10px; color:var(--text-muted); margin-top:3px;">Launch command: <code>python main.py</code> (Port 8188)</div>
+      </div>
+
+      <!-- Whisper ASR Backend -->
+      <div class="form-group" style="border:1px solid var(--border-frame); padding:8px; margin-bottom:8px; background:var(--bg-transcript);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <span style="font-family:var(--font-mono); font-size:11.5px; font-weight:700;">🎙️ Whisper ASR Server (Speech-to-Text)</span>
+          <span class="backend-status-indicator" id="statusBeWhisper">○ STANDBY</span>
+        </div>
+        <div class="form-action-row">
+          <input type="text" id="settingBeWhisperUrl" class="form-input" value="http://127.0.0.1:8178">
+          <button type="button" class="composer-btn" id="pingBeWhisperBtn">Ping</button>
+        </div>
+        <div style="font-size:10px; color:var(--text-muted); margin-top:3px;">Launch command: <code>./server -m models/ggml-base.bin --port 8178</code></div>
+      </div>
+
+      <!-- Piper TTS Backend -->
+      <div class="form-group" style="border:1px solid var(--border-frame); padding:8px; margin-bottom:8px; background:var(--bg-transcript);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <span style="font-family:var(--font-mono); font-size:11.5px; font-weight:700;">🔊 Piper TTS Server (Text-to-Speech)</span>
+          <span class="backend-status-indicator" id="statusBePiper">○ STANDBY</span>
+        </div>
+        <div class="form-action-row">
+          <input type="text" id="settingBePiperUrl" class="form-input" value="http://127.0.0.1:5000">
+          <button type="button" class="composer-btn" id="pingBePiperBtn">Ping</button>
+        </div>
+        <div style="font-size:10px; color:var(--text-muted); margin-top:3px;">Launch command: <code>python3 -m piper_http --port 5000</code></div>
+      </div>
+
+      <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
+        <button type="button" class="composer-btn" id="saveBackendsConfigBtn" style="font-weight:700;">💾 Save Backends & Probe All</button>
+        <span id="backendsSaveStatus" class="inline-status-badge"></span>
+      </div>
+    </div>
+
+    <div class="modal-tab-pane" id="serverTab">
       <div class="form-group">
         <label for="settingOllamaHost">Ollama Host URL:</label>
         <input type="text" id="settingOllamaHost" class="form-input" value="http://127.0.0.1:11434">
@@ -3777,6 +4886,36 @@ html, body {
         </label>
       </div>
     </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         VOICE & SPEECH SYNTHESIS SETTINGS
+         ═══════════════════════════════════════════════════════════════════ -->
+    <div class="modal-tab-pane" id="audioTab">
+      <div class="form-group">
+        <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+          <input type="checkbox" id="settingAutoSpeak">
+          <span style="font-weight:600;">Auto-Speak Assistant Responses Aloud (TTS)</span>
+        </label>
+        <div style="font-size:10.5px; color:var(--text-muted); margin-top:4px;">
+          Automatically triggers neural voice synthesis when an assistant message finishes streaming.
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top:12px;">
+        <label for="settingTtsVoiceSelect">Text-to-Speech Voice Engine:</label>
+        <select id="settingTtsVoiceSelect" class="form-input">
+          <option value="browser-default">Browser Native Web Speech Voice</option>
+        </select>
+        <div style="font-size:10.5px; color:var(--text-muted); margin-top:4px;">
+          Select from local Piper TTS voices or built-in system browser voices.
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top:12px;">
+        <label for="settingTtsSpeed">Speech Playback Speed: <span id="ttsSpeedLabel">1.0x</span></label>
+        <input type="range" id="settingTtsSpeed" min="0.5" max="2.0" step="0.1" value="1.0">
+      </div>
+    </div>
     <div class="drawer-footer">
       <button class="composer-btn" id="closeSettingsBtn">Cancel</button>
       <button class="composer-btn" id="saveSettingsBtn">Save Configuration</button>
@@ -3849,6 +4988,7 @@ html, body {
     <div class="hub-source-tabs" id="hubSourceTabs">
       <button class="hub-source-tab active" data-source="ollama">Ollama Registry</button>
       <button class="hub-source-tab" data-source="huggingface">HuggingFace Hub</button>
+      <button class="hub-source-tab" data-source="civitai">CivitAI Diffusion</button>
     </div>
 
     <!-- Hugging Face Live Real-Time Control Toolbar -->
@@ -3879,6 +5019,35 @@ html, body {
         <select class="hub-hf-ctrl-select" id="hubHfLimitSelect" title="Number of models to fetch">
           <option value="20">20 / page</option>
           <option value="40" selected>40 / page</option>
+          <option value="60">60 / page</option>
+          <option value="100">100 / page</option>
+        </select>
+        <button type="button" class="hub-hf-action-btn" id="openHfConfigBtn" title="Open Hugging Face settings drawer">
+          ⚙ HF Config
+        </button>
+      </div>
+    </div>
+
+    <!-- CivitAI Diffusion Control Toolbar -->
+    <div class="hub-civitai-toolbar" id="hubCivitaiToolbar" style="display:none;">
+      <div class="hub-hf-toolbar-left">
+        <select class="hub-hf-ctrl-select" id="hubCivitaiTypeSelect" title="Filter CivitAI Asset Type">
+          <option value="Checkpoint" selected>Type: Checkpoint</option>
+          <option value="LORA">Type: LoRA</option>
+          <option value="Controlnet">Type: ControlNet</option>
+          <option value="VAE">Type: VAE</option>
+          <option value="All">Type: All Assets</option>
+        </select>
+        <select class="hub-hf-ctrl-select" id="hubCivitaiSortSelect" title="Sort Criteria">
+          <option value="Highest Rated" selected>Sort: Highest Rated</option>
+          <option value="Most Downloaded">Sort: Most Downloaded</option>
+          <option value="Newest">Sort: Newest</option>
+        </select>
+      </div>
+      <div class="hub-hf-toolbar-right">
+        <span style="font-family:var(--font-mono); font-size:10px; color:var(--text-muted);">CivitAI Live REST API</span>
+      </div>
+    </div>
           <option value="60">60 / page</option>
           <option value="100">100 / page</option>
         </select>
@@ -4011,7 +5180,10 @@ html, body {
 <div id="lightboxModal" class="lightbox-modal" role="dialog" aria-modal="true" aria-label="Attachment Preview">
   <div class="lightbox-toolbar">
     <span class="lightbox-caption" id="lightboxCaption">Attachment Preview</span>
-    <button type="button" class="lightbox-close-btn" id="lightboxCloseBtn" title="Close Preview (Esc)">✕ CLOSE [ESC]</button>
+    <div style="display:flex; gap:6px;">
+      <button type="button" class="top-btn" id="lightboxDownloadBtn" onclick="downloadDataUri(document.getElementById('lightboxImg').src, 'preview.png')" style="height:24px; padding:0 8px; font-size:11px;">⬇ Download</button>
+      <button type="button" class="lightbox-close-btn" id="lightboxCloseBtn" title="Close Preview (Esc)">✕ CLOSE [ESC]</button>
+    </div>
   </div>
   <div class="lightbox-content">
     <img id="lightboxImg" alt="Enlarged attachment preview">
@@ -6318,6 +7490,17 @@ html, body {
     const text = promptInput.value.trim();
     if (!text && !attachedBase64Image && !attachedDocPayload) return;
 
+    // Check for inline slash command (/imagine <prompt> or /image <prompt>)
+    if (text.startsWith('/imagine ') || text.startsWith('/image ')) {
+      const imgPrompt = text.replace(/^\/(imagine|image)\s+/i, '').trim();
+      promptInput.value = '';
+      promptInput.style.height = '32px';
+      if (promptTokenCounter) updateCountDisplay(promptTokenCounter, '0 TOKENS');
+      removeAttachment();
+      await executeInlineImageGen(imgPrompt);
+      return;
+    }
+
     if (!modelSelect.value) {
       showToast('Please select a model first.', 'warning');
       return;
@@ -6355,6 +7538,158 @@ html, body {
     removeAttachment();
 
     await executeGeneration();
+  }
+
+  // Helper actions for generated images
+  window.downloadDataUri = function(uri, filename) {
+    const a = document.createElement('a');
+    a.href = uri;
+    a.download = filename || 'diffusion-art.png';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    showToast('Image download started', 'success');
+  };
+
+  window.copyImageBase64 = function(b64) {
+    fetch(`data:image/png;base64,${b64}`)
+      .then(res => res.blob())
+      .then(blob => {
+        return navigator.clipboard.write([
+          new ClipboardItem({ 'image/png': blob })
+        ]);
+      })
+      .then(() => {
+        showToast('Image copied to clipboard', 'success');
+      })
+      .catch(() => {
+        navigator.clipboard.writeText(`data:image/png;base64,${b64}`);
+        showToast('Base64 image URI copied', 'success');
+      });
+  };
+
+  window.openInImageStudio = function(prompt, imgSrc) {
+    if (window.switchStudioView) window.switchStudioView('image');
+    const pInput = document.getElementById('imgPromptInput');
+    if (pInput) pInput.value = prompt;
+    const stageImg = document.getElementById('stageImage');
+    const placeholder = document.getElementById('stagePlaceholder');
+    if (stageImg && imgSrc) {
+      stageImg.src = imgSrc;
+      stageImg.style.display = 'block';
+      if (placeholder) placeholder.style.display = 'none';
+    }
+  };
+
+  async function executeInlineImageGen(promptText) {
+    if (!promptText) return;
+    const session = getActiveSession();
+
+    // 1. Append user /imagine message
+    const userMessage = { role: 'user', content: `/imagine ${promptText}` };
+    session.messages.push(userMessage);
+    if (session.messages.filter(m => m.role === 'user').length === 1) {
+      session.title = `🎨 ${promptText.slice(0, 32)}`;
+    }
+    saveSessions();
+    appendMessageToDOM('user', `/imagine ${promptText}`);
+
+    // 2. Append assistant placeholder card
+    const placeholderMsg = {
+      role: 'assistant',
+      content: `⚡ Synthesizing image with local diffusion model: "${promptText}"...`
+    };
+    session.messages.push(placeholderMsg);
+    saveSessions();
+
+    const emptyHero = chatContainer.querySelector('.empty-chat-hero');
+    if (emptyHero) emptyHero.remove();
+
+    const row = document.createElement('div');
+    row.className = 'msg-row bot';
+    row.innerHTML = `
+      <div class="msg-header">
+        <span class="header-label">ASSISTANT · Local Diffusion Engine</span>
+      </div>
+      <div class="msg-bubble">
+        <div class="inline-generating-spinner" id="inlineImgGeneratingState" style="padding:10px; font-family:var(--font-mono); font-size:12px;">
+          <span class="typing-caret-block">▌</span> Generating diffusion image: <em>"${escapeHtml(promptText)}"</em>...
+        </div>
+      </div>
+    `;
+    chatContainer.appendChild(row);
+    smartScrollToBottom();
+
+    try {
+      const res = await fetch('/api/image/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: promptText,
+          width: 512,
+          height: 512,
+          steps: 25,
+          cfg_scale: 7.0,
+          sampler_name: 'Euler a'
+        })
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `HTTP ${res.status}`);
+      }
+
+      const data = await res.json();
+      if (!data.images || data.images.length === 0) {
+        throw new Error('No image was returned by diffusion backend.');
+      }
+
+      const b64 = data.images[0];
+      const imgSrc = `data:image/png;base64,${b64}`;
+
+      // Update session message
+      placeholderMsg.content = `Generated image for prompt: "${promptText}"`;
+      placeholderMsg.generated_image = b64;
+      saveSessions();
+
+      // Replace row content with rich generated-image-card
+      row.querySelector('.msg-bubble').innerHTML = `
+        <div class="generated-image-card">
+          <div class="generated-image-header">
+            <span>DIFFUSION GENERATION · 512×512 · Euler a</span>
+          </div>
+          <div class="generated-image-prompt">
+            <strong>Prompt:</strong> ${escapeHtml(promptText)}
+          </div>
+          <img src="${imgSrc}" class="generated-image-img" alt="Generated Artwork" onclick="openLightbox('${imgSrc}', 'Generated Image: ${escapeHtml(promptText)}')">
+          <div class="generated-image-footer">
+            <button type="button" class="top-btn" onclick="downloadDataUri('${imgSrc}', 'diffusion-art.png')">⬇ Download</button>
+            <button type="button" class="top-btn" onclick="copyImageBase64('${b64}')">📋 Copy</button>
+            <button type="button" class="top-btn" onclick="openInImageStudio('${escapeHtml(promptText)}', '${imgSrc}')">🎨 Open in Studio</button>
+          </div>
+        </div>
+      `;
+      smartScrollToBottom();
+      showToast('Diffusion image generated successfully!', 'success');
+
+    } catch (err) {
+      placeholderMsg.content = `Image Generation Failed: ${err.message}`;
+      saveSessions();
+
+      row.querySelector('.msg-bubble').innerHTML = `
+        <div class="hub-empty-state" style="padding:12px; border:1px solid var(--danger); background:rgba(220,53,69,0.06);">
+          <div style="font-weight:700; color:var(--danger); font-family:var(--font-mono); font-size:12px;">✕ DIFFUSION BACKEND STANDBY</div>
+          <div style="font-size:11px; margin-top:4px; font-family:var(--font-mono);">
+            ${escapeHtml(err.message)}
+          </div>
+          <div style="font-size:10.5px; color:var(--text-muted); margin-top:6px;">
+            Ensure Stable Diffusion WebUI is running with <code>--api</code> on port 7860 or ComfyUI on port 8188. Check Settings > Backends to configure ports.
+          </div>
+        </div>
+      `;
+      smartScrollToBottom();
+      showToast(`Diffusion error: ${err.message}`, 'error');
+    }
   }
 
   async function executeGeneration() {
@@ -7367,7 +8702,7 @@ html, body {
     const session = getActiveSession();
     let md = `# ${session.title}\n`;
     md += `**Date:** ${new Date(session.timestamp).toLocaleString()}\n`;
-    md += `**Platform:** Ollama Studio · Local AI Workstation\n\n`;
+    md += `**Platform:** Local Intelligence Workstation\n\n`;
     md += `---\n\n`;
 
     session.messages.forEach(m => {
@@ -7558,6 +8893,10 @@ html, body {
         });
       });
 
+      // CivitAI controls
+      document.getElementById('hubCivitaiTypeSelect')?.addEventListener('change', () => search());
+      document.getElementById('hubCivitaiSortSelect')?.addEventListener('change', () => search());
+
       // Category chips (event delegation so dynamically loaded chips work seamlessly)
       categoryBar?.addEventListener('click', (e) => {
         const chip = e.target.closest('.hub-cat-chip');
@@ -7624,25 +8963,45 @@ html, body {
         t.classList.toggle('active', t.dataset.source === src);
       });
 
+      const civitaiToolbar = document.getElementById('hubCivitaiToolbar');
+
       if (sourceLabel) {
-        sourceLabel.textContent = `Source: ${currentSource === 'ollama' ? 'Ollama Registry (ollama.com)' : 'HuggingFace Hub'}`;
+        if (currentSource === 'ollama') {
+          sourceLabel.textContent = 'Source: Ollama Registry (ollama.com)';
+        } else if (currentSource === 'huggingface') {
+          sourceLabel.textContent = 'Source: HuggingFace Hub';
+        } else if (currentSource === 'civitai') {
+          sourceLabel.textContent = 'Source: CivitAI Diffusion Hub (Checkpoints & LoRAs)';
+        }
       }
 
       if (searchInput) {
-        searchInput.placeholder = currentSource === 'ollama'
-          ? 'Search models... (e.g. llama, deepseek, coder, vision, whisper)'
-          : 'Search GGUF models on HuggingFace... (e.g. bartowski, Qwen2.5, Gemma, Mistral)';
+        if (currentSource === 'ollama') {
+          searchInput.placeholder = 'Search models... (e.g. llama, deepseek, coder, vision, whisper)';
+        } else if (currentSource === 'huggingface') {
+          searchInput.placeholder = 'Search GGUF models on HuggingFace... (e.g. bartowski, Qwen2.5, Gemma, Mistral)';
+        } else if (currentSource === 'civitai') {
+          searchInput.placeholder = 'Search CivitAI checkpoints, LoRAs... (e.g. Pony, SDXL, DreamShaper, RealVis)';
+        }
       }
 
       // Show/hide HF toolbar
       if (hfToolbar) {
         hfToolbar.style.display = currentSource === 'huggingface' ? 'flex' : 'none';
       }
+      if (civitaiToolbar) {
+        civitaiToolbar.style.display = currentSource === 'civitai' ? 'flex' : 'none';
+      }
+      if (categoryBar) {
+        categoryBar.style.display = currentSource === 'civitai' ? 'none' : 'flex';
+      }
       if (hfConfigPanel && currentSource !== 'huggingface') {
         hfConfigPanel.classList.remove('open');
       }
 
-      await loadDynamicCategories(src);
+      if (currentSource !== 'civitai') {
+        await loadDynamicCategories(src);
+      }
       search();
     }
 
@@ -7812,13 +9171,13 @@ html, body {
       try {
         const res = await fetch(`/hub/hf/whoami?token=${encodeURIComponent(token)}&endpoint=${encodeURIComponent(endpoint || '')}`);
         if (!res.ok) {
-          throw new Error(`Server returned HTTP ${res.status}. Ensure Ollama Studio was started with ./start.sh or "python3 server.py" (not plain http.server).`);
+          throw new Error(`Server returned HTTP ${res.status}. Ensure Local Intelligence Workstation was started with ./start.sh or "python3 server.py" (not plain http.server).`);
         }
         let data;
         try {
           data = await res.json();
         } catch (jsonErr) {
-          throw new Error('Invalid JSON response. Ensure Ollama Studio was started with ./start.sh or "python3 server.py" (not plain http.server).');
+          throw new Error('Invalid JSON response. Ensure Local Intelligence Workstation was started with ./start.sh or "python3 server.py" (not plain http.server).');
         }
 
         if (data.valid) {
@@ -8238,11 +9597,13 @@ html, body {
         let data;
         if (currentSource === 'ollama') {
           data = await fetchOllamaModels(currentQuery, forceRefresh);
-        } else {
+        } else if (currentSource === 'huggingface') {
           data = await fetchHuggingFaceModels(currentQuery, forceRefresh);
+        } else if (currentSource === 'civitai') {
+          data = await fetchCivitaiModels(currentQuery, forceRefresh);
         }
 
-        hubModels = data.models || [];
+        hubModels = data.models || data.items || [];
         renderResults();
 
         if (data.error) {
@@ -8250,6 +9611,25 @@ html, body {
         }
       } catch (e) {
         showError(e.message);
+      }
+    }
+
+    async function fetchCivitaiModels(query, force) {
+      const typeSel = document.getElementById('hubCivitaiTypeSelect');
+      const sortSel = document.getElementById('hubCivitaiSortSelect');
+      const params = new URLSearchParams();
+      if (query) params.set('q', query);
+      if (typeSel && typeSel.value) params.set('type', typeSel.value);
+      if (sortSel && sortSel.value) params.set('sort', sortSel.value);
+      params.set('limit', '30');
+
+      try {
+        const res = await fetch(`/hub/civitai/search?${params.toString()}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        return { models: data.items || [], error: data.error };
+      } catch (e) {
+        return { models: [], error: `CivitAI search failed: ${e.message}` };
       }
     }
 
@@ -8369,6 +9749,11 @@ html, body {
     }
 
     function renderResults() {
+      if (currentSource === 'civitai') {
+        renderCivitaiResults(hubModels);
+        return;
+      }
+
       const filtered = filterModels(hubModels);
       const sorted = sortModels(filtered);
 
@@ -8446,6 +9831,66 @@ html, body {
           });
         });
       }
+    }
+
+    function renderCivitaiResults(items) {
+      if (resultCount) {
+        resultCount.textContent = `${items.length} checkpoint${items.length !== 1 ? 's' : ''} found`;
+      }
+      if (!items || items.length === 0) {
+        if (resultsArea) {
+          resultsArea.innerHTML = `
+            <div class="hub-empty">
+              <div class="hub-empty-title">No CivitAI checkpoints found</div>
+              <div class="hub-empty-desc">
+                ${currentQuery ? `No diffusion models matching "${escapeHtml(currentQuery)}".` : 'Try searching for "Pony", "SDXL", "DreamShaper", or "RealVis".'}
+              </div>
+            </div>
+          `;
+        }
+        return;
+      }
+
+      let html = `<div class="hub-results-header">
+        <span>${items.length} diffusion model${items.length !== 1 ? 's' : ''} · CivitAI Live API</span>
+      </div><div class="civitai-grid">`;
+
+      items.forEach(item => {
+        const previewUrl = item.previewImage || '';
+        const downloadsFmt = item.downloads ? Number(item.downloads).toLocaleString() : '0';
+        const ratingFmt = item.rating ? item.rating.toFixed(1) : '5.0';
+
+        html += `
+          <div class="civitai-card">
+            <div class="civitai-thumb-wrap">
+              ${previewUrl 
+                ? `<img class="civitai-thumb" src="${escapeHtml(previewUrl)}" loading="lazy" alt="${escapeHtml(item.name)}">`
+                : '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#666;font-size:32px;">🎨</div>'
+              }
+              <span class="civitai-badge-top">${escapeHtml(item.baseModel || 'SD')}</span>
+            </div>
+            <div class="civitai-info">
+              <div class="civitai-title" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</div>
+              <div class="civitai-meta">
+                <span>By ${escapeHtml(item.creator || 'CivitAI')}</span>
+                <span>⭐ ${escapeHtml(ratingFmt)} · ⬇ ${escapeHtml(downloadsFmt)}</span>
+              </div>
+              <div style="font-size:10px; color:var(--text-muted); font-family:var(--font-mono);">
+                Size: ${escapeHtml(item.size || '—')} · ${escapeHtml(item.type || 'Checkpoint')}
+              </div>
+              <div class="civitai-actions">
+                ${item.downloadUrl 
+                  ? `<a href="${escapeHtml(item.downloadUrl)}" target="_blank" class="top-btn" style="flex:1; text-align:center; text-decoration:none; display:inline-block;" title="Direct model download (.safetensors)">⬇ Download</a>`
+                  : ''
+                }
+                <a href="https://civitai.com/models/${item.id}" target="_blank" class="top-btn" style="flex:1; text-align:center; text-decoration:none; display:inline-block;" title="View on CivitAI.com">CivitAI ↗</a>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+      if (resultsArea) resultsArea.innerHTML = html;
     }
 
     function renderModelCard(model, idx) {
@@ -8627,17 +10072,27 @@ html, body {
         const quant = f.quantization || extractQuantFromName(f.name);
         const pullTag = `hf.co/${modelId}:${quant || f.name}`;
         const installed = isInstalled(pullTag) || isInstalled(`${modelId}:${quant}`);
+        const isSplit = Boolean(f.is_split);
+
+        let pullActionHtml = '';
+        if (installed) {
+          pullActionHtml = '<span class="hub-installed-badge" style="font-size:8.5px;">INSTALLED</span>';
+        } else if (isSplit) {
+          pullActionHtml = `<button type="button" class="hub-tag-pull-btn split-disabled-btn" title="⚠ Multi-part split shard (${f.split_info || 'Shard'}). Ollama cannot pull multi-part shards in 1-click. Select a single-file quant (e.g. Q4_K_M) or combine files." disabled>Split Shard</button>`;
+        } else {
+          pullActionHtml = `<button type="button" class="hub-tag-pull-btn hub-hf-file-pull" data-pull-tag="${escapeHtml(pullTag)}" title="Pull ${escapeHtml(pullTag)}">Pull</button>`;
+        }
 
         html += `
-          <div class="hub-hf-file">
-            <span class="hub-hf-filename" title="${escapeHtml(f.name)}">${escapeHtml(f.name)}</span>
+          <div class="hub-hf-file ${isSplit ? 'is-split-shard' : ''}">
+            <span class="hub-hf-filename" title="${escapeHtml(f.name)}">
+              ${escapeHtml(f.name)}
+              ${isSplit ? `<span class="split-shard-badge" title="Multi-part GGUF Shard">⚠ ${escapeHtml(f.split_info || 'Split Shard')}</span>` : ''}
+            </span>
             ${quant ? `<span class="hub-hf-quant">${escapeHtml(quant)}</span>` : ''}
             <span class="hub-hf-filesize">${escapeHtml(f.size || '—')}</span>
             <div class="hub-hf-file-actions">
-              ${installed
-                ? '<span class="hub-installed-badge" style="font-size:8.5px;">INSTALLED</span>'
-                : `<button type="button" class="hub-tag-pull-btn hub-hf-file-pull" data-pull-tag="${escapeHtml(pullTag)}" title="Pull ${escapeHtml(pullTag)}">Pull</button>`
-              }
+              ${pullActionHtml}
               <button type="button" class="top-btn hub-hf-file-mf" data-model-id="${escapeHtml(modelId)}" data-file-name="${escapeHtml(f.name)}" data-quant="${escapeHtml(quant)}" style="font-size:9px; height:18px; padding:0 4px;" title="Create Custom Modelfile">Modelfile</button>
               <button type="button" class="top-btn hub-hf-copy-cmd" data-cmd="ollama run ${escapeHtml(pullTag)}" style="font-size:9px; height:18px; padding:0 4px;" title="Copy terminal command">Copy</button>
             </div>
@@ -8898,7 +10353,7 @@ html, body {
             <div class="hub-empty-title">Connection Error</div>
             <div class="hub-empty-desc">
               ${escapeHtml(message)}
-              <br><br>Make sure the Ollama Studio server (server.py) is running.
+              <br><br>Make sure the Local Intelligence Workstation gateway (server.py) is running.
               <br>Run: <code>python3 server.py</code> or <code>./start.command</code>
             </div>
           </div>
@@ -8947,7 +10402,7 @@ html, body {
   // Make HUB globally accessible for inline event handlers
   window.HUB = HUB;
 
-  // Also hook into switchSettingsTab so switching to hfTab synchronizes properly
+  // Also hook into switchSettingsTab so switching to tabs synchronizes properly
   const _origSwitchSettingsTab = switchSettingsTab;
   switchSettingsTab = function(tabId) {
     _origSwitchSettingsTab(tabId);
@@ -8961,6 +10416,10 @@ html, body {
       if (sHfEndpoint) sHfEndpoint.value = hfConf.endpoint || 'https://huggingface.co';
       if (sHfDefaultQuant) sHfDefaultQuant.value = hfConf.defaultQuant || 'Q4_K_M';
       if (sHfGgufOnly) sHfGgufOnly.checked = Boolean(hfConf.ggufOnly);
+    } else if (tabId === 'backendsTab') {
+      fetchBackendsStatus();
+    } else if (tabId === 'audioTab') {
+      populateTtsVoiceDropdowns();
     }
   };
 
@@ -8971,6 +10430,1210 @@ html, body {
     window.installedModels = installedModels;
   };
 
+  /* ═══════════════════════════════════════════════════════════════════════
+     LOCAL INTELLIGENCE WORKSTATION — MULTI-BACKEND ORCHESTRATION ENGINE
+     ═══════════════════════════════════════════════════════════════════════ */
+
+  // State
+  let currentStudioView = 'chat';
+  let backendsRegistry = {};
+  let imageHistory = JSON.parse(localStorage.getItem('liw_image_history') || '[]');
+  let audioRecorder = null;
+  let audioChunks = [];
+  let recordTimerInterval = null;
+  let recordSeconds = 0;
+  let audioContext = null;
+  let analyserNode = null;
+  let vuAnimFrame = null;
+  let currentAudioBlob = null;
+  let isComposerDictating = false;
+  let activeAudioPlayer = null;
+  let activeSpeechBtn = null;
+
+  // ─── 1. Studio View Navigation ──────────────────────────────────────────
+
+  function switchStudioView(view) {
+    currentStudioView = view;
+    const chatWs = document.getElementById('chatWorkspace');
+    const imgWs = document.getElementById('imageStudioWorkspace');
+    const audioWs = document.getElementById('audioLabWorkspace');
+    const sidebar = document.getElementById('sidebar');
+
+    const btnChat = document.getElementById('viewBtnChat');
+    const btnImg = document.getElementById('viewBtnImage');
+    const btnAudio = document.getElementById('viewBtnAudio');
+
+    if (btnChat) btnChat.classList.toggle('active', view === 'chat');
+    if (btnImg) btnImg.classList.toggle('active', view === 'image');
+    if (btnAudio) btnAudio.classList.toggle('active', view === 'audio');
+
+    if (chatWs) chatWs.style.display = view === 'chat' ? 'flex' : 'none';
+    if (sidebar) sidebar.style.display = view === 'chat' ? 'flex' : 'none';
+    if (imgWs) imgWs.style.display = view === 'image' ? 'grid' : 'none';
+    if (audioWs) audioWs.style.display = view === 'audio' ? 'grid' : 'none';
+
+    if (view === 'image') {
+      loadSdModels();
+      loadSdSamplers();
+      renderImageFilmstrip();
+    } else if (view === 'audio') {
+      populateTtsVoiceDropdowns();
+    }
+  }
+  window.switchStudioView = switchStudioView;
+
+  document.getElementById('viewBtnChat')?.addEventListener('click', () => switchStudioView('chat'));
+  document.getElementById('viewBtnImage')?.addEventListener('click', () => switchStudioView('image'));
+  document.getElementById('viewBtnAudio')?.addEventListener('click', () => switchStudioView('audio'));
+
+  // ─── 2. Multi-Backend Management & Telemetry ──────────────────────────
+
+  async function fetchBackendsStatus() {
+    try {
+      const res = await fetch('/api/backends');
+      if (!res.ok) return;
+      const data = await res.json();
+      backendsRegistry = data.backends || {};
+      updateBackendsTelemetryUI();
+    } catch (e) {
+      console.warn('Backend status probe error:', e);
+    }
+  }
+
+  function updateBackendsTelemetryUI() {
+    const b = backendsRegistry;
+
+    // Telemetry strip dots
+    const olDot = document.getElementById('beOllamaDot');
+    const sdDot = document.getElementById('beSdDot');
+    const asrDot = document.getElementById('beAsrDot');
+    const ttsDot = document.getElementById('beTtsDot');
+
+    const olInd = document.getElementById('beOllamaInd');
+    const sdInd = document.getElementById('beSdInd');
+    const asrInd = document.getElementById('beAsrInd');
+    const ttsInd = document.getElementById('beTtsInd');
+
+    if (olDot && b.ollama) {
+      const on = b.ollama.online;
+      olDot.textContent = on ? '●' : '○';
+      olDot.style.color = on ? '#28a745' : '#888';
+      olInd?.classList.toggle('online', on);
+    }
+    if (sdDot && b.sd_webui) {
+      const on = b.sd_webui.online;
+      sdDot.textContent = on ? '●' : '○';
+      sdDot.style.color = on ? '#28a745' : '#888';
+      sdInd?.classList.toggle('online', on);
+    }
+    if (asrDot && b.whisper) {
+      const on = b.whisper.online;
+      asrDot.textContent = on ? '●' : '○';
+      asrDot.style.color = on ? '#28a745' : '#888';
+      asrInd?.classList.toggle('online', on);
+    }
+    if (ttsDot && b.piper) {
+      const on = b.piper.online;
+      ttsDot.textContent = on ? '●' : '○';
+      ttsDot.style.color = on ? '#28a745' : '#888';
+      ttsInd?.classList.toggle('online', on);
+    }
+
+    // Studio Header Badges
+    const sdBadge = document.getElementById('sdBackendStatusBadge');
+    if (sdBadge && b.sd_webui) {
+      sdBadge.textContent = b.sd_webui.online ? `● ONLINE (${b.sd_webui.latency_ms || 0}ms)` : '○ STANDBY';
+      sdBadge.classList.toggle('online', b.sd_webui.online);
+    }
+    const whisperBadge = document.getElementById('whisperBackendStatusBadge');
+    if (whisperBadge && b.whisper) {
+      whisperBadge.textContent = b.whisper.online ? `● ONLINE (${b.whisper.latency_ms || 0}ms)` : '○ STANDBY';
+      whisperBadge.classList.toggle('online', b.whisper.online);
+    }
+    const piperBadge = document.getElementById('piperBackendStatusBadge');
+    if (piperBadge && b.piper) {
+      piperBadge.textContent = b.piper.online ? `● ONLINE (${b.piper.latency_ms || 0}ms)` : '○ STANDBY';
+      piperBadge.classList.toggle('online', b.piper.online);
+    }
+
+    // Settings backendsTab inputs & badges
+    if (b.ollama) {
+      const inp = document.getElementById('settingBeOllamaUrl');
+      if (inp && !inp.dataset.dirty) inp.value = b.ollama.url || '';
+      const st = document.getElementById('statusBeOllama');
+      if (st) {
+        st.textContent = b.ollama.online ? `● ONLINE (${b.ollama.latency_ms || 0}ms)` : '○ STANDBY';
+        st.classList.toggle('online', b.ollama.online);
+      }
+    }
+    if (b.sd_webui) {
+      const inp = document.getElementById('settingBeSdUrl');
+      if (inp && !inp.dataset.dirty) inp.value = b.sd_webui.url || '';
+      const st = document.getElementById('statusBeSd');
+      if (st) {
+        st.textContent = b.sd_webui.online ? `● ONLINE (${b.sd_webui.latency_ms || 0}ms)` : '○ STANDBY';
+        st.classList.toggle('online', b.sd_webui.online);
+      }
+    }
+    if (b.comfyui) {
+      const inp = document.getElementById('settingBeComfyUrl');
+      if (inp && !inp.dataset.dirty) inp.value = b.comfyui.url || '';
+      const st = document.getElementById('statusBeComfy');
+      if (st) {
+        st.textContent = b.comfyui.online ? `● ONLINE (${b.comfyui.latency_ms || 0}ms)` : '○ STANDBY';
+        st.classList.toggle('online', b.comfyui.online);
+      }
+    }
+    if (b.whisper) {
+      const inp = document.getElementById('settingBeWhisperUrl');
+      if (inp && !inp.dataset.dirty) inp.value = b.whisper.url || '';
+      const st = document.getElementById('statusBeWhisper');
+      if (st) {
+        st.textContent = b.whisper.online ? `● ONLINE (${b.whisper.latency_ms || 0}ms)` : '○ STANDBY';
+        st.classList.toggle('online', b.whisper.online);
+      }
+    }
+    if (b.piper) {
+      const inp = document.getElementById('settingBePiperUrl');
+      if (inp && !inp.dataset.dirty) inp.value = b.piper.url || '';
+      const st = document.getElementById('statusBePiper');
+      if (st) {
+        st.textContent = b.piper.online ? `● ONLINE (${b.piper.latency_ms || 0}ms)` : '○ STANDBY';
+        st.classList.toggle('online', b.piper.online);
+      }
+    }
+  }
+
+  window.testSingleBackend = async function(backendId) {
+    const inputMap = {
+      'ollama': 'settingBeOllamaUrl',
+      'sd_webui': 'settingBeSdUrl',
+      'comfyui': 'settingBeComfyUrl',
+      'whisper': 'settingBeWhisperUrl',
+      'piper': 'settingBePiperUrl'
+    };
+    const statusMap = {
+      'ollama': 'statusBeOllama',
+      'sd_webui': 'statusBeSd',
+      'comfyui': 'statusBeComfy',
+      'whisper': 'statusBeWhisper',
+      'piper': 'statusBePiper'
+    };
+
+    const inp = document.getElementById(inputMap[backendId]);
+    const st = document.getElementById(statusMap[backendId]);
+    if (!inp || !st) return;
+
+    st.textContent = 'Pinging...';
+    st.className = 'backend-status-indicator';
+
+    try {
+      const res = await fetch('/api/backends/probe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: backendId, url: inp.value.trim() })
+      });
+      const data = await res.json();
+      if (data.online) {
+        st.textContent = `● ONLINE (${data.latency_ms}ms)`;
+        st.classList.add('online');
+        showToast(`${backendId} is online! Latency: ${data.latency_ms}ms`, 'success');
+      } else {
+        st.textContent = '○ STANDBY';
+        st.classList.remove('online');
+        showToast(`${backendId} unreachable at ${inp.value}`, 'warning');
+      }
+    } catch (e) {
+      st.textContent = '✕ ERROR';
+      showToast(`Probe error: ${e.message}`, 'error');
+    }
+  };
+
+  document.getElementById('pingBeOllamaBtn')?.addEventListener('click', () => testSingleBackend('ollama'));
+  document.getElementById('pingBeSdBtn')?.addEventListener('click', () => testSingleBackend('sd_webui'));
+  document.getElementById('pingBeComfyBtn')?.addEventListener('click', () => testSingleBackend('comfyui'));
+  document.getElementById('pingBeWhisperBtn')?.addEventListener('click', () => testSingleBackend('whisper'));
+  document.getElementById('pingBePiperBtn')?.addEventListener('click', () => testSingleBackend('piper'));
+
+  document.getElementById('saveBackendsConfigBtn')?.addEventListener('click', async () => {
+    const payload = {
+      ollama: { url: document.getElementById('settingBeOllamaUrl')?.value.trim() || 'http://127.0.0.1:11434' },
+      sd_webui: { url: document.getElementById('settingBeSdUrl')?.value.trim() || 'http://127.0.0.1:7860' },
+      comfyui: { url: document.getElementById('settingBeComfyUrl')?.value.trim() || 'http://127.0.0.1:8188' },
+      whisper: { url: document.getElementById('settingBeWhisperUrl')?.value.trim() || 'http://127.0.0.1:8178' },
+      piper: { url: document.getElementById('settingBePiperUrl')?.value.trim() || 'http://127.0.0.1:5000' }
+    };
+
+    const statusBadge = document.getElementById('backendsSaveStatus');
+    if (statusBadge) statusBadge.textContent = 'Saving & Probing...';
+
+    try {
+      const res = await fetch('/api/backends/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      backendsRegistry = data.backends || {};
+      updateBackendsTelemetryUI();
+      if (statusBadge) statusBadge.textContent = '✓ Saved & Verified';
+      showToast('Backends configuration saved and verified live!', 'success');
+      setTimeout(() => { if (statusBadge) statusBadge.textContent = ''; }, 3000);
+    } catch (e) {
+      if (statusBadge) statusBadge.textContent = '✕ Save Error';
+      showToast(`Error saving backends: ${e.message}`, 'error');
+    }
+  });
+
+  // Track manual edits so polling doesn't overwrite while user types
+  ['settingBeOllamaUrl', 'settingBeSdUrl', 'settingBeComfyUrl', 'settingBeWhisperUrl', 'settingBePiperUrl'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', (e) => {
+      e.target.dataset.dirty = 'true';
+    });
+  });
+
+  // ─── 3. Image Generation Studio ───────────────────────────────────────
+
+  // Aspect Ratio Preset Buttons
+  document.getElementById('imgAspectPresets')?.addEventListener('click', (e) => {
+    const btn = e.target.closest('.aspect-preset-btn');
+    if (!btn) return;
+    document.querySelectorAll('#imgAspectPresets .aspect-preset-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const w = btn.dataset.w;
+    const h = btn.dataset.h;
+    const wInp = document.getElementById('imgWidthInput');
+    const hInp = document.getElementById('imgHeightInput');
+    if (wInp) wInp.value = w;
+    if (hInp) hInp.value = h;
+  });
+
+  // Sliders
+  document.getElementById('imgStepsInput')?.addEventListener('input', (e) => {
+    const lbl = document.getElementById('imgStepsLabel');
+    if (lbl) lbl.textContent = e.target.value;
+  });
+  document.getElementById('imgCfgInput')?.addEventListener('input', (e) => {
+    const lbl = document.getElementById('imgCfgLabel');
+    if (lbl) lbl.textContent = parseFloat(e.target.value).toFixed(1);
+  });
+
+  // Fetch Checkpoints
+  async function loadSdModels() {
+    const select = document.getElementById('imgModelSelect');
+    if (!select) return;
+    try {
+      const res = await fetch('/api/image/models');
+      const data = await res.json();
+      select.innerHTML = '';
+      if (data.models && data.models.length > 0) {
+        data.models.forEach(m => {
+          const opt = document.createElement('option');
+          opt.value = m.title || m.model_name;
+          opt.textContent = m.model_name || m.title;
+          select.appendChild(opt);
+        });
+      } else {
+        select.innerHTML = '<option value="">No SD models loaded (SD WebUI standby)</option>';
+      }
+    } catch (e) {
+      select.innerHTML = '<option value="">SD WebUI offline</option>';
+    }
+  }
+
+  // Fetch Samplers
+  async function loadSdSamplers() {
+    const select = document.getElementById('imgSamplerSelect');
+    if (!select) return;
+    try {
+      const res = await fetch('/api/image/samplers');
+      const data = await res.json();
+      if (data.samplers && data.samplers.length > 0) {
+        select.innerHTML = '';
+        data.samplers.forEach(s => {
+          const opt = document.createElement('option');
+          opt.value = s;
+          opt.textContent = s;
+          select.appendChild(opt);
+        });
+      }
+    } catch (e) {}
+  }
+
+  document.getElementById('refreshImgModelsBtn')?.addEventListener('click', () => {
+    loadSdModels();
+    loadSdSamplers();
+    showToast('Refreshing checkpoints from SD WebUI...', 'info');
+  });
+
+  // Randomize Prompt & Quality Tags
+  document.getElementById('imgRandomizePromptBtn')?.addEventListener('click', () => {
+    const promptInput = document.getElementById('imgPromptInput');
+    const seedInput = document.getElementById('imgSeedInput');
+    if (!promptInput) return;
+
+    const styles = [
+      'cinematic lighting, hyper-detailed cutaway blueprint, architectural CAD rendering',
+      'vintage industrial workstation, 8k resolution, photorealistic, intricate engineering drawing',
+      'moody atmospheric lighting, sharp focus, technical schematic, archival parchment style',
+      'cybernetic laboratory, clean hairline precision, isometric technical illustration'
+    ];
+    const pick = styles[Math.floor(Math.random() * styles.length)];
+    if (!promptInput.value.includes(pick)) {
+      promptInput.value = promptInput.value.trim() ? `${promptInput.value.trim()}, ${pick}` : pick;
+    }
+    if (seedInput) seedInput.value = -1;
+    showToast('Appended technical styling modifiers and randomized seed.', 'info');
+  });
+
+  // Generate Image
+  document.getElementById('imgGenerateBtn')?.addEventListener('click', async () => {
+    const promptInput = document.getElementById('imgPromptInput');
+    const negPromptInput = document.getElementById('imgNegPromptInput');
+    const widthInput = document.getElementById('imgWidthInput');
+    const heightInput = document.getElementById('imgHeightInput');
+    const samplerSelect = document.getElementById('imgSamplerSelect');
+    const stepsInput = document.getElementById('imgStepsInput');
+    const cfgInput = document.getElementById('imgCfgInput');
+    const seedInput = document.getElementById('imgSeedInput');
+    const batchInput = document.getElementById('imgBatchInput');
+
+    const prompt = (promptInput ? promptInput.value : '').trim();
+    if (!prompt) {
+      showToast('Please enter a synthesis prompt', 'warning');
+      return;
+    }
+
+    const payload = {
+      prompt: prompt,
+      negative_prompt: negPromptInput ? negPromptInput.value.trim() : '',
+      width: parseInt(widthInput ? widthInput.value : 512) || 512,
+      height: parseInt(heightInput ? heightInput.value : 512) || 512,
+      sampler_name: samplerSelect ? samplerSelect.value : 'Euler a',
+      steps: parseInt(stepsInput ? stepsInput.value : 25) || 25,
+      cfg_scale: parseFloat(cfgInput ? cfgInput.value : 7.0) || 7.0,
+      seed: parseInt(seedInput ? seedInput.value : -1) || -1,
+      batch_size: parseInt(batchInput ? batchInput.value : 1) || 1
+    };
+
+    const genBtn = document.getElementById('imgGenerateBtn');
+    const progressBox = document.getElementById('imgGenerationProgress');
+    const progressFill = document.getElementById('imgProgressBarFill');
+    const progressText = document.getElementById('imgProgressText');
+    const metaInfo = document.getElementById('stageMetaInfo');
+
+    if (genBtn) {
+      genBtn.disabled = true;
+      genBtn.textContent = '⏳ SYNTHESIZING...';
+    }
+    if (progressBox) progressBox.style.display = 'block';
+    if (progressFill) progressFill.style.width = '15%';
+    if (progressText) progressText.textContent = 'Submitting prompt to diffusion engine...';
+
+    // Start progress polling
+    const pollInterval = setInterval(async () => {
+      try {
+        const pRes = await fetch('/api/image/progress');
+        if (pRes.ok) {
+          const pData = await pRes.json();
+          const pct = Math.round((pData.progress || 0) * 100);
+          if (progressFill && pct > 0) progressFill.style.width = `${pct}%`;
+          if (progressText && pData.eta_relative) {
+            progressText.textContent = `Sampling step... ${pct}% (ETA: ${pData.eta_relative.toFixed(1)}s)`;
+          }
+        }
+      } catch (e) {}
+    }, 600);
+
+    const startTime = Date.now();
+
+    try {
+      const res = await fetch('/api/image/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      clearInterval(pollInterval);
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `HTTP ${res.status}`);
+      }
+
+      const data = await res.json();
+      if (!data.images || data.images.length === 0) {
+        throw new Error('No images returned by diffusion backend');
+      }
+
+      const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+      const b64 = data.images[0];
+      const imgSrc = `data:image/png;base64,${b64}`;
+
+      // Update Stage Canvas
+      const stageImg = document.getElementById('stageImage');
+      const placeholder = document.getElementById('stagePlaceholder');
+      if (stageImg) {
+        stageImg.src = imgSrc;
+        stageImg.style.display = 'block';
+        stageImg.onclick = () => openLightbox(imgSrc, `Generated Image: ${escapeHtml(prompt)}`);
+      }
+      if (placeholder) placeholder.style.display = 'none';
+
+      if (metaInfo) {
+        metaInfo.textContent = `${payload.width}×${payload.height} · ${payload.sampler_name} · ${payload.steps} steps · CFG ${payload.cfg_scale} · ${elapsed}s`;
+      }
+
+      // Save to History
+      const histItem = {
+        id: Date.now(),
+        prompt: prompt,
+        image: b64,
+        params: payload,
+        time: new Date().toLocaleTimeString()
+      };
+      imageHistory.unshift(histItem);
+      if (imageHistory.length > 30) imageHistory = imageHistory.slice(0, 30);
+      localStorage.setItem('liw_image_history', JSON.stringify(imageHistory));
+      renderImageFilmstrip();
+
+      showToast(`Image generated in ${elapsed}s!`, 'success');
+
+    } catch (err) {
+      clearInterval(pollInterval);
+      showToast(`Generation Error: ${err.message}`, 'error');
+    } finally {
+      if (genBtn) {
+        genBtn.disabled = false;
+        genBtn.textContent = '⚡ GENERATE IMAGE';
+      }
+      if (progressBox) progressBox.style.display = 'none';
+    }
+  });
+
+  // Stage Action Toolbar Buttons
+  document.getElementById('stageZoomBtn')?.addEventListener('click', () => {
+    const stageImg = document.getElementById('stageImage');
+    if (stageImg && stageImg.src && stageImg.style.display !== 'none') {
+      openLightbox(stageImg.src, 'Studio Generated Image');
+    } else {
+      showToast('No active image to view', 'info');
+    }
+  });
+
+  document.getElementById('stageDownloadBtn')?.addEventListener('click', () => {
+    const stageImg = document.getElementById('stageImage');
+    if (stageImg && stageImg.src && stageImg.style.display !== 'none') {
+      downloadDataUri(stageImg.src, 'diffusion-art.png');
+    } else {
+      showToast('No image to download', 'info');
+    }
+  });
+
+  document.getElementById('stageCopyBtn')?.addEventListener('click', () => {
+    const stageImg = document.getElementById('stageImage');
+    if (stageImg && stageImg.src && stageImg.style.display !== 'none') {
+      const b64 = stageImg.src.replace(/^data:image\/png;base64,/, '');
+      copyImageBase64(b64);
+    } else {
+      showToast('No image to copy', 'info');
+    }
+  });
+
+  document.getElementById('stageSendToChatBtn')?.addEventListener('click', () => {
+    const stageImg = document.getElementById('stageImage');
+    const promptInput = document.getElementById('imgPromptInput');
+    if (!stageImg || stageImg.style.display === 'none' || !stageImg.src) {
+      showToast('No image to send', 'info');
+      return;
+    }
+
+    const promptText = (promptInput ? promptInput.value : '').trim() || 'Diffusion Artwork';
+    const b64 = stageImg.src.replace(/^data:image\/png;base64,/, '');
+
+    const session = getActiveSession();
+    session.messages.push({
+      role: 'assistant',
+      content: `Diffusion Artwork: "${promptText}"`,
+      generated_image: b64
+    });
+    saveSessions();
+
+    switchStudioView('chat');
+
+    const row = document.createElement('div');
+    row.className = 'msg-row bot';
+    row.innerHTML = `
+      <div class="msg-header"><span class="header-label">ASSISTANT · Image Studio</span></div>
+      <div class="msg-bubble">
+        <div class="generated-image-card">
+          <div class="generated-image-prompt"><strong>Prompt:</strong> ${escapeHtml(promptText)}</div>
+          <img src="${stageImg.src}" class="generated-image-img" alt="Artwork" onclick="openLightbox('${stageImg.src}', '${escapeHtml(promptText)}')">
+          <div class="generated-image-footer">
+            <button type="button" class="top-btn" onclick="downloadDataUri('${stageImg.src}', 'artwork.png')">⬇ Download</button>
+            <button type="button" class="top-btn" onclick="copyImageBase64('${b64}')">📋 Copy</button>
+          </div>
+        </div>
+      </div>
+    `;
+    chatContainer.appendChild(row);
+    smartScrollToBottom();
+    showToast('Image injected into active session transcript!', 'success');
+  });
+
+  function renderImageFilmstrip() {
+    const filmstrip = document.getElementById('imageFilmstripScroll');
+    if (!filmstrip) return;
+    if (imageHistory.length === 0) {
+      filmstrip.innerHTML = '<span class="filmstrip-empty-text">Past generated images will appear here.</span>';
+      return;
+    }
+
+    filmstrip.innerHTML = imageHistory.map((item, idx) => `
+      <img src="data:image/png;base64,${item.image}" class="filmstrip-thumb" data-idx="${idx}" title="${escapeHtml(item.prompt)} · ${item.time}" alt="Thumb">
+    `).join('');
+
+    filmstrip.querySelectorAll('.filmstrip-thumb').forEach(thumb => {
+      thumb.addEventListener('click', () => {
+        const idx = parseInt(thumb.dataset.idx);
+        const item = imageHistory[idx];
+        if (!item) return;
+
+        const stageImg = document.getElementById('stageImage');
+        const placeholder = document.getElementById('stagePlaceholder');
+        const metaInfo = document.getElementById('stageMetaInfo');
+        const promptInput = document.getElementById('imgPromptInput');
+
+        if (stageImg) {
+          stageImg.src = `data:image/png;base64,${item.image}`;
+          stageImg.style.display = 'block';
+        }
+        if (placeholder) placeholder.style.display = 'none';
+        if (promptInput) promptInput.value = item.prompt || '';
+        if (metaInfo) metaInfo.textContent = `Historical generation · ${item.time}`;
+
+        filmstrip.querySelectorAll('.filmstrip-thumb').forEach(t => t.classList.remove('active'));
+        thumb.classList.add('active');
+      });
+    });
+  }
+
+  document.getElementById('clearFilmstripBtn')?.addEventListener('click', () => {
+    imageHistory = [];
+    localStorage.removeItem('liw_image_history');
+    renderImageFilmstrip();
+    showToast('Gallery history cleared', 'info');
+  });
+
+  // ─── 4. Audio Lab (Speech-to-Text & Text-to-Speech) ───────────────────
+
+  // Live Microphone Capture
+  document.getElementById('audioRecordToggleBtn')?.addEventListener('click', toggleAudioRecording);
+
+  async function toggleAudioRecording() {
+    const btn = document.getElementById('audioRecordToggleBtn');
+    const timer = document.getElementById('audioRecordTimer');
+    const vuBar = document.getElementById('audioRecordVuBar');
+
+    if (audioRecorder && audioRecorder.state === 'recording') {
+      // Stop recording
+      audioRecorder.stop();
+      if (btn) {
+        btn.textContent = '● Record Audio';
+        btn.classList.remove('recording');
+      }
+      clearInterval(recordTimerInterval);
+      if (vuAnimFrame) cancelAnimationFrame(vuAnimFrame);
+      if (vuBar) vuBar.style.width = '0%';
+      return;
+    }
+
+    // Start recording
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioChunks = [];
+      recordSeconds = 0;
+
+      // Audio analyser for VU meter
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const source = audioContext.createMediaStreamSource(stream);
+      analyserNode = audioContext.createAnalyser();
+      analyserNode.fftSize = 64;
+      source.connect(analyserNode);
+
+      const dataArray = new Uint8Array(analyserNode.frequencyBinCount);
+      function updateVu() {
+        if (!analyserNode) return;
+        analyserNode.getByteFrequencyData(dataArray);
+        let sum = 0;
+        for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
+        const avg = sum / dataArray.length;
+        const pct = Math.min(100, Math.round((avg / 128) * 100));
+        if (vuBar) vuBar.style.width = `${pct}%`;
+        vuAnimFrame = requestAnimationFrame(updateVu);
+      }
+      updateVu();
+
+      audioRecorder = new MediaRecorder(stream);
+      audioRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunks.push(e.data);
+      };
+
+      audioRecorder.onstop = () => {
+        currentAudioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        stream.getTracks().forEach(t => t.stop());
+        if (audioContext) audioContext.close();
+
+        // Load into audio player scrubber
+        const audioEl = document.getElementById('audioElement');
+        const playerBar = document.getElementById('audioPlayerBar');
+        if (audioEl && currentAudioBlob) {
+          audioEl.src = URL.createObjectURL(currentAudioBlob);
+          if (playerBar) playerBar.style.display = 'flex';
+        }
+
+        const dropInfo = document.getElementById('audioFileInfo');
+        const nameDisp = document.getElementById('audioFileNameDisplay');
+        if (dropInfo && nameDisp) {
+          nameDisp.textContent = `Mic Recording (${(currentAudioBlob.size / 1024).toFixed(0)} KB)`;
+          dropInfo.style.display = 'flex';
+        }
+
+        showToast('Microphone recording captured. Ready to transcribe!', 'success');
+      };
+
+      audioRecorder.start(100);
+
+      if (btn) {
+        btn.textContent = '■ Stop Recording';
+        btn.classList.add('recording');
+      }
+
+      recordTimerInterval = setInterval(() => {
+        recordSeconds++;
+        const mins = String(Math.floor(recordSeconds / 60)).padStart(2, '0');
+        const secs = String(recordSeconds % 60).padStart(2, '0');
+        if (timer) timer.textContent = `${mins}:${secs}`;
+      }, 1000);
+
+    } catch (err) {
+      showToast(`Microphone Access Error: ${err.message}`, 'error');
+    }
+  }
+
+  // Audio File Dropzone & Picker
+  const audioDropzone = document.getElementById('audioFileDropzone');
+  const audioFileInput = document.getElementById('audioFileInput');
+
+  audioDropzone?.addEventListener('click', () => audioFileInput?.click());
+  audioDropzone?.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    audioDropzone.style.borderColor = 'var(--text-main)';
+  });
+  audioDropzone?.addEventListener('dragleave', () => {
+    audioDropzone.style.borderColor = 'var(--border-frame)';
+  });
+  audioDropzone?.addEventListener('drop', (e) => {
+    e.preventDefault();
+    audioDropzone.style.borderColor = 'var(--border-frame)';
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleSelectedAudioFile(e.dataTransfer.files[0]);
+    }
+  });
+
+  audioFileInput?.addEventListener('change', (e) => {
+    if (e.target.files && e.target.files[0]) {
+      handleSelectedAudioFile(e.target.files[0]);
+    }
+  });
+
+  function handleSelectedAudioFile(file) {
+    currentAudioBlob = file;
+    const dropInfo = document.getElementById('audioFileInfo');
+    const nameDisp = document.getElementById('audioFileNameDisplay');
+    const audioEl = document.getElementById('audioElement');
+    const playerBar = document.getElementById('audioPlayerBar');
+
+    if (dropInfo && nameDisp) {
+      nameDisp.textContent = `${file.name} (${(file.size / 1024).toFixed(0)} KB)`;
+      dropInfo.style.display = 'flex';
+    }
+
+    if (audioEl) {
+      audioEl.src = URL.createObjectURL(file);
+      if (playerBar) playerBar.style.display = 'flex';
+    }
+
+    showToast(`Loaded audio file: ${file.name}`, 'info');
+  }
+
+  document.getElementById('clearAudioFileBtn')?.addEventListener('click', () => {
+    currentAudioBlob = null;
+    const dropInfo = document.getElementById('audioFileInfo');
+    const playerBar = document.getElementById('audioPlayerBar');
+    const audioEl = document.getElementById('audioElement');
+    if (dropInfo) dropInfo.style.display = 'none';
+    if (playerBar) playerBar.style.display = 'none';
+    if (audioEl) audioEl.src = '';
+  });
+
+  // Audio Player Scrubber Controls
+  const audioEl = document.getElementById('audioElement');
+  const playPauseBtn = document.getElementById('audioPlayPauseBtn');
+  const scrubber = document.getElementById('audioScrubber');
+  const curTime = document.getElementById('audioCurrentTime');
+  const durTime = document.getElementById('audioDuration');
+
+  playPauseBtn?.addEventListener('click', () => {
+    if (!audioEl) return;
+    if (audioEl.paused) {
+      audioEl.play();
+      playPauseBtn.textContent = '⏸ Pause';
+    } else {
+      audioEl.pause();
+      playPauseBtn.textContent = '▶ Play';
+    }
+  });
+
+  if (audioEl) {
+    audioEl.addEventListener('timeupdate', () => {
+      if (audioEl.duration && scrubber) {
+        scrubber.value = (audioEl.currentTime / audioEl.duration) * 100;
+        const curM = String(Math.floor(audioEl.currentTime / 60)).padStart(2, '0');
+        const curS = String(Math.floor(audioEl.currentTime % 60)).padStart(2, '0');
+        const durM = String(Math.floor(audioEl.duration / 60)).padStart(2, '0');
+        const durS = String(Math.floor(audioEl.duration % 60)).padStart(2, '0');
+        if (curTime) curTime.textContent = `${curM}:${curS}`;
+        if (durTime) durTime.textContent = `${durM}:${durS}`;
+      }
+    });
+
+    audioEl.addEventListener('ended', () => {
+      if (playPauseBtn) playPauseBtn.textContent = '▶ Play';
+    });
+
+    scrubber?.addEventListener('input', (e) => {
+      if (audioEl.duration) {
+        audioEl.currentTime = (e.target.value / 100) * audioEl.duration;
+      }
+    });
+  }
+
+  // Transcribe Speech Action
+  document.getElementById('audioTranscribeBtn')?.addEventListener('click', async () => {
+    if (!currentAudioBlob) {
+      showToast('Please record audio or upload an audio file first', 'warning');
+      return;
+    }
+
+    const langSel = document.getElementById('audioLangSelect');
+    const status = document.getElementById('audioTranscribeStatus');
+    const transBtn = document.getElementById('audioTranscribeBtn');
+    const placeholder = document.getElementById('audioTranscriptPlaceholder');
+    const content = document.getElementById('audioTranscriptContent');
+
+    if (transBtn) {
+      transBtn.disabled = true;
+      transBtn.textContent = '⏳ TRANSCRIBING...';
+    }
+    if (status) {
+      status.style.display = 'block';
+      status.className = 'inline-status-badge checking';
+      status.innerHTML = '<span class="badge-dot pulse"></span> Streaming to Whisper ASR engine...';
+    }
+
+    try {
+      const reader = new FileReader();
+      const b64Promise = new Promise((resolve, reject) => {
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(currentAudioBlob);
+      });
+
+      const audioB64 = await b64Promise;
+
+      const res = await fetch('/api/audio/transcribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          audio: audioB64,
+          filename: currentAudioBlob.name || 'recording.webm',
+          language: langSel ? langSel.value : 'auto'
+        })
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `HTTP ${res.status}`);
+      }
+
+      const data = await res.json();
+      const transcribedText = data.text || '';
+
+      if (content) {
+        content.textContent = transcribedText;
+        content.style.display = 'block';
+      }
+      if (placeholder) placeholder.style.display = 'none';
+
+      if (status) {
+        status.className = 'inline-status-badge success';
+        status.innerHTML = `✓ Transcription complete (${transcribedText.split(' ').length} words)`;
+      }
+
+      showToast('Audio transcribed successfully!', 'success');
+
+    } catch (err) {
+      if (status) {
+        status.className = 'inline-status-badge error';
+        status.innerHTML = `✕ ${escapeHtml(err.message)}`;
+      }
+      showToast(`Transcription error: ${err.message}`, 'error');
+    } finally {
+      if (transBtn) {
+        transBtn.disabled = false;
+        transBtn.textContent = '⚡ TRANSCRIBE SPEECH';
+      }
+    }
+  });
+
+  // Transcript Document Action Toolbar
+  document.getElementById('copyAudioTranscriptBtn')?.addEventListener('click', () => {
+    const content = document.getElementById('audioTranscriptContent');
+    if (!content || !content.textContent.trim()) {
+      showToast('No transcript to copy', 'warning');
+      return;
+    }
+    navigator.clipboard.writeText(content.textContent).then(() => {
+      showToast('Transcript copied to clipboard', 'success');
+    });
+  });
+
+  document.getElementById('sendAudioToChatBtn')?.addEventListener('click', () => {
+    const content = document.getElementById('audioTranscriptContent');
+    const promptInput = document.getElementById('promptInput');
+    if (!content || !content.textContent.trim()) {
+      showToast('No transcript to send', 'warning');
+      return;
+    }
+    if (promptInput) {
+      promptInput.value = content.textContent.trim();
+      promptInput.style.height = 'auto';
+      promptInput.style.height = `${Math.min(promptInput.scrollHeight, 180)}px`;
+    }
+    switchStudioView('chat');
+    showToast('Transcript sent to Chat composer prompt!', 'success');
+  });
+
+  document.getElementById('downloadAudioTranscriptBtn')?.addEventListener('click', () => {
+    const content = document.getElementById('audioTranscriptContent');
+    if (!content || !content.textContent.trim()) {
+      showToast('No transcript to download', 'warning');
+      return;
+    }
+    const blob = new Blob([content.textContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `transcript-${Date.now()}.txt`;
+    a.click();
+    showToast('Transcript downloaded as text file', 'success');
+  });
+
+  // ─── 5. Composer Microphone Dictation Button (🎙️) in Chat ───────────
+
+  document.getElementById('chatDictateBtn')?.addEventListener('click', async () => {
+    const micBtn = document.getElementById('chatDictateBtn');
+    const promptInput = document.getElementById('promptInput');
+
+    if (isComposerDictating) {
+      // Stop dictating and transcribe
+      if (audioRecorder && audioRecorder.state === 'recording') {
+        audioRecorder.stop();
+      }
+      isComposerDictating = false;
+      if (micBtn) {
+        micBtn.textContent = '🎙️';
+        micBtn.classList.remove('recording');
+        micBtn.style.background = '';
+        micBtn.style.color = '';
+      }
+      return;
+    }
+
+    // Start dictation recording
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioChunks = [];
+      audioRecorder = new MediaRecorder(stream);
+      audioRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunks.push(e.data);
+      };
+
+      audioRecorder.onstop = async () => {
+        stream.getTracks().forEach(t => t.stop());
+        const blob = new Blob(audioChunks, { type: 'audio/webm' });
+
+        if (micBtn) micBtn.textContent = '⏳';
+
+        try {
+          const reader = new FileReader();
+          const b64Promise = new Promise((resolve) => {
+            reader.onload = () => resolve(reader.result.split(',')[1]);
+            reader.readAsDataURL(blob);
+          });
+          const b64 = await b64Promise;
+
+          const res = await fetch('/api/audio/transcribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ audio: b64, filename: 'dictation.webm', language: 'auto' })
+          });
+
+          if (!res.ok) throw new Error('Whisper ASR offline');
+          const data = await res.json();
+          const text = (data.text || '').trim();
+
+          if (text && promptInput) {
+            promptInput.value = promptInput.value.trim() ? `${promptInput.value.trim()} ${text}` : text;
+            promptInput.style.height = 'auto';
+            promptInput.style.height = `${Math.min(promptInput.scrollHeight, 180)}px`;
+            promptInput.focus();
+            showToast(`Dictated: "${text}"`, 'success');
+          }
+        } catch (e) {
+          showToast(`Dictation failed: ${e.message}. Start Whisper server on port 8178.`, 'warning');
+        } finally {
+          if (micBtn) {
+            micBtn.textContent = '🎙️';
+            micBtn.classList.remove('recording');
+          }
+        }
+      };
+
+      audioRecorder.start(100);
+      isComposerDictating = true;
+      if (micBtn) {
+        micBtn.textContent = '● REC';
+        micBtn.classList.add('recording');
+        micBtn.style.background = '#dc3545';
+        micBtn.style.color = '#fff';
+      }
+      showToast('Speaking... Click again when finished.', 'info');
+
+    } catch (e) {
+      showToast(`Microphone error: ${e.message}`, 'error');
+    }
+  });
+
+  // ─── 6. Text-to-Speech (TTS) Engine & Voice Playback ─────────────────
+
+  async function populateTtsVoiceDropdowns() {
+    const selects = [
+      document.getElementById('ttsVoiceSelect'),
+      document.getElementById('settingTtsVoiceSelect')
+    ];
+
+    try {
+      const res = await fetch('/api/audio/voices');
+      const data = await res.json();
+      const voices = data.voices || [];
+
+      // Also get browser voices
+      const sysVoices = 'speechSynthesis' in window ? window.speechSynthesis.getVoices() : [];
+
+      selects.forEach(sel => {
+        if (!sel) return;
+        const curVal = sel.value;
+        sel.innerHTML = '';
+
+        if (voices.length > 0) {
+          const piperGrp = document.createElement('optgroup');
+          piperGrp.label = 'Piper Neural Voices (Local Server)';
+          voices.forEach(v => {
+            const opt = document.createElement('option');
+            opt.value = v.id || v.name;
+            opt.textContent = `${v.name || v.id} (${v.language || 'local'})`;
+            piperGrp.appendChild(opt);
+          });
+          sel.appendChild(piperGrp);
+        }
+
+        if (sysVoices.length > 0) {
+          const sysGrp = document.createElement('optgroup');
+          sysGrp.label = 'Web Speech System Voices';
+          sysVoices.forEach(v => {
+            const opt = document.createElement('option');
+            opt.value = `browser:${v.name}`;
+            opt.textContent = `${v.name} (${v.lang})`;
+            sysGrp.appendChild(opt);
+          });
+          sel.appendChild(sysGrp);
+        }
+
+        if (curVal) sel.value = curVal;
+      });
+    } catch (e) {}
+  }
+
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.onvoiceschanged = populateTtsVoiceDropdowns;
+  }
+
+  // TTS Synthesizer Play button in Audio Lab
+  document.getElementById('ttsSpeakBtn')?.addEventListener('click', () => {
+    const textInput = document.getElementById('ttsInputText');
+    const voiceSelect = document.getElementById('ttsVoiceSelect');
+    const text = (textInput ? textInput.value : '').trim();
+    if (!text) {
+      showToast('Please type text to speak aloud', 'warning');
+      return;
+    }
+    const voice = voiceSelect ? voiceSelect.value : '';
+    toggleSpeech(text, document.getElementById('ttsSpeakBtn'), voice);
+  });
+
+  // Speed slider in Settings
+  document.getElementById('settingTtsSpeed')?.addEventListener('input', (e) => {
+    const lbl = document.getElementById('ttsSpeedLabel');
+    if (lbl) lbl.textContent = `${parseFloat(e.target.value).toFixed(1)}x`;
+  });
+
+  // Robust Speech Synthesizer Function
+  function toggleSpeech(rawText, btn, preferredVoice = null) {
+    if (activeAudioPlayer) {
+      activeAudioPlayer.pause();
+      activeAudioPlayer = null;
+      if (activeSpeechBtn) {
+        activeSpeechBtn.innerText = 'Read Aloud';
+        activeSpeechBtn.classList.remove('playing');
+        activeSpeechBtn = null;
+      }
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      return;
+    }
+
+    const cleanText = cleanTextForSpeech(rawText);
+    if (!cleanText) {
+      showToast('No readable text to speak', 'warning');
+      return;
+    }
+
+    if (btn) {
+      btn.innerText = '■ Stop';
+      btn.classList.add('playing');
+      activeSpeechBtn = btn;
+    }
+
+    // Try Piper HTTP backend
+    fetch('/api/audio/speak', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text: cleanText.slice(0, 1500),
+        voice: preferredVoice || ''
+      })
+    })
+    .then(res => {
+      if (!res.ok) throw new Error('Piper backend offline');
+      return res.blob();
+    })
+    .then(blob => {
+      const audioUrl = URL.createObjectURL(blob);
+      const audio = new Audio(audioUrl);
+      activeAudioPlayer = audio;
+      audio.onended = () => {
+        if (activeSpeechBtn) {
+          activeSpeechBtn.innerText = 'Read Aloud';
+          activeSpeechBtn.classList.remove('playing');
+          activeSpeechBtn = null;
+        }
+        activeAudioPlayer = null;
+      };
+      audio.play();
+    })
+    .catch(() => {
+      // Client-side Web Speech API fallback
+      if (!('speechSynthesis' in window)) {
+        showToast('Speech synthesis not supported in this browser', 'error');
+        if (activeSpeechBtn) {
+          activeSpeechBtn.innerText = 'Read Aloud';
+          activeSpeechBtn.classList.remove('playing');
+          activeSpeechBtn = null;
+        }
+        return;
+      }
+
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(cleanText);
+
+      const speedSlider = document.getElementById('settingTtsSpeed');
+      if (speedSlider) utterance.rate = parseFloat(speedSlider.value) || 1.0;
+
+      // Select system voice if specified
+      if (preferredVoice && preferredVoice.startsWith('browser:')) {
+        const vName = preferredVoice.replace('browser:', '');
+        const found = window.speechSynthesis.getVoices().find(v => v.name === vName);
+        if (found) utterance.voice = found;
+      }
+
+      utterance.onend = () => {
+        if (activeSpeechBtn) {
+          activeSpeechBtn.innerText = 'Read Aloud';
+          activeSpeechBtn.classList.remove('playing');
+          activeSpeechBtn = null;
+        }
+      };
+      utterance.onerror = () => {
+        if (activeSpeechBtn) {
+          activeSpeechBtn.innerText = 'Read Aloud';
+          activeSpeechBtn.classList.remove('playing');
+          activeSpeechBtn = null;
+        }
+      };
+
+      window.speechSynthesis.speak(utterance);
+    });
+  }
+  window.toggleSpeech = toggleSpeech;
+
+  function cleanTextForSpeech(text) {
+    if (!text) return '';
+    return text
+      .replace(/<think>[\s\S]*?<\/think>/gi, '')
+      .replace(/```[\s\S]*?```/gi, ' Code snippet omitted. ')
+      .replace(/`([^`]+)`/g, '$1')
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+      .replace(/[*_#~>|]/g, '')
+      .trim();
+  }
+
+  // ─── 7. Auto-Speak Hook on Assistant Completion ───────────────────────
+
+  // Check auto-speak setting when assistant completes
+  const _origSaveSessions = saveSessions;
+  saveSessions = function() {
+    _origSaveSessions();
+    const autoSpeakCheckbox = document.getElementById('settingAutoSpeak');
+    if (autoSpeakCheckbox && autoSpeakCheckbox.checked && !isGenerating) {
+      const sess = getActiveSession();
+      if (sess && sess.messages && sess.messages.length > 0) {
+        const lastMsg = sess.messages[sess.messages.length - 1];
+        if (lastMsg && (lastMsg.role === 'assistant' || lastMsg.role === 'bot') && !lastMsg.hasAutoSpoken) {
+          lastMsg.hasAutoSpoken = true;
+          toggleSpeech(lastMsg.content, null);
+        }
+      }
+    }
+  };
+
+  // ─── 8. Initial Backend & Telemetry Boot ───────────────────────────────
+
+  fetchBackendsStatus();
+  setInterval(fetchBackendsStatus, 30000); // 30s background health probe
+  populateTtsVoiceDropdowns();
 
 </script>
 </body>
