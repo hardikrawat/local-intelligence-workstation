@@ -2511,13 +2511,18 @@ html, body {
 
   /* Hugging Face Toolbar on Mobile (Clean 2-Column Grid) */
   .hub-hf-toolbar {
-    display: flex !important;
+    display: flex;
     flex-direction: column !important;
     gap: 6px !important;
     padding: 8px 12px !important;
     width: 100% !important;
     box-sizing: border-box !important;
     flex-shrink: 0 !important;
+  }
+
+  .hub-hf-toolbar[style*="display: none"],
+  .hub-hf-toolbar[style*="display:none"] {
+    display: none !important;
   }
 
   .hub-hf-toolbar-left,

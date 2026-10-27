@@ -73,8 +73,8 @@ MODEL_TYPE_KEYWORDS = {
     "audio": ["whisper", "audio", "speech", "voice", "tts"],
     "video": ["video", "cogvideo"],
     "math": ["math", "mathstral", "qwen2-math", "deepseek-math", "internlm2-math"],
-    "reasoning": ["r1", "qwq", "reason", "deepseek-r1", "qwen3"],
-    "tool_use": ["firefunction", "hermes", "nexusraven", "gorilla"],
+    "reasoning": ["r1", "qwq", "reason", "deepseek-r1", "qwen3", "thinking"],
+    "tool_use": ["firefunction", "hermes", "nexusraven", "gorilla", "tools", "tool"],
     "medical": ["medllama", "meditron", "med-", "clinical", "medical", "biomistral"],
     "legal": ["saul", "legal", "law"],
     "finance": ["finance", "fin-"],
@@ -193,92 +193,87 @@ def fetch_ollama_models(query="", category=""):
 def parse_ollama_search_html(body):
     """Parse Ollama search page HTML to extract model listings."""
     models = []
-
-    # Parse model cards from search results HTML
-    # Match <li> or <a> blocks that contain model info
-    # Pattern adapted for ollama.com/search page structure
-
-    # Try matching anchor tags with model info
-    # The search page uses cards with href="/library/{model}"
-    card_pattern = re.compile(
-        r'<a[^>]*href="[/]library/([^"]+)"[^>]*>(.*?)</a>',
-        re.DOTALL | re.IGNORECASE
-    )
-
-    # Also try matching model names and descriptions from structured elements
-    name_pattern = re.compile(
-        r'(?:<h[23][^>]*>|<span[^>]*class="[^"]*truncate[^"]*"[^>]*>)\s*([\w./-]+(?::[\w.]+)?)\s*(?:</h[23]>|</span>)',
-        re.IGNORECASE
-    )
-
-    desc_pattern = re.compile(
-        r'<p[^>]*class="[^"]*(?:description|text-neutral)[^"]*"[^>]*>(.*?)</p>',
-        re.DOTALL | re.IGNORECASE
-    )
-
-    pulls_pattern = re.compile(
-        r'(\d+(?:\.\d+)?[KkMmBb]?)\s*(?:Pulls?|Downloads?|pulls)',
-        re.IGNORECASE
-    )
-
-    # Extract model blocks
-    # Look for structured model card sections
-    block_pattern = re.compile(
-        r'<(?:li|div|a)[^>]*(?:class="[^"]*(?:model|card|item)[^"]*"|href="/library/)[^>]*>(.*?)</(?:li|div|a)>',
-        re.DOTALL | re.IGNORECASE
-    )
-
-    blocks = block_pattern.findall(body)
-
-    # If no structured blocks found, try extracting from full page
-    if not blocks:
-        blocks = [body]
-
     seen = set()
-    for block in blocks:
-        # Extract model name from href or heading
-        name_match = re.search(r'href="[/]library/([^"/]+)"', block, re.IGNORECASE)
-        if not name_match:
-            name_match = re.search(r'<h\d[^>]*>\s*([\w.-]+(?:/[\w.-]+)?)\s*</h\d>', block, re.IGNORECASE)
+    IGNORE_NAMES = {"models", "search", "filters", "library", "blog", "download", "login"}
 
-        if name_match:
-            name = name_match.group(1).strip()
-            if name in seen or len(name) < 2:
+    # Pattern targeting model cards: <a href="/library/{model_name}" ...>...</a>
+    card_pattern = re.compile(
+        r'<a[^>]+href=[\"\']/library/([^\"/\'#?]+)[\"\'][^>]*>(.*?)</a>',
+        re.DOTALL | re.IGNORECASE
+    )
+
+    matches = card_pattern.findall(body)
+
+    for name, block in matches:
+        name = name.strip()
+        if not name or name.lower() in IGNORE_NAMES or name in seen or len(name) < 2:
+            continue
+        seen.add(name)
+
+        # Description
+        desc = ""
+        desc_match = re.search(r'<p[^>]*>(.*?)</p>', block, re.DOTALL)
+        if desc_match:
+            desc = re.sub(r'<[^>]+>', '', desc_match.group(1)).strip()
+            desc = html.unescape(desc)
+
+        # Pull count
+        pulls = ""
+        pulls_title_match = re.search(r'title=[\"\']([\d,]+)\s+downloads[\"\']', block, re.IGNORECASE)
+        if pulls_title_match:
+            pulls = pulls_title_match.group(1)
+        else:
+            pulls_text_match = re.search(r'(\d+(?:\.\d+)?[KkMmBb]?)\s*(?:Pulls?|Downloads?|pulls)', block, re.IGNORECASE)
+            if pulls_text_match:
+                pulls = pulls_text_match.group(1)
+
+        # Sizes and capability badges
+        sizes = []
+        capabilities = []
+        badges = re.findall(r'<span[^>]*class=[\"\'][^\"\']*(?:rounded|bg-|text-blue|text-indigo)[^\"\']*[\"\'][^>]*>\s*([^<]+)\s*</span>', block)
+        for b in badges:
+            b_clean = b.strip()
+            if not b_clean:
                 continue
-            seen.add(name)
+            if re.match(r'^[0-9.]+[a-zA-Z]+$', b_clean):
+                if b_clean.lower() not in sizes:
+                    sizes.append(b_clean.lower())
+            elif len(b_clean) < 25 and not re.search(r'downloads|tags|updated', b_clean, re.IGNORECASE):
+                if b_clean not in capabilities:
+                    capabilities.append(b_clean)
 
-            # Extract description
-            desc = ""
-            desc_match = re.search(r'<p[^>]*>(.*?)</p>', block, re.DOTALL)
-            if desc_match:
-                desc = re.sub(r'<[^>]+>', '', desc_match.group(1)).strip()
-
-            # Extract pull count
-            pulls = ""
-            pulls_match = pulls_pattern.search(block)
-            if pulls_match:
-                pulls = pulls_match.group(1)
-
-            # Extract sizes/tags
-            sizes = []
-            size_matches = re.findall(r'(\d+(?:\.\d+)?[bBmM])\b', block)
-            sizes = list(set(size_matches))
-
-            # Extract updated time
-            updated = ""
-            updated_match = re.search(r'Updated?\s+([\w\s,]+ago|[\d-]+)', block, re.IGNORECASE)
+        # Updated time
+        updated = ""
+        updated_title_match = re.search(r'title=[\"\']Updated\s+([^\"\']+)[\"\']', block, re.IGNORECASE)
+        if updated_title_match:
+            updated = updated_title_match.group(1).strip()
+        else:
+            updated_match = re.search(r'text-muted[^>]*>([^<]+)<', block)
             if updated_match:
                 updated = updated_match.group(1).strip()
 
-            models.append({
-                "name": name,
-                "description": html.unescape(desc) if desc else "",
-                "pulls": pulls,
-                "sizes": sizes,
-                "updated": updated,
-                "types": classify_model_types(name, desc),
-                "source": "ollama"
-            })
+        # Classify categories
+        types = classify_model_types(name, desc)
+        for cap in capabilities:
+            cap_type = cap.lower()
+            if cap_type in ("tools", "tool_use", "vision", "embedding", "reasoning", "code", "audio", "thinking"):
+                if cap_type in ("tools", "tool"):
+                    cap_type = "tool_use"
+                elif cap_type == "thinking":
+                    cap_type = "reasoning"
+                if cap_type not in types:
+                    types.append(cap_type)
+
+        models.append({
+            "name": name,
+            "description": desc,
+            "pulls": pulls,
+            "sizes": sizes,
+            "capabilities": capabilities,
+            "updated": updated,
+            "types": types,
+            "source": "ollama"
+        })
 
     # If scraping yielded nothing, provide popular fallback models
     if not models:
