@@ -194,50 +194,74 @@ html, body {
   flex-shrink: 0;
 }
 
+/* ─── Top Command Bar Controls: Unified High-Precision Engineering Aesthetics ─── */
+.top-btn,
 .top-select-btn {
-  background: var(--bg-btn);
+  height: 25px;
+  min-height: 25px;
+  max-height: 25px;
   border: 1px solid var(--border-dark);
+  border-radius: 0;
+  background: var(--bg-btn);
   color: var(--text-main);
   font-family: var(--font-mono);
   font-size: 11px;
-  font-weight: 700;
-  padding: 2px 8px;
+  font-weight: 600;
+  line-height: 1;
+  padding: 0 9px;
   cursor: pointer;
   outline: none;
-  height: 24px;
   box-sizing: border-box;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  text-decoration: none;
+  transition: background 0.1s ease, color 0.1s ease, border-color 0.1s ease;
+}
+
+.top-btn:hover,
+.top-select-btn:hover {
+  background: #1A1816;
+  color: #FFFFFF;
+  border-color: #1A1816;
+}
+
+.top-btn:active,
+.top-select-btn:active {
+  background: #000000;
+  color: #FFFFFF;
+  border-color: #000000;
+}
+
+/* Custom crisp dropdown arrow for selects */
+.top-select-btn {
+  padding-right: 20px;
+  padding-left: 8px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%231A1816' d='M0 0l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 7px center;
+  background-size: 8px 5px;
+}
+
+.top-select-btn:hover {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23FFFFFF' d='M0 0l5 5 5-5z'/%3E%3C/svg%3E");
 }
 
 #modelSelect.top-select-btn {
-  max-width: 170px;
-  min-width: 110px;
+  max-width: 175px;
+  min-width: 120px;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 #modelModeSelect.top-select-btn {
-  max-width: 130px;
-}
-}
-
-.top-btn {
-  background: var(--bg-btn);
-  border: 1px solid var(--border-dark);
-  color: var(--text-main);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 700;
-  padding: 2px 8px;
-  cursor: pointer;
-  text-decoration: none;
-  height: 24px;
-  display: inline-flex;
-  align-items: center;
-}
-
-.top-btn:hover, .top-select-btn:hover {
-  background: #1A1816;
-  color: #FFFFFF;
+  max-width: 140px;
+  min-width: 105px;
+  text-overflow: ellipsis;
 }
 
 .top-header-divider {
@@ -245,7 +269,7 @@ html, body {
   width: 1px;
   height: 16px;
   background: var(--border-frame);
-  margin: 0 3px;
+  margin: 0 4px;
   flex-shrink: 0;
   vertical-align: middle;
 }
@@ -254,15 +278,11 @@ html, body {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  height: 24px;
   padding: 0 8px;
-  font-weight: 700;
-  letter-spacing: 0.1px;
 }
 
 .top-settings-btn .settings-btn-icon {
-  display: inline-block;
-  font-size: 12px;
+  font-size: 11px;
   line-height: 1;
 }
 
@@ -273,13 +293,22 @@ html, body {
   font-size: 9px;
   font-family: var(--font-mono);
   font-weight: 700;
-  opacity: 0.65;
   padding: 0 4px;
-  height: 14px;
-  border: 1px solid currentColor;
-  margin-left: 2px;
+  height: 15px;
   line-height: 1;
+  border: 1px solid var(--border-rule);
+  background: rgba(0, 0, 0, 0.05);
+  color: inherit;
+  border-radius: 2px;
+  margin-left: 2px;
   pointer-events: none;
+  transition: border-color 0.1s, background 0.1s, color 0.1s;
+}
+
+.top-settings-btn:hover .kbd-shortcut-pill {
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.15);
+  color: #FFFFFF;
 }
 
 .work-area {
@@ -3677,35 +3706,43 @@ html, body {
 .studio-nav-segmented {
   display: inline-flex;
   align-items: center;
+  height: 25px;
+  box-sizing: border-box;
   border: 1px solid var(--border-dark);
   background: var(--bg-parchment);
   padding: 1px;
   gap: 1px;
-  margin-left: 10px;
+  margin-left: 8px;
 }
 
 .studio-nav-btn {
   font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 600;
-  padding: 3px 9px;
+  height: 100%;
+  padding: 0 9px;
   border: none;
   background: transparent;
   color: var(--text-muted);
   cursor: pointer;
   border-radius: 0;
-  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.1s ease;
   white-space: nowrap;
+  box-sizing: border-box;
 }
 
 .studio-nav-btn:hover {
   color: var(--text-main);
-  background: rgba(0, 0, 0, 0.05);
+  background: rgba(0, 0, 0, 0.06);
 }
 
 .studio-nav-btn.active {
   background: var(--text-main);
-  color: var(--bg-parchment);
+  color: #FFFFFF;
+  font-weight: 700;
 }
 
 /* Studio Workspaces Base */
@@ -4455,11 +4492,11 @@ html, body {
     </div>
     <div class="top-header-right">
       <select id="modelSelect" class="top-select-btn" title="Select Active Model"></select>
-      <select id="modelModeSelect" class="top-select-btn" title="Select Mode">
-        <option value="thinking">Mode: Thinking</option>
-        <option value="no_think">Mode: Fast</option>
-        <option value="json">Mode: JSON</option>
-        <option value="raw">Mode: Raw</option>
+      <select id="modelModeSelect" class="top-select-btn" title="Select Operating Mode">
+        <option value="thinking">🧠 Thinking</option>
+        <option value="no_think">⚡ Fast</option>
+        <option value="json">📋 JSON</option>
+        <option value="raw">⚡ Raw</option>
       </select>
       <button class="top-btn" id="newChatBtn" title="Start New Session">
         <span class="desktop-text">New Session</span>
@@ -5334,6 +5371,7 @@ html, body {
     thinking: {
       id: 'thinking',
       label: '🧠 Thinking Mode (Full CoT Reasoning)',
+      shortLabel: '🧠 Thinking',
       tag: '🧠 Thinking',
       desc: 'Native Chain-of-Thought reasoning. Emits internal <think> scratchpad before the final conclusion.',
       requiresCapability: 'thinking',
@@ -5346,7 +5384,8 @@ html, body {
     no_think: {
       id: 'no_think',
       label: '⚡ No-Thinking Mode (Direct Fast Response)',
-      tag: '⚡ Fast Mode',
+      shortLabel: '⚡ Fast',
+      tag: '⚡ Fast',
       desc: 'Suppresses internal reasoning scratchpad. Bypasses thinking loop for instant answers & minimal resource consumption.',
       requiresCapability: 'thinking',
       applyPayload: (payload) => {
@@ -5362,6 +5401,7 @@ html, body {
     standard: {
       id: 'standard',
       label: '💬 Standard Chat Mode',
+      shortLabel: '💬 Standard',
       tag: '💬 Standard',
       desc: 'Direct instruction following and dialogue execution without internal chain-of-thought scratchpad.',
       requiresCapability: 'general',
@@ -5370,6 +5410,7 @@ html, body {
     prompted_cot: {
       id: 'prompted_cot',
       label: '🧠 Chain-of-Thought (Emulated CoT)',
+      shortLabel: '🧠 Emulated CoT',
       tag: '🧠 Emulated CoT',
       desc: 'Instructs non-reasoning models to break problems down step-by-step using structured reasoning blocks.',
       requiresCapability: 'general',
@@ -5383,6 +5424,7 @@ html, body {
     json: {
       id: 'json',
       label: '📋 Structured JSON Mode (format: "json")',
+      shortLabel: '📋 JSON',
       tag: '📋 JSON',
       desc: 'Forces the Ollama grammar sampler to guarantee strictly valid JSON conforming to grammar schemas.',
       requiresCapability: 'json',
@@ -5397,6 +5439,7 @@ html, body {
     raw: {
       id: 'raw',
       label: '⚡ Raw Passthrough Mode (raw: true)',
+      shortLabel: '⚡ Raw',
       tag: '⚡ Raw',
       desc: 'Bypasses Ollama prompt templating and system wrappers for direct raw tokenizer completion.',
       requiresCapability: 'raw',
@@ -5407,6 +5450,7 @@ html, body {
     tools: {
       id: 'tools',
       label: '🔧 Tool Execution Mode (Function Calling)',
+      shortLabel: '🔧 Tools',
       tag: '🔧 Tools',
       desc: 'Activates native model function calling and tool schema evaluation.',
       requiresCapability: 'tools',
@@ -5415,6 +5459,7 @@ html, body {
     vision: {
       id: 'vision',
       label: '👁️ Multimodal Vision Mode (Image Ingestion)',
+      shortLabel: '👁️ Vision',
       tag: '👁️ Vision',
       desc: 'Enables visual tensor processing and document image analysis.',
       requiresCapability: 'vision',
@@ -5423,6 +5468,7 @@ html, body {
     coder: {
       id: 'coder',
       label: '💻 Code Infill / Architecture Mode (FIM)',
+      shortLabel: '💻 Coder',
       tag: '💻 Code',
       desc: 'Optimized for code generation, syntax construction, and fill-in-the-middle completion.',
       requiresCapability: 'coder',
@@ -6151,7 +6197,7 @@ html, body {
     if (hasCoder) availableModes.push(TECHNICAL_MODES_REGISTRY.coder);
 
     modelModeSelect.innerHTML = availableModes.map(m => `
-      <option value="${m.id}" title="${escapeHtml(m.desc)}">${m.label}</option>
+      <option value="${m.id}" title="${escapeHtml(m.label)} — ${escapeHtml(m.desc)}">${m.shortLabel || m.tag || m.label}</option>
     `).join('');
 
     
