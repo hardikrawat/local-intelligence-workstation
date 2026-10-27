@@ -2,7 +2,7 @@
 
 A minimalist local inference workstation and client interface for [Ollama](https://ollama.com).
 
-Ollama Studio is designed with an emphasis on usability, information density, and a classic engineering document aesthetic. It runs entirely in the browser as a standalone single-page application with zero build tools, package managers, or external runtimes—requiring only a standard static web server (such as Python's built-in `http.server`) to serve client assets.
+Ollama Studio is designed with an emphasis on usability, information density, and a classic engineering document aesthetic. It runs entirely in the browser as a standalone single-page application with zero build tools or complex package managers—requiring only Python 3 to serve client assets and provide reverse-proxy capabilities for Ollama and the Model Hub.
 
 ---
 
@@ -90,9 +90,9 @@ start.bat
 ```
 
 **Manual Start**:
-Run Python's built-in static server from the project directory:
+Run the Ollama Studio server & proxy from the project directory:
 ```bash
-python3 -m http.server 3300
+python3 server.py 3300
 ```
 Open your browser to:
 ```

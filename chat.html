@@ -6988,7 +6988,15 @@ html, body {
 
       try {
         const res = await fetch(`/hub/hf/whoami?token=${encodeURIComponent(token)}&endpoint=${encodeURIComponent(endpoint || '')}`);
-        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(`Server returned HTTP ${res.status}. Ensure Ollama Studio was started with ./start.sh or "python3 server.py" (not plain http.server).`);
+        }
+        let data;
+        try {
+          data = await res.json();
+        } catch (jsonErr) {
+          throw new Error('Invalid JSON response. Ensure Ollama Studio was started with ./start.sh or "python3 server.py" (not plain http.server).');
+        }
 
         if (data.valid) {
           hfConfig.token = token;
@@ -7055,6 +7063,7 @@ html, body {
 
       try {
         const res = await fetch(`/hub/hf/ping?endpoint=${encodeURIComponent(endpoint || '')}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         if (data.online) {
           if (hfLatencyBadge) {
@@ -7352,7 +7361,7 @@ html, body {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return await res.json();
       } catch (e) {
-        return { models: [], error: `Backend unreachable: ${e.message}` };
+        return { models: [], error: `Backend unreachable: ${e.message}. Ensure server.py is running.` };
       }
     }
 

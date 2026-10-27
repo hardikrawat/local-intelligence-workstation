@@ -462,10 +462,20 @@ def format_bytes_py(size_bytes):
 DEFAULT_HF_ENDPOINT = "https://huggingface.co"
 
 
+def normalize_endpoint(endpoint=None):
+    """Normalize and ensure scheme on Hugging Face API endpoint/mirror."""
+    ep = (endpoint or DEFAULT_HF_ENDPOINT).strip().rstrip("/")
+    if not ep:
+        return DEFAULT_HF_ENDPOINT
+    if not ep.startswith("http://") and not ep.startswith("https://"):
+        ep = "https://" + ep
+    return ep
+
+
 def fetch_hf_models(query="", model_type="", sort="downloads", limit=40,
                     token=None, endpoint=None, gguf_only=True):
     """Search HuggingFace Hub with full configuration support (token, mirror, filters)."""
-    base_endpoint = (endpoint or DEFAULT_HF_ENDPOINT).rstrip("/")
+    base_endpoint = normalize_endpoint(endpoint)
     clean_token = (token or "").strip()
     cache_key = f"hf:{base_endpoint}:{query}:{model_type}:{sort}:{limit}:{gguf_only}:{'auth' if clean_token else 'anon'}"
     cached = cache_get(cache_key)
@@ -610,7 +620,7 @@ def fetch_hf_models(query="", model_type="", sort="downloads", limit=40,
 
 def fetch_hf_model_detail(model_id, token=None, endpoint=None):
     """Fetch detailed info for a specific HuggingFace model."""
-    base_endpoint = (endpoint or DEFAULT_HF_ENDPOINT).rstrip("/")
+    base_endpoint = normalize_endpoint(endpoint)
     clean_token = (token or "").strip()
     cache_key = f"hf_detail:{base_endpoint}:{model_id}:{'auth' if clean_token else 'anon'}"
     cached = cache_get(cache_key)
@@ -679,7 +689,7 @@ def fetch_hf_model_detail(model_id, token=None, endpoint=None):
 
 def verify_hf_token(token, endpoint=None):
     """Verify Hugging Face API token using /api/whoami-v2."""
-    base_endpoint = (endpoint or DEFAULT_HF_ENDPOINT).rstrip("/")
+    base_endpoint = normalize_endpoint(endpoint)
     clean_token = (token or "").strip()
     if not clean_token:
         return {"valid": False, "error": "No token provided"}
@@ -716,7 +726,7 @@ def verify_hf_token(token, endpoint=None):
 
 def ping_hf_endpoint(endpoint=None):
     """Test connectivity and measure latency to Hugging Face or mirror."""
-    base_endpoint = (endpoint or DEFAULT_HF_ENDPOINT).rstrip("/")
+    base_endpoint = normalize_endpoint(endpoint)
     start = time.time()
     try:
         url = f"{base_endpoint}/api/models?limit=1"
@@ -806,7 +816,11 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
-        if self.path.startswith("/api/"):
+        if self.path == "/favicon.ico":
+            self.send_response(204)
+            self.end_headers()
+            return
+        elif self.path.startswith("/api/"):
             self.proxy_request("GET")
         elif self.path.startswith("/hub/"):
             self.handle_hub_request()
@@ -966,6 +980,7 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
 def run():
     port = int(sys.argv[1]) if len(sys.argv) > 1 else DEFAULT_PORT
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    HTTPServer.allow_reuse_address = True
     server = HTTPServer(("0.0.0.0", port), OllamaProxyHandler)
     print(f"Ollama Studio server & proxy running on http://0.0.0.0:{port}")
     print(f"Forwarding /api/* -> {OLLAMA_BACKEND} (CORS & HTTPS-tunnel safe)")

@@ -10,4 +10,4 @@ if not errorlevel 1 (
 )
 echo Starting Ollama Studio on http://localhost:%PORT% ...
 start "" http://localhost:%PORT%
-python -m http.server %PORT%
+python server.py %PORT%
