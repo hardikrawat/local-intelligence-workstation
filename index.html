@@ -1143,6 +1143,50 @@ html, body {
   gap: 8px;
 }
 
+/* Fixed Height & Architecture for Settings & Configuration Modal */
+#settingsModal .drawer-card {
+  width: 680px;
+  max-width: 92vw;
+  height: 520px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+}
+
+#settingsModal .modal-tab-pane.active {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+#settingsModal #personaTab.active {
+  display: flex !important;
+  flex-direction: column;
+}
+
+#settingsModal #personaTab .form-group:last-child {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+#settingsModal #settingSystemPrompt {
+  flex: 1 1 auto;
+  min-height: 140px;
+  resize: vertical;
+}
+
+#settingsModal .drawer-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: auto;
+  border-top: 1px solid var(--border-frame);
+  padding-top: 10px;
+  flex-shrink: 0;
+}
+
 .model-table {
   width: 100%;
   border-collapse: collapse;
@@ -2718,6 +2762,11 @@ html, body {
     border-bottom: none;
   }
 
+  #settingsModal .drawer-card {
+    height: 85vh !important;
+    height: 85dvh !important;
+  }
+
   .form-input {
     font-size: 16px !important; /* Prevent iOS zoom */
     min-height: 36px;
@@ -2947,7 +2996,7 @@ html, body {
       </div>
       <div class="form-group" style="margin-top:8px;">
         <label for="settingSystemPrompt">System Prompt Directive:</label>
-        <textarea id="settingSystemPrompt" class="form-input" rows="4"></textarea>
+        <textarea id="settingSystemPrompt" class="form-input" rows="6"></textarea>
       </div>
     </div>
     <div class="modal-tab-pane" id="hfTab">
@@ -2990,7 +3039,7 @@ html, body {
         </label>
       </div>
     </div>
-    <div style="display:flex; justify-content:flex-end; gap:6px; margin-top:12px; border-top:1px solid var(--border-frame); padding-top:8px;">
+    <div class="drawer-footer">
       <button class="composer-btn" id="closeSettingsBtn">Cancel</button>
       <button class="composer-btn" id="saveSettingsBtn">Save Configuration</button>
     </div>
@@ -7101,13 +7150,34 @@ html, body {
       sHfTestTokenBtn?.addEventListener('click', async () => {
         const t = (sHfToken ? sHfToken.value : '').trim();
         const ep = (sHfEndpoint ? sHfEndpoint.value : '').trim() || hfConfig.endpoint;
+        const sFeedback = document.getElementById('settingsHfTokenFeedback');
+        if (sFeedback) {
+          sFeedback.innerHTML = '<span class="typing-caret-block">▌</span> Verifying token with Hugging Face API...';
+        }
         await verifyHfTokenLive(t, ep);
         syncFromSettingsModal();
+        syncToSettingsModal();
       });
 
       sHfPingBtn?.addEventListener('click', async () => {
         const ep = (sHfEndpoint ? sHfEndpoint.value : '').trim() || hfConfig.endpoint;
-        await pingHfEndpointLive(ep);
+        sHfPingBtn.textContent = '...';
+        sHfPingBtn.disabled = true;
+        try {
+          const res = await fetch(`/hub/hf/ping?endpoint=${encodeURIComponent(ep)}`);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          if (data.online) {
+            showToast(`✓ Mirror online: ${data.latency_ms} ms (${data.endpoint})`, 'success');
+          } else {
+            showToast(`✕ Mirror unreachable: ${data.error || 'Offline'}`, 'error');
+          }
+        } catch (e) {
+          showToast(`Ping error: ${e.message}`, 'error');
+        } finally {
+          sHfPingBtn.textContent = 'Ping';
+          sHfPingBtn.disabled = false;
+        }
       });
 
       // Hook into main Save Settings button
@@ -7137,11 +7207,22 @@ html, body {
       const sHfEndpoint = document.getElementById('settingsHfEndpoint');
       const sHfDefaultQuant = document.getElementById('settingsHfDefaultQuant');
       const sHfGgufOnly = document.getElementById('settingsHfGgufOnly');
+      const sFeedback = document.getElementById('settingsHfTokenFeedback');
 
       if (sHfToken) sHfToken.value = hfConfig.token || '';
       if (sHfEndpoint) sHfEndpoint.value = hfConfig.endpoint || 'https://huggingface.co';
       if (sHfDefaultQuant) sHfDefaultQuant.value = hfConfig.defaultQuant || 'Q4_K_M';
       if (sHfGgufOnly) sHfGgufOnly.checked = Boolean(hfConfig.ggufOnly);
+
+      if (sFeedback) {
+        if (hfConfig.verifiedUser && hfConfig.verifiedUser.username) {
+          sFeedback.innerHTML = `<span style="color:var(--success); font-weight:700;">✓ Verified Account:</span> @${escapeHtml(hfConfig.verifiedUser.username)} (${escapeHtml(hfConfig.verifiedUser.fullname || hfConfig.verifiedUser.username)}) · Plan: ${escapeHtml((hfConfig.verifiedUser.plan || 'Free').toUpperCase())}`;
+        } else if (hfConfig.token) {
+          sFeedback.innerHTML = 'Token saved. Click <strong>Verify</strong> to test authentication.';
+        } else {
+          sFeedback.innerHTML = 'Enables downloading gated models (e.g. Llama 3, Gemma) and provides 1000+ req/min rate limits.';
+        }
+      }
     }
 
     function setupModelfileModal() {
