@@ -2784,7 +2784,8 @@ html, body {
     box-sizing: border-box !important;
   }
 
-  .hub-model-actions .hub-hf-pull-quick-btn {
+  .hub-model-actions .hub-hf-pull-quick-btn,
+  .hub-model-actions .hub-hf-expand-diffusion-btn {
     flex: 1 1 0 !important;
     width: auto !important;
     min-width: 0 !important;
@@ -11359,7 +11360,7 @@ html, body {
           });
 
           // Ollama pull button
-          card.querySelectorAll('.hub-pull-btn').forEach(btn => {
+          card.querySelectorAll('.hub-pull-btn:not(.hub-hf-pull-quick-btn):not(.hub-hf-expand-diffusion-btn)').forEach(btn => {
             btn.addEventListener('click', (e) => {
               e.stopPropagation();
               const pullName = btn.dataset.pullName || modelName;
@@ -11373,6 +11374,14 @@ html, body {
               e.stopPropagation();
               const pullTag = btn.dataset.hfPullTag;
               pullModel(pullTag, btn, card);
+            });
+          });
+
+          // HF Expand Diffusion button
+          card.querySelectorAll('.hub-hf-expand-diffusion-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              toggleExpand(card, modelName, modelIdx);
             });
           });
 
@@ -11450,6 +11459,36 @@ html, body {
       if (resultsArea) resultsArea.innerHTML = html;
     }
 
+    function isDiffusionModel(model) {
+      if (!model) return false;
+      const pTag = (model.pipeline_tag || '').toLowerCase();
+      const types = (model.types || []).map(t => String(t).toLowerCase());
+      const tags = (model.tags || []).map(t => String(t).toLowerCase());
+      const id = (model.id || model.name || '').toLowerCase();
+
+      // Vision-Language models (VLMs like LLaVA, Qwen-VL) DO work in Ollama
+      if (pTag === 'image-text-to-text' || pTag === 'visual-question-answering' || pTag === 'image-to-text') {
+        return false;
+      }
+
+      return (
+        pTag === 'text-to-image' ||
+        pTag === 'image-to-image' ||
+        pTag === 'text-to-video' ||
+        pTag === 'image-text-to-video' ||
+        types.includes('image-generation') ||
+        tags.includes('text-to-image') ||
+        tags.includes('diffusion') ||
+        tags.includes('diffusers') ||
+        tags.includes('flux') ||
+        tags.includes('stable-diffusion') ||
+        id.includes('flux') ||
+        id.includes('sdxl') ||
+        id.includes('stable-diffusion') ||
+        id.includes('auraflow')
+      );
+    }
+
     function renderModelCard(model, idx) {
       const name = model.name || model.id || '—';
       const displayName = currentSource === 'huggingface' ? (model.id || name) : name;
@@ -11463,11 +11502,16 @@ html, body {
       const updated = model.updated || model.last_modified || '';
       const isExpanded = expandedCards.has(displayName);
       const installed = isInstalled(displayName);
+      const isDiffusion = currentSource === 'huggingface' && isDiffusionModel(model);
 
       // Type badges
-      const typeBadgesHtml = types.map(t =>
+      let typeBadgesHtml = types.map(t =>
         `<span class="hub-type-badge ${t}">${t}</span>`
       ).join('');
+
+      if (isDiffusion) {
+        typeBadgesHtml += `<span class="hub-type-badge diffusion-warning" style="border-color:#eab308; color:#eab308; background:rgba(234,179,8,0.1); font-weight:700;" title="Diffusion model (FLUX/SD). Quantized for ComfyUI / Forge / sd.cpp. Ollama daemon does not support text-to-image diffusion.">⚡ ComfyUI / Forge (Not Ollama)</span>`;
+      }
 
       // Stats
       let statsHtml = '';
@@ -11505,13 +11549,20 @@ html, body {
             <div class="hub-model-actions">
               ${currentSource === 'ollama'
                 ? `<button class="hub-pull-btn ${installed ? 'done' : ''}" data-pull-name="${escapeHtml(name)}">${installed ? '✓ Installed' : 'Pull'}</button>`
-                : `<div style="display:flex; gap:4px; align-items:center;">
-                    <button type="button" class="hub-pull-btn hub-hf-pull-quick-btn" data-hf-pull-tag="hf.co/${escapeHtml(displayName)}:${escapeHtml(hfConfig.defaultQuant || 'Q4_K_M')}" title="1-Click Pull to Ollama (hf.co/${displayName}:${hfConfig.defaultQuant || 'Q4_K_M'})">
-                      ${installed ? '✓ Installed' : '↓ Pull to Ollama'}
-                    </button>
-                    <button type="button" class="top-btn hub-hf-mf-btn" data-model-id="${escapeHtml(displayName)}" title="Build Ollama Modelfile">Modelfile</button>
-                    <a href="${model.url || '#'}" target="_blank" class="top-btn" style="text-decoration:none; padding:2px 6px;" title="Open on Hugging Face">HF ↗</a>
-                   </div>`
+                : isDiffusion
+                  ? `<div style="display:flex; gap:4px; align-items:center;">
+                      <button type="button" class="hub-pull-btn hub-hf-expand-diffusion-btn" title="View GGUF files to download for ComfyUI / Forge / sd.cpp (Not Ollama)">
+                        ⬇ ComfyUI / Forge GGUF
+                      </button>
+                      <a href="${model.url || `https://huggingface.co/${escapeHtml(displayName)}`}" target="_blank" class="top-btn" style="text-decoration:none; padding:2px 6px;" title="Open repository on Hugging Face">HF ↗</a>
+                     </div>`
+                  : `<div style="display:flex; gap:4px; align-items:center;">
+                      <button type="button" class="hub-pull-btn hub-hf-pull-quick-btn" data-hf-pull-tag="hf.co/${escapeHtml(displayName)}:${escapeHtml(hfConfig.defaultQuant || 'Q4_K_M')}" title="1-Click Pull to Ollama (hf.co/${displayName}:${hfConfig.defaultQuant || 'Q4_K_M'})">
+                        ${installed ? '✓ Installed' : '↓ Pull to Ollama'}
+                      </button>
+                      <button type="button" class="top-btn hub-hf-mf-btn" data-model-id="${escapeHtml(displayName)}" title="Build Ollama Modelfile">Modelfile</button>
+                      <a href="${model.url || '#'}" target="_blank" class="top-btn" style="text-decoration:none; padding:2px 6px;" title="Open on Hugging Face">HF ↗</a>
+                     </div>`
               }
             </div>
           </div>
@@ -11608,22 +11659,54 @@ html, body {
     function renderHuggingFaceFiles(container, model) {
       const files = model.gguf_files || [];
       const modelId = model.id || model.name;
+      const isDiffusion = isDiffusionModel(model);
+      const endpoint = (hfConfig && hfConfig.endpoint) ? hfConfig.endpoint.replace(/\/+$/, '') : 'https://huggingface.co';
 
       if (files.length === 0) {
-        container.innerHTML = `
-          <div class="hub-empty-desc" style="padding:8px 0; font-size:10.5px;">
-            No individual GGUF weights listed in repository root.
-            <br>You can still pull with Ollama via: <code>ollama pull hf.co/${escapeHtml(modelId)}</code>
-            <br>Or view files on <a href="${model.url || '#'}" target="_blank" style="color:var(--text-main); font-weight:700;">Hugging Face ↗</a>.
-          </div>
-        `;
+        if (isDiffusion) {
+          container.innerHTML = `
+            <div class="hub-empty-desc" style="padding:10px 0; font-size:11px; line-height:1.5;">
+              <strong style="color:var(--text-warning, #eab308);">⚡ Diffusion Model (ComfyUI / Forge / sd.cpp)</strong><br>
+              No individual <code>.gguf</code> weights listed directly in repository root.<br>
+              Browse weights and subfolders on <a href="${model.url || `https://huggingface.co/${escapeHtml(modelId)}/tree/main`}" target="_blank" style="color:var(--text-main); font-weight:700;">Hugging Face ↗</a> to download into your ComfyUI models folder.<br>
+              <em>Note: Ollama cannot run text-to-image diffusion models.</em>
+            </div>
+          `;
+        } else {
+          container.innerHTML = `
+            <div class="hub-empty-desc" style="padding:8px 0; font-size:10.5px;">
+              No individual GGUF weights listed in repository root.
+              <br>You can still pull with Ollama via: <code>ollama pull hf.co/${escapeHtml(modelId)}</code>
+              <br>Or view files on <a href="${model.url || '#'}" target="_blank" style="color:var(--text-main); font-weight:700;">Hugging Face ↗</a>.
+            </div>
+          `;
+        }
         return;
       }
 
+      let bannerHtml = '';
+      if (isDiffusion) {
+        bannerHtml = `
+          <div class="hub-diffusion-notice-banner" style="margin-bottom:8px; padding:8px 10px; background:rgba(234, 179, 8, 0.08); border:1px solid rgba(234, 179, 8, 0.3); font-size:10.5px; line-height:1.5;">
+            <div style="font-weight:700; color:var(--text-warning, #eab308); margin-bottom:2px; display:flex; align-items:center; gap:5px;">
+              <span>⚡</span> <span>TEXT-TO-IMAGE DIFFUSION MODEL · NOT COMPATIBLE WITH OLLAMA</span>
+            </div>
+            <div style="color:var(--text-muted);">
+              Ollama only executes autoregressive language/vision models (LLMs/VLMs). It does not have a diffusion denoising pipeline.
+              These GGUF files are quantized for <strong>ComfyUI-GGUF</strong>, <strong>Forge</strong>, or <strong>stable-diffusion.cpp</strong>.
+              Download your preferred quantization below and place it in <code>ComfyUI/models/diffusion_models/</code> or <code>models/unet/</code>.
+            </div>
+          </div>
+        `;
+      }
+
       let html = `
+        ${bannerHtml}
         <div style="font-size:10.5px; font-weight:700; margin-bottom:4px; display:flex; justify-content:space-between; align-items:center;">
           <span>GGUF QUANTIZATIONS & WEIGHTS (${files.length} variants):</span>
-          <span style="font-weight:400; color:var(--text-muted); font-size:10px;">Click 'Pull' to download directly into Ollama via hf.co</span>
+          <span style="font-weight:400; color:var(--text-muted); font-size:10px;">
+            ${isDiffusion ? 'Direct download for ComfyUI / Forge' : "Click 'Pull' to download directly into Ollama via hf.co"}
+          </span>
         </div>
         <div class="hub-hf-file-list">
       `;
@@ -11633,14 +11716,30 @@ html, body {
         const pullTag = `hf.co/${modelId}:${quant || f.name}`;
         const installed = isInstalled(pullTag) || isInstalled(`${modelId}:${quant}`);
         const isSplit = Boolean(f.is_split);
+        const downloadUrl = `${endpoint}/${modelId}/resolve/main/${encodeURIComponent(f.name)}?download=true`;
+        const wgetCmd = `wget -c "${endpoint}/${modelId}/resolve/main/${f.name}"`;
 
-        let pullActionHtml = '';
-        if (installed) {
-          pullActionHtml = '<span class="hub-installed-badge" style="font-size:8.5px;">INSTALLED</span>';
-        } else if (isSplit) {
-          pullActionHtml = `<button type="button" class="hub-tag-pull-btn split-disabled-btn" title="⚠ Multi-part split shard (${f.split_info || 'Shard'}). Ollama cannot pull multi-part shards in 1-click. Select a single-file quant (e.g. Q4_K_M) or combine files." disabled>Split Shard</button>`;
+        let actionHtml = '';
+        if (isDiffusion) {
+          actionHtml = `
+            <a href="${downloadUrl}" target="_blank" rel="noopener noreferrer" class="hub-tag-pull-btn" style="text-decoration:none; display:inline-flex; align-items:center; justify-content:center;" title="Direct download ${escapeHtml(f.name)} for ComfyUI/Forge">⬇ Download</a>
+            <button type="button" class="top-btn hub-hf-copy-link" data-url="${escapeHtml(downloadUrl)}" style="font-size:9px; height:18px; padding:0 4px;" title="Copy direct download URL">URL</button>
+            <button type="button" class="top-btn hub-hf-copy-cmd" data-cmd="${escapeHtml(wgetCmd)}" style="font-size:9px; height:18px; padding:0 4px;" title="Copy wget command">Wget</button>
+          `;
         } else {
-          pullActionHtml = `<button type="button" class="hub-tag-pull-btn hub-hf-file-pull" data-pull-tag="${escapeHtml(pullTag)}" title="Pull ${escapeHtml(pullTag)}">Pull</button>`;
+          let pullActionHtml = '';
+          if (installed) {
+            pullActionHtml = '<span class="hub-installed-badge" style="font-size:8.5px;">INSTALLED</span>';
+          } else if (isSplit) {
+            pullActionHtml = `<button type="button" class="hub-tag-pull-btn split-disabled-btn" title="⚠ Multi-part split shard (${f.split_info || 'Shard'}). Ollama cannot pull multi-part shards in 1-click. Select a single-file quant (e.g. Q4_K_M) or combine files." disabled>Split Shard</button>`;
+          } else {
+            pullActionHtml = `<button type="button" class="hub-tag-pull-btn hub-hf-file-pull" data-pull-tag="${escapeHtml(pullTag)}" title="Pull ${escapeHtml(pullTag)}">Pull</button>`;
+          }
+          actionHtml = `
+            ${pullActionHtml}
+            <button type="button" class="top-btn hub-hf-file-mf" data-model-id="${escapeHtml(modelId)}" data-file-name="${escapeHtml(f.name)}" data-quant="${escapeHtml(quant)}" style="font-size:9px; height:18px; padding:0 4px;" title="Create Custom Modelfile">Modelfile</button>
+            <button type="button" class="top-btn hub-hf-copy-cmd" data-cmd="ollama run ${escapeHtml(pullTag)}" style="font-size:9px; height:18px; padding:0 4px;" title="Copy terminal command">Copy</button>
+          `;
         }
 
         html += `
@@ -11652,9 +11751,7 @@ html, body {
             ${quant ? `<span class="hub-hf-quant">${escapeHtml(quant)}</span>` : ''}
             <span class="hub-hf-filesize">${escapeHtml(f.size || '—')}</span>
             <div class="hub-hf-file-actions">
-              ${pullActionHtml}
-              <button type="button" class="top-btn hub-hf-file-mf" data-model-id="${escapeHtml(modelId)}" data-file-name="${escapeHtml(f.name)}" data-quant="${escapeHtml(quant)}" style="font-size:9px; height:18px; padding:0 4px;" title="Create Custom Modelfile">Modelfile</button>
-              <button type="button" class="top-btn hub-hf-copy-cmd" data-cmd="ollama run ${escapeHtml(pullTag)}" style="font-size:9px; height:18px; padding:0 4px;" title="Copy terminal command">Copy</button>
+              ${actionHtml}
             </div>
           </div>
         `;
@@ -11687,6 +11784,15 @@ html, body {
           });
         });
       });
+
+      container.querySelectorAll('.hub-hf-copy-link').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          navigator.clipboard.writeText(btn.dataset.url).then(() => {
+            showToast('Download URL copied to clipboard', 'success');
+          });
+        });
+      });
     }
 
     function extractQuantFromName(fname) {
@@ -11697,6 +11803,12 @@ html, body {
 
     async function pullModel(modelName, btn, cardEl) {
       if (!modelName) return;
+
+      const lower = modelName.toLowerCase();
+      if (lower.includes('flux') || lower.includes('stable-diffusion') || lower.includes('sdxl') || lower.includes('auraflow')) {
+        showToast('Ollama cannot run diffusion models (FLUX/SD). Download the GGUF file for ComfyUI or Forge instead.', 'warning', 6000);
+        return;
+      }
 
       // Check if already downloading
       if (activeDownloads[modelName]) {
