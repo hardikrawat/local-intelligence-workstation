@@ -205,6 +205,48 @@ html, body {
   color: #FFFFFF;
 }
 
+.top-header-divider {
+  display: inline-block;
+  width: 1px;
+  height: 16px;
+  background: var(--border-frame);
+  margin: 0 3px;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+.top-settings-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 24px;
+  padding: 0 8px;
+  font-weight: 700;
+  letter-spacing: 0.1px;
+}
+
+.top-settings-btn .settings-btn-icon {
+  display: inline-block;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.top-settings-btn .kbd-shortcut-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  opacity: 0.65;
+  padding: 0 4px;
+  height: 14px;
+  border: 1px solid currentColor;
+  margin-left: 2px;
+  line-height: 1;
+  pointer-events: none;
+}
+
 .work-area {
   flex: 1;
   display: flex;
@@ -2792,13 +2834,19 @@ html, body {
   #newChatBtn {
     grid-column: 3;
     grid-row: 1;
-    height: 28px;
-    padding: 0 8px;
-    font-size: 11px;
-    font-weight: 700;
+    height: 28px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 0 6px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
     background: var(--bg-btn);
     border: 1px solid var(--border-dark);
     color: var(--text-main);
+    box-sizing: border-box !important;
     white-space: nowrap;
     touch-action: manipulation;
   }
@@ -2806,45 +2854,56 @@ html, body {
   #settingsBtn {
     grid-column: 4;
     grid-row: 1;
-    height: 28px;
-    width: 28px;
-    min-width: 28px;
-    padding: 0;
+    height: 28px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 0 6px !important;
     display: inline-flex !important;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
     background: var(--bg-btn);
     border: 1px solid var(--border-dark);
     color: var(--text-main);
+    box-sizing: border-box !important;
+    white-space: nowrap;
     touch-action: manipulation;
   }
 
   select#modelModeSelect.top-select-btn {
     grid-column: 1 / 3;
     grid-row: 2;
-    height: 26px;
+    height: 28px !important;
     width: 100% !important;
     max-width: none !important;
     min-width: 0 !important;
-    font-size: 11px;
-    font-weight: 600;
-    padding: 0 4px;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    padding: 0 4px !important;
     border: 1px solid var(--border-dark);
     background: var(--bg-btn);
     color: var(--text-main);
+    box-sizing: border-box !important;
   }
 
   #modelsLibraryBtn {
     grid-column: 3;
     grid-row: 2;
-    height: 26px;
-    padding: 0 8px;
-    font-size: 10.5px;
-    font-weight: 700;
+    height: 28px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 0 6px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
     background: var(--bg-btn);
     border: 1px solid var(--border-dark);
     color: var(--text-main);
+    box-sizing: border-box !important;
     white-space: nowrap;
     touch-action: manipulation;
   }
@@ -2858,15 +2917,30 @@ html, body {
   #vramPurgeQuickBtn {
     grid-column: 4;
     grid-row: 2;
-    height: 26px;
-    padding: 0 6px;
-    font-size: 10.5px;
-    font-weight: 700;
+    height: 28px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 0 6px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
     background: var(--bg-btn);
     border: 1px solid var(--border-dark);
     color: var(--text-main);
+    box-sizing: border-box !important;
     white-space: nowrap;
     touch-action: manipulation;
+  }
+
+  #settingsBtn:active,
+  #newChatBtn:active,
+  #modelsLibraryBtn:active,
+  #vramPurgeQuickBtn:active,
+  .mobile-ledger-toggle:active {
+    background: #1A1816 !important;
+    color: #FFFFFF !important;
   }
 
   /* 3. Session Ledger Off-Canvas Drawer */
@@ -3486,9 +3560,11 @@ html, body {
         <span class="desktop-text">Evict VRAM</span>
         <span class="mobile-text">Evict</span>
       </button>
-      <button class="top-btn" id="settingsBtn" title="Settings & Diagnostics">
-        <span class="desktop-text">Settings ⚙</span>
-        <span class="mobile-text">⚙</span>
+      <span class="top-header-divider desktop-text" aria-hidden="true"></span>
+      <button class="top-btn top-settings-btn" id="settingsBtn" title="Settings & Diagnostics (⌘, or S in Palette)">
+        <span class="settings-btn-icon">⚙</span>
+        <span class="settings-btn-label">Settings</span>
+        <span class="kbd-shortcut-pill desktop-text">S</span>
       </button>
 
       <button id="refreshModelsBtn" style="display:none;"></button>
@@ -5297,6 +5373,11 @@ html, body {
     });
 
     window.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && (e.key === ',' || e.key === 'Comma')) {
+        e.preventDefault();
+        document.getElementById('settingsBtn')?.click();
+        return;
+      }
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         if (commandPaletteModal.classList.contains('open')) {
