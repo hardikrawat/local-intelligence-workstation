@@ -100,6 +100,12 @@ docker compose up -d
 - **Whisper ASR Transcription**: Single-click transcription with multi-language detection, formatted transcript editing, clipboard copy, and `.txt` export.
 - **Neural TTS Synthesizer**: Text input card to synthesize neural speech using Piper voices or system browser voices with speed adjustment.
 
+### 📱 Mobile & Responsive Experience
+- **Adaptive Command Grid**: Balanced 2x2 mobile header grid maintaining strict 28px button heights, sharp monochrome borders, and readable typography.
+- **Flush Action Composer**: Single-row mobile prompt bar with fixed 36px flush alignment across the prompt input, microphone dictation, attachment picker, and send button.
+- **Segmented Toolbars**: Horizontally scrollable single-row tab bars for Model Hub categories and Settings modals, preventing vertical wrapping on small screens.
+- **Non-Collapsing Card Layout**: Isolated workspace panes and Model Hub cards preventing layout shifting, element stacking, or touch target collisions on mobile viewports.
+
 ---
 
 ## Universal Model Hub
@@ -110,10 +116,13 @@ Access the Model Hub via the **Hub ↓** button in the command header:
    - Live scraping and search across all models on `ollama.com`.
    - Real-time tag resolution and one-click pulling into Ollama.
 2. **Hugging Face Hub**:
-   - Search tens of thousands of community GGUF models.
+   - Search tens of thousands of community GGUF models across all official pipeline categories (`text-generation`, `image-text-to-text`, `text-to-image`, `text-to-speech`, `automatic-speech-recognition`, etc.).
+   - **Modality-Aware Action Architecture**: Distinguishes autoregressive LLMs/VLMs from text-to-image diffusion models (such as FLUX.1, SDXL, and SD 1.5/3).
+     - **Autoregressive Models (LLMs / VLMs)**: Provide 1-click `↓ Pull to Ollama`, dynamic quantization tag selectors, and custom Ollama Modelfile generation.
+     - **Diffusion Models (FLUX / Stable Diffusion)**: Clearly labeled with `⚡ ComfyUI / Forge (Not Ollama)` notices. Provides `⬇ ComfyUI / Forge GGUF` direct browser download links, copyable direct URLs, and copyable `wget` terminal commands targeting `ComfyUI/models/diffusion_models/` or `models/unet/`. Intercepts invalid pull attempts with technical guidance.
    - **Split GGUF Shard Detection**: Automatically flags multi-part shards (`-00001-of-00002.gguf`) with warning badges and prevents failed pulls by recommending single-file variants.
    - High-speed mirror selector (`huggingface.co` vs `hf-mirror.com`) and token authentication.
-   - Modelfile Builder: Generate custom Ollama Modelfiles with one click.
+   - Modelfile Builder: Generate custom Ollama Modelfiles with one click for supported LLMs.
 3. **CivitAI Diffusion Hub**:
    - Search Stable Diffusion checkpoints, LoRAs, and VAEs.
    - View base model tags (`Pony`, `SDXL 1.0`, `SD 1.5`, `FLUX.1 D`), download statistics, and direct safetensors download links.
