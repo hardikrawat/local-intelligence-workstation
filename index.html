@@ -1186,6 +1186,918 @@ html, body {
   font-weight: 600;
 }
 
+/* ==========================================================================
+   MODEL HUB — Professional-Grade Model Discovery & Download System
+   Dual-source (Ollama Registry + HuggingFace) search, filter, download
+   ========================================================================== */
+
+.hub-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+}
+
+.hub-overlay.open {
+  display: flex !important;
+}
+
+.hub-panel {
+  background: var(--bg-parchment);
+  border: 2px solid var(--border-dark);
+  width: 920px;
+  max-width: 96vw;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-mono);
+  overflow: hidden;
+}
+
+.hub-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--bg-top-bar);
+  border-bottom: 2px solid var(--border-dark);
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.hub-top-bar-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.hub-top-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hub-close-btn {
+  background: var(--bg-btn);
+  border: 1px solid var(--border-dark);
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  cursor: pointer;
+  height: 26px;
+}
+
+.hub-close-btn:hover {
+  background: #1A1816;
+  color: #FFFFFF;
+}
+
+/* Source Tabs */
+.hub-source-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border-frame);
+  background: var(--bg-parchment);
+  flex-shrink: 0;
+  overflow-x: auto;
+}
+
+.hub-source-tab {
+  padding: 8px 16px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: color 0.1s, border-color 0.1s;
+}
+
+.hub-source-tab:hover {
+  color: var(--text-main);
+}
+
+.hub-source-tab.active {
+  color: var(--text-main);
+  font-weight: 700;
+  border-bottom-color: var(--text-main);
+}
+
+/* Search Bar */
+.hub-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border-frame);
+  background: var(--bg-transcript);
+  flex-shrink: 0;
+}
+
+.hub-search-input {
+  flex: 1;
+  border: 1px solid var(--border-dark);
+  background: #FFFFFF;
+  padding: 6px 10px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-main);
+  outline: none;
+  height: 30px;
+}
+
+.hub-search-input:focus {
+  border-color: #000000;
+}
+
+.hub-search-input::placeholder {
+  color: #999;
+}
+
+.hub-search-btn {
+  height: 30px;
+  padding: 0 14px;
+  border: 1px solid var(--border-dark);
+  background: var(--bg-btn);
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.hub-search-btn:hover {
+  background: #1A1816;
+  color: #FFFFFF;
+}
+
+/* Category Filter Bar */
+.hub-category-bar {
+  display: flex;
+  gap: 4px;
+  padding: 6px 14px;
+  border-bottom: 1px solid var(--border-frame);
+  background: var(--bg-parchment);
+  overflow-x: auto;
+  flex-shrink: 0;
+  scrollbar-width: none;
+}
+
+.hub-category-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.hub-cat-chip {
+  padding: 3px 10px;
+  border: 1px solid var(--border-rule);
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.1s;
+}
+
+.hub-cat-chip:hover {
+  border-color: var(--border-dark);
+  color: var(--text-main);
+}
+
+.hub-cat-chip.active {
+  background: #1A1816;
+  color: #FFFFFF;
+  border-color: #1A1816;
+}
+
+/* Results Area */
+.hub-results-area {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0;
+  min-height: 200px;
+}
+
+.hub-results-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 14px;
+  font-size: 10.5px;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-frame);
+  background: var(--bg-top-bar);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.hub-sort-select {
+  border: 1px solid var(--border-rule);
+  background: #FFFFFF;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  padding: 2px 6px;
+  color: var(--text-main);
+  cursor: pointer;
+  height: 22px;
+}
+
+/* Model Card */
+.hub-model-card {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-frame);
+  cursor: pointer;
+  transition: background 0.08s;
+}
+
+.hub-model-card:hover {
+  background: #EAE6D8;
+}
+
+.hub-model-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hub-model-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.hub-model-name {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.hub-model-author {
+  font-size: 10.5px;
+  font-weight: 400;
+  color: var(--text-muted);
+  margin-left: 2px;
+}
+
+.hub-model-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 3px;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.hub-model-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 5px;
+  flex-wrap: wrap;
+}
+
+.hub-model-stat {
+  font-size: 10px;
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.hub-type-badge {
+  display: inline-block;
+  font-size: 9.5px;
+  font-family: var(--font-mono);
+  padding: 1px 5px;
+  border: 1px solid var(--border-rule);
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.hub-type-badge.vision { border-color: #6B8E23; color: #6B8E23; }
+.hub-type-badge.code { border-color: #4169E1; color: #4169E1; }
+.hub-type-badge.reasoning { border-color: #8B4513; color: #8B4513; }
+.hub-type-badge.embedding { border-color: #708090; color: #708090; }
+.hub-type-badge.audio { border-color: #9370DB; color: #9370DB; }
+.hub-type-badge.video { border-color: #CD5C5C; color: #CD5C5C; }
+.hub-type-badge.math { border-color: #2E8B57; color: #2E8B57; }
+.hub-type-badge.medical { border-color: #DC143C; color: #DC143C; }
+.hub-type-badge.tool_use { border-color: #DAA520; color: #DAA520; }
+
+.hub-model-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.hub-installed-badge {
+  font-size: 9.5px;
+  font-family: var(--font-mono);
+  background: var(--success);
+  color: #FFFFFF;
+  padding: 1px 6px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.hub-pull-btn {
+  height: 26px;
+  padding: 0 12px;
+  border: 1px solid var(--border-dark);
+  background: var(--bg-btn);
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.hub-pull-btn:hover {
+  background: #1A1816;
+  color: #FFFFFF;
+}
+
+.hub-pull-btn.pulling {
+  background: var(--text-muted);
+  color: #FFFFFF;
+  cursor: wait;
+  border-color: var(--text-muted);
+}
+
+.hub-pull-btn.done {
+  background: var(--success);
+  color: #FFFFFF;
+  border-color: var(--success);
+}
+
+/* Tags / Variants Expansion */
+.hub-tags-section {
+  display: none;
+  margin-top: 6px;
+  padding: 6px 0 0 0;
+  border-top: 1px dashed var(--border-rule);
+}
+
+.hub-model-card.expanded .hub-tags-section {
+  display: block;
+}
+
+.hub-tags-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.hub-tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border: 1px solid var(--border-rule);
+  background: #FFFFFF;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  cursor: pointer;
+  transition: all 0.08s;
+}
+
+.hub-tag-chip:hover {
+  border-color: var(--border-dark);
+  background: var(--bg-btn);
+}
+
+.hub-tag-chip .tag-name {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.hub-tag-chip .tag-size {
+  font-weight: 400;
+  color: var(--text-muted);
+  font-size: 9.5px;
+}
+
+.hub-tag-chip .tag-quant {
+  font-weight: 400;
+  color: var(--text-muted);
+  font-size: 9.5px;
+}
+
+.hub-tag-pull-btn {
+  padding: 1px 6px;
+  border: 1px solid var(--border-dark);
+  background: var(--bg-btn);
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-left: 2px;
+}
+
+.hub-tag-pull-btn:hover {
+  background: #1A1816;
+  color: #FFFFFF;
+}
+
+/* Download Progress in Hub */
+.hub-download-bar {
+  display: none;
+  margin-top: 6px;
+  padding: 6px 0 0 0;
+}
+
+.hub-download-bar.active {
+  display: block;
+}
+
+.hub-dl-progress-track {
+  width: 100%;
+  height: 6px;
+  background: var(--border-frame);
+  overflow: hidden;
+}
+
+.hub-dl-progress-fill {
+  width: 0%;
+  height: 100%;
+  background: var(--text-main);
+  transition: width 0.15s ease;
+}
+
+.hub-dl-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+
+.hub-dl-cancel-btn {
+  border: 1px solid var(--border-rule);
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  padding: 1px 6px;
+  cursor: pointer;
+}
+
+.hub-dl-cancel-btn:hover {
+  background: var(--danger);
+  color: #FFFFFF;
+  border-color: var(--danger);
+}
+
+/* Loading & Empty States */
+.hub-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  font-size: 12px;
+  color: var(--text-muted);
+  gap: 8px;
+}
+
+.hub-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  gap: 8px;
+}
+
+.hub-empty-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.hub-empty-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: center;
+  max-width: 400px;
+  line-height: 1.5;
+}
+
+/* Hub Footer */
+.hub-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-top: 2px solid var(--border-dark);
+  background: var(--bg-top-bar);
+  font-size: 10px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  gap: 10px;
+}
+
+.hub-footer-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hub-footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* HuggingFace-specific styles */
+.hub-hf-file-list {
+  margin-top: 6px;
+  max-height: 200px;
+  overflow-y: auto;
+  font-size: 10.5px;
+}
+
+.hub-hf-file {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--border-frame);
+  gap: 8px;
+}
+
+.hub-hf-file:hover {
+  background: var(--bg-btn);
+}
+
+.hub-hf-filename {
+  font-weight: 600;
+  color: var(--text-main);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.hub-hf-filesize {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.hub-hf-quant {
+  font-size: 9.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+/* Hugging Face Real-Time Live Control Strip */
+.hub-hf-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 14px;
+  background: var(--bg-top-bar);
+  border-bottom: 1px solid var(--border-dark);
+  font-size: 11px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.hub-hf-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.hub-hf-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.hub-hf-auth-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 7px;
+  border: 1px solid var(--border-rule);
+  background: #FFFFFF;
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  cursor: pointer;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.hub-hf-auth-badge:hover {
+  background: #1A1816;
+  color: #FFFFFF;
+  border-color: #1A1816;
+}
+
+.hub-hf-auth-badge.verified {
+  border-color: var(--success);
+  color: #2e6930;
+  background: #F0F9F1;
+}
+
+.hub-hf-auth-badge.verified:hover {
+  background: #2e6930;
+  color: #FFFFFF;
+}
+
+.hub-hf-auth-badge.unauth {
+  border-color: var(--warning);
+  color: #8C6510;
+  background: #FFFDF5;
+}
+
+.hub-hf-auth-badge.unauth:hover {
+  background: #8C6510;
+  color: #FFFFFF;
+}
+
+.hub-hf-ctrl-select {
+  border: 1px solid var(--border-rule);
+  background: #FFFFFF;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  padding: 2px 6px;
+  color: var(--text-main);
+  cursor: pointer;
+  height: 24px;
+}
+
+.hub-hf-toggle-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10.5px;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.hub-hf-toggle-label input[type="checkbox"] {
+  cursor: pointer;
+  margin: 0;
+}
+
+.hub-hf-action-btn {
+  background: var(--bg-btn);
+  border: 1px solid var(--border-dark);
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 8px;
+  cursor: pointer;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.hub-hf-action-btn:hover {
+  background: #1A1816;
+  color: #FFFFFF;
+}
+
+/* Hugging Face Settings Drawer */
+.hub-hf-config-panel {
+  display: none;
+  background: var(--bg-transcript);
+  border-bottom: 2px solid var(--border-dark);
+  padding: 12px 14px;
+  font-size: 11px;
+  flex-direction: column;
+  gap: 10px;
+  flex-shrink: 0;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.hub-hf-config-panel.open {
+  display: flex !important;
+}
+
+.hub-hf-config-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .hub-hf-config-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+.hub-hf-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hub-hf-field-label {
+  font-weight: 700;
+  font-size: 11px;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hub-hf-input-wrap {
+  display: flex;
+  gap: 4px;
+}
+
+.hub-hf-input {
+  flex: 1;
+  border: 1px solid var(--border-dark);
+  background: #FFFFFF;
+  padding: 4px 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-main);
+  outline: none;
+  height: 26px;
+}
+
+.hub-hf-input:focus {
+  border-color: #000000;
+}
+
+.hub-hf-status-box {
+  padding: 6px 8px;
+  border: 1px dashed var(--border-rule);
+  background: var(--bg-card);
+  font-size: 10.5px;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+.hub-hf-status-box.success {
+  border-color: var(--success);
+  color: #2e6930;
+  background: #F4FAF5;
+}
+
+.hub-hf-status-box.error {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: #FFF5F5;
+}
+
+.hub-hf-file-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+/* Modelfile Builder Modal */
+.modelfile-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 2500;
+  align-items: center;
+  justify-content: center;
+}
+
+.modelfile-modal.open {
+  display: flex !important;
+}
+
+.modelfile-card {
+  background: var(--bg-transcript);
+  border: 2px solid var(--border-dark);
+  width: 680px;
+  max-width: 94vw;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  padding: 14px;
+  gap: 10px;
+  overflow-y: auto;
+  font-family: var(--font-mono);
+}
+
+.modelfile-editor {
+  width: 100%;
+  height: 180px;
+  border: 1px solid var(--border-dark);
+  background: #181A1F;
+  color: #E5E7EB;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  line-height: 1.5;
+  padding: 8px 10px;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+/* Mobile Responsive for Hub */
+@media (max-width: 768px) {
+  .hub-panel {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 92vh;
+    max-height: 92dvh;
+    border: 2px solid var(--border-dark);
+    border-bottom: none;
+  }
+
+  .hub-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .hub-top-bar-title {
+    font-size: 11.5px;
+  }
+
+  .hub-search-input {
+    font-size: 16px !important;
+    height: 36px;
+  }
+
+  .hub-search-btn {
+    height: 36px;
+    font-size: 12px;
+  }
+
+  .hub-model-card {
+    padding: 8px 10px;
+  }
+
+  .hub-model-name {
+    font-size: 11.5px;
+  }
+
+  .hub-model-desc {
+    font-size: 10.5px;
+  }
+
+  .hub-category-bar {
+    padding: 5px 10px;
+  }
+
+  .hub-cat-chip {
+    font-size: 10px;
+    padding: 4px 8px;
+  }
+
+  .hub-tags-grid {
+    gap: 3px;
+  }
+
+  .hub-tag-chip {
+    font-size: 10px;
+    padding: 4px 6px;
+  }
+}
+
 .toast-container {
   position: fixed;
   top: 38px;
@@ -1444,6 +2356,12 @@ html, body {
     color: var(--text-main);
     white-space: nowrap;
     touch-action: manipulation;
+  }
+
+  #modelHubBtn {
+    grid-column: 3;
+    grid-row: 2;
+    display: none !important;
   }
 
   #vramPurgeQuickBtn {
@@ -1886,6 +2804,7 @@ html, body {
         <span class="mobile-text">+ New</span>
       </button>
       <button class="top-btn" id="modelsLibraryBtn" title="Local Models Library">Models</button>
+      <button class="top-btn" id="modelHubBtn" title="Search & Download Models from Ollama & HuggingFace">Hub ↓</button>
       <button class="top-btn" id="vramPurgeQuickBtn" title="Evict Model from VRAM">
         <span class="desktop-text">Evict VRAM</span>
         <span class="mobile-text">Evict</span>
@@ -1987,6 +2906,7 @@ html, body {
     <div class="modal-tab-bar" id="settingsTabBar">
       <button class="modal-tab-btn active" data-tab="serverTab">Server & Hardware</button>
       <button class="modal-tab-btn" data-tab="personaTab">System Persona</button>
+      <button class="modal-tab-btn" data-tab="hfTab">Hugging Face</button>
     </div>
     <div class="modal-tab-pane active" id="serverTab">
       <div class="form-group">
@@ -2030,6 +2950,46 @@ html, body {
         <textarea id="settingSystemPrompt" class="form-input" rows="4"></textarea>
       </div>
     </div>
+    <div class="modal-tab-pane" id="hfTab">
+      <div class="form-group">
+        <label for="settingsHfToken">Hugging Face API Access Token:</label>
+        <div style="display:flex; gap:4px;">
+          <input type="password" id="settingsHfToken" class="form-input" placeholder="hf_xxxxxxxxxxxxxxxxxxxxxxx" spellcheck="false">
+          <button type="button" class="top-btn" id="settingsHfVisBtn" style="height:32px; padding:0 8px;" title="Show / Hide token">👁</button>
+          <button type="button" class="composer-btn" id="settingsHfTestTokenBtn" style="height:32px;">Verify</button>
+        </div>
+        <div id="settingsHfTokenFeedback" style="font-size:10.5px; color:var(--text-muted); margin-top:2px;">
+          Enables downloading gated models (e.g. Llama 3, Gemma) and provides 1000+ req/min rate limits.
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:8px;">
+        <label for="settingsHfEndpoint">Hugging Face Mirror / Endpoint:</label>
+        <div style="display:flex; gap:4px;">
+          <input type="text" id="settingsHfEndpoint" class="form-input" value="https://huggingface.co" spellcheck="false">
+          <button type="button" class="composer-btn" id="settingsHfPingBtn" style="height:32px;">Ping</button>
+        </div>
+        <div style="display:flex; gap:6px; margin-top:4px;">
+          <button type="button" class="top-btn" style="font-size:10px; height:22px; padding:0 6px;" onclick="document.getElementById('settingsHfEndpoint').value='https://huggingface.co'">Official (huggingface.co)</button>
+          <button type="button" class="top-btn" style="font-size:10px; height:22px; padding:0 6px;" onclick="document.getElementById('settingsHfEndpoint').value='https://hf-mirror.com'">Mirror (hf-mirror.com)</button>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:8px;">
+        <label for="settingsHfDefaultQuant">Preferred GGUF Quantization:</label>
+        <select id="settingsHfDefaultQuant" class="form-input">
+          <option value="Q4_K_M" selected>Q4_K_M (Recommended - Best balance of speed, RAM & fidelity)</option>
+          <option value="Q5_K_M">Q5_K_M (High quality - Near lossless)</option>
+          <option value="Q8_0">Q8_0 (Maximum fidelity - High VRAM)</option>
+          <option value="Q2_K">Q2_K / Q3_K (Low VRAM / Mobile)</option>
+          <option value="FP16">FP16 / BF16 (Uncompressed)</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-top:8px;">
+        <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+          <input type="checkbox" id="settingsHfGgufOnly" checked>
+          <span>Search GGUF Weights Only by Default</span>
+        </label>
+      </div>
+    </div>
     <div style="display:flex; justify-content:flex-end; gap:6px; margin-top:12px; border-top:1px solid var(--border-frame); padding-top:8px;">
       <button class="composer-btn" id="closeSettingsBtn">Cancel</button>
       <button class="composer-btn" id="saveSettingsBtn">Save Configuration</button>
@@ -2065,7 +3025,10 @@ html, body {
       </table>
     </div>
     <div style="display:flex; justify-content:space-between; margin-top:8px; border-top:1px solid var(--border-frame); padding-top:8px;">
-      <button class="composer-btn" id="refreshLibBtn">Refresh</button>
+      <div style="display:flex; gap:6px;">
+        <button class="composer-btn" id="refreshLibBtn">Refresh</button>
+        <button class="composer-btn" onclick="document.getElementById('modelsLibraryModal').classList.remove('open'); HUB.open();">↓ Download from Hub</button>
+      </div>
       <button class="composer-btn" id="closeLibraryBtn">Close</button>
     </div>
   </div>
@@ -2080,6 +3043,181 @@ html, body {
     <div style="display:flex; justify-content:flex-end; gap:8px;">
       <button class="composer-btn" id="confirmCancelBtn">Cancel</button>
       <button class="composer-btn" id="confirmProceedBtn">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     MODEL HUB — Professional-Grade Model Discovery & Download System
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div class="hub-overlay" id="modelHubOverlay">
+  <div class="hub-panel">
+    <div class="hub-top-bar">
+      <span class="hub-top-bar-title">MODEL HUB — Search & Download</span>
+      <div class="hub-top-bar-actions">
+        <button class="hub-close-btn" id="hubCloseBtn">✕ CLOSE</button>
+      </div>
+    </div>
+
+    <div class="hub-source-tabs" id="hubSourceTabs">
+      <button class="hub-source-tab active" data-source="ollama">Ollama Registry</button>
+      <button class="hub-source-tab" data-source="huggingface">HuggingFace Hub</button>
+    </div>
+
+    <!-- Hugging Face Live Real-Time Control Toolbar -->
+    <div class="hub-hf-toolbar" id="hubHfToolbar" style="display:none;">
+      <div class="hub-hf-toolbar-left">
+        <button type="button" class="hub-hf-auth-badge unauth" id="hubHfAuthBtn" title="Click to view & configure Hugging Face token">
+          <span id="hubHfAuthDot" style="color:var(--warning);">●</span>
+          <span id="hubHfAuthText">Token: Guest</span>
+        </button>
+        <select class="hub-hf-ctrl-select" id="hubHfMirrorSelect" title="Hugging Face endpoint or high-speed mirror">
+          <option value="https://huggingface.co">Mirror: huggingface.co (Official)</option>
+          <option value="https://hf-mirror.com">Mirror: hf-mirror.com (Fast)</option>
+        </select>
+        <label class="hub-hf-toggle-label" title="Only display models with GGUF files for Ollama">
+          <input type="checkbox" id="hubHfGgufOnlyCheckbox" checked>
+          <span>GGUF Only</span>
+        </label>
+        <select class="hub-hf-ctrl-select" id="hubHfQuantFilterSelect" title="Filter by preferred GGUF Quantization">
+          <option value="">Quant: All</option>
+          <option value="Q4_K_M" selected>Quant: Q4_K_M (Balanced)</option>
+          <option value="Q5_K_M">Quant: Q5_K_M (High)</option>
+          <option value="Q8_0">Quant: Q8_0 (Near FP16)</option>
+          <option value="Q2_K">Quant: Q2_K / Low VRAM</option>
+          <option value="FP16">Quant: FP16 / Full</option>
+        </select>
+      </div>
+      <div class="hub-hf-toolbar-right">
+        <select class="hub-hf-ctrl-select" id="hubHfLimitSelect" title="Number of models to fetch">
+          <option value="20">20 / page</option>
+          <option value="40" selected>40 / page</option>
+          <option value="60">60 / page</option>
+          <option value="100">100 / page</option>
+        </select>
+        <button type="button" class="hub-hf-action-btn" id="openHfConfigBtn" title="Open Hugging Face settings drawer">
+          ⚙ HF Config
+        </button>
+      </div>
+    </div>
+
+    <!-- Hugging Face Live Real-Time Configuration Drawer -->
+    <div class="hub-hf-config-panel" id="hubHfConfigPanel">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-frame); padding-bottom:6px;">
+        <strong style="font-size:12px; letter-spacing:0.3px;">HUGGING FACE REAL-TIME CONFIGURATION</strong>
+        <button type="button" class="top-btn" id="closeHfConfigPanelBtn" style="height:20px; font-size:10px; padding:0 6px;">✕ Hide Panel</button>
+      </div>
+      <div class="hub-hf-config-grid">
+        <div class="hub-hf-field">
+          <div class="hub-hf-field-label">
+            <span>API Access Token (Read / Fine-Grained):</span>
+            <a href="https://huggingface.co/settings/tokens" target="_blank" style="color:var(--text-muted); font-size:10px; text-decoration:underline;">Generate Token ↗</a>
+          </div>
+          <div class="hub-hf-input-wrap">
+            <input type="password" id="hfTokenInput" class="hub-hf-input" placeholder="hf_xxxxxxxxxxxxxxxxxxxxxxx" autocomplete="off" spellcheck="false">
+            <button type="button" class="top-btn" id="hfTokenToggleVisBtn" style="height:26px; padding:0 6px;" title="Show / Hide token">👁</button>
+            <button type="button" class="composer-btn" id="hfTestTokenBtn" style="height:26px; padding:0 8px; font-size:10px;">Verify</button>
+            <button type="button" class="top-btn" id="hfClearTokenBtn" style="height:26px; padding:0 6px; color:var(--danger);" title="Clear Token">✕</button>
+          </div>
+          <div class="hub-hf-status-box" id="hfTokenStatusBox">
+            Token not configured. Public access active (subject to Hugging Face anonymous rate limits).
+          </div>
+        </div>
+
+        <div class="hub-hf-field">
+          <div class="hub-hf-field-label">
+            <span>Endpoint / Regional Mirror:</span>
+            <span id="hfLatencyBadge" style="font-size:10px; color:var(--text-muted);">— ms</span>
+          </div>
+          <div class="hub-hf-input-wrap">
+            <input type="text" id="hfEndpointInput" class="hub-hf-input" value="https://huggingface.co" spellcheck="false">
+            <button type="button" class="composer-btn" id="hfPingBtn" style="height:26px; padding:0 8px; font-size:10px;">Ping</button>
+          </div>
+          <div style="display:flex; gap:6px; margin-top:2px;">
+            <button type="button" class="top-btn" style="font-size:9.5px; height:20px; padding:0 5px;" onclick="HUB.setHfEndpoint('https://huggingface.co')">Official (huggingface.co)</button>
+            <button type="button" class="top-btn" style="font-size:9.5px; height:20px; padding:0 5px;" onclick="HUB.setHfEndpoint('https://hf-mirror.com')">Mirror (hf-mirror.com)</button>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border-frame); padding-top:6px;">
+        <span style="font-size:10px; color:var(--text-muted);">Config changes take effect instantly across all searches & downloads without reloading.</span>
+        <button type="button" class="composer-btn" id="saveHfLiveConfigBtn" style="font-size:11px; height:26px;">Apply & Save Live</button>
+      </div>
+    </div>
+
+    <div class="hub-search-bar">
+      <input type="text" class="hub-search-input" id="hubSearchInput"
+             placeholder="Search models... (e.g. llama, deepseek, coder, vision)"
+             spellcheck="false" autocomplete="off">
+      <select class="hub-sort-select" id="hubSortSelect">
+        <option value="popular">Most Popular</option>
+        <option value="newest">Newest</option>
+        <option value="name">Name A-Z</option>
+      </select>
+      <button class="hub-search-btn" id="hubSearchBtn">Search</button>
+    </div>
+
+    <div class="hub-category-bar" id="hubCategoryBar">
+      <button class="hub-cat-chip active" data-cat="">All Models</button>
+      <button class="hub-cat-chip" data-cat="text">💬 Text</button>
+      <button class="hub-cat-chip" data-cat="reasoning">🧠 Reasoning</button>
+      <button class="hub-cat-chip" data-cat="code">💻 Code</button>
+      <button class="hub-cat-chip" data-cat="vision">👁️ Vision</button>
+      <button class="hub-cat-chip" data-cat="embedding">🔗 Embedding</button>
+      <button class="hub-cat-chip" data-cat="math">📐 Math</button>
+      <button class="hub-cat-chip" data-cat="audio">🎵 Audio</button>
+      <button class="hub-cat-chip" data-cat="video">🎬 Video</button>
+      <button class="hub-cat-chip" data-cat="tool_use">🔧 Tools</button>
+      <button class="hub-cat-chip" data-cat="medical">🏥 Medical</button>
+      <button class="hub-cat-chip" data-cat="creative">✨ Creative</button>
+    </div>
+
+    <div class="hub-results-area" id="hubResultsArea">
+      <div class="hub-loading" id="hubLoadingState">
+        <span class="typing-caret-block">▌</span> Loading model registry...
+      </div>
+    </div>
+
+    <div class="hub-footer">
+      <div class="hub-footer-status">
+        <span id="hubResultCount">—</span>
+        <span>|</span>
+        <span id="hubSourceLabel">Source: Ollama Registry</span>
+      </div>
+      <div class="hub-footer-actions">
+        <button class="hub-close-btn" style="font-size:10px; height:22px; padding:0 8px;" id="hubRefreshBtn">↻ Refresh</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modelfile Generator & Direct Ollama Import Modal -->
+<div class="modelfile-modal" id="modelfileModal">
+  <div class="modelfile-card">
+    <div class="drawer-header">
+      <span id="modelfileModalTitle">CREATE OLLAMA MODEL FROM HUGGING FACE</span>
+      <button type="button" class="top-btn" id="closeModelfileModalX">✕</button>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:4px;">
+      <label style="font-size:11px; font-weight:700;">Target Model Name in Ollama:</label>
+      <input type="text" id="mfModelTargetName" class="form-input" style="height:28px; font-size:12px;" placeholder="e.g. my-llama3:latest">
+    </div>
+    <div style="display:flex; flex-direction:column; gap:4px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <label style="font-size:11px; font-weight:700;">Modelfile Definition:</label>
+        <span style="font-size:10px; color:var(--text-muted);">Uses native Ollama FROM hf.co / GGUF syntax</span>
+      </div>
+      <textarea id="mfEditor" class="modelfile-editor" spellcheck="false" rows="8"></textarea>
+    </div>
+    <div id="mfBuildStatus" style="font-size:11px; display:none; padding:8px 10px; border:1px solid var(--border-dark); background:#FFFFFF; line-height:1.4;">
+      <span class="typing-caret-block">▌</span> <span id="mfBuildStatusText">Creating model in Ollama...</span>
+    </div>
+    <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border-frame); padding-top:8px;">
+      <button type="button" class="top-btn" id="mfCopyBtn">Copy Modelfile</button>
+      <div style="display:flex; gap:6px;">
+        <button type="button" class="composer-btn" id="closeModelfileBtn">Cancel</button>
+        <button type="button" class="composer-btn" id="mfExecuteCreateBtn" style="background:#1A1816; color:#FFFFFF;">Create in Ollama</button>
+      </div>
     </div>
   </div>
 </div>
@@ -3359,6 +4497,7 @@ html, body {
       { id: 'eco_mode', label: '⚡ Toggle Eco Mode', desc: 'Reduce animation overhead and UI resource usage', key: 'O', action: () => applyEcoMode(!ecoModeActive, true) },
       { id: 'abort_stream', label: '⏹ Stop Generation', desc: 'Immediately halt response generation and preserve output', key: 'Q', action: () => abortGeneration(false) },
       { id: 'pull', label: 'Pull Model from Ollama', desc: 'Download model from Ollama library', key: 'P', action: () => document.getElementById('pullModelOpenBtn').click() },
+      { id: 'hub', label: '📦 Model Hub — Search & Download', desc: 'Browse and download models from Ollama Registry & HuggingFace Hub', key: 'H', action: () => HUB.open() },
       { id: 'models', label: 'Local Models Library', desc: 'View installed models and disk usage', key: 'M', action: () => document.getElementById('modelsLibraryBtn').click() },
       { id: 'persona', label: 'System Persona Preset', desc: 'Switch persona preset (Academic, Socratic, Coder...)', key: 'A', action: () => document.getElementById('systemPromptQuickBtn').click() },
       { id: 'export', label: 'Export Conversation', desc: 'Download conversation as Markdown (.md) or JSON', key: 'E', action: () => document.getElementById('exportSessionBtn').click() },
@@ -3656,6 +4795,7 @@ html, body {
       const hostDisplay = config.host ? (new URL(config.host).host || config.host) : 'Proxy (Tunnel)';
       serverStatusText.innerText = `Connected (${hostDisplay})`;
       installedModels = data.models || [];
+      window.installedModels = installedModels;
       hideCorsBanner();
 
       if (installedModels.length > 0) {
@@ -5504,6 +6644,1395 @@ html, body {
     loadModelsLibrary();
     modelsLibraryModal.classList.remove('open');
     showToast(`Active model switched to ${name}`, 'success');
+  };
+
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // MODEL HUB — Professional-Grade Model Discovery & Download System
+  // Dual-source: Ollama Registry + HuggingFace Hub
+  // Real-time HF Configuration: Token, Mirror, GGUF/All Formats, Quant, Tasks
+  // Full Support: Text, Vision, Code, Audio, Video, Embedding, Reasoning, etc.
+  // ══════════════════════════════════════════════════════════════════════════
+
+  const HF_CONFIG_KEY = 'ollama_studio_hf_config';
+
+  const HUB = (() => {
+    // State
+    let currentSource = 'ollama';
+    let currentCategory = '';
+    let currentQuery = '';
+    let currentSort = 'popular';
+    let hubModels = [];
+    let activeDownloads = {};  // modelName -> {controller, status}
+    let expandedCards = new Set();
+    let tagsCache = {};
+    let installedModelNames = new Set();
+
+    // Hugging Face Real-Time Configuration
+    const defaultHfConfig = {
+      token: '',
+      endpoint: 'https://huggingface.co',
+      ggufOnly: true,
+      defaultQuant: 'Q4_K_M',
+      sort: 'downloads',
+      limit: 40,
+      verifiedUser: null
+    };
+
+    let hfConfig = {
+      ...defaultHfConfig,
+      ...JSON.parse(localStorage.getItem(HF_CONFIG_KEY) || '{}')
+    };
+
+    // DOM refs
+    const overlay = document.getElementById('modelHubOverlay');
+    const resultsArea = document.getElementById('hubResultsArea');
+    const searchInput = document.getElementById('hubSearchInput');
+    const sortSelect = document.getElementById('hubSortSelect');
+    const resultCount = document.getElementById('hubResultCount');
+    const sourceLabel = document.getElementById('hubSourceLabel');
+    const categoryBar = document.getElementById('hubCategoryBar');
+    const sourceTabs = document.getElementById('hubSourceTabs');
+
+    // HF Controls DOM refs
+    const hfToolbar = document.getElementById('hubHfToolbar');
+    const hfConfigPanel = document.getElementById('hubHfConfigPanel');
+    const hfAuthBtn = document.getElementById('hubHfAuthBtn');
+    const hfAuthDot = document.getElementById('hubHfAuthDot');
+    const hfAuthText = document.getElementById('hubHfAuthText');
+    const hfMirrorSelect = document.getElementById('hubHfMirrorSelect');
+    const hfGgufOnlyCheckbox = document.getElementById('hubHfGgufOnlyCheckbox');
+    const hfQuantFilterSelect = document.getElementById('hubHfQuantFilterSelect');
+    const hfLimitSelect = document.getElementById('hubHfLimitSelect');
+    const openHfConfigBtn = document.getElementById('openHfConfigBtn');
+    const closeHfConfigPanelBtn = document.getElementById('closeHfConfigPanelBtn');
+    const hfTokenInput = document.getElementById('hfTokenInput');
+    const hfTokenToggleVisBtn = document.getElementById('hfTokenToggleVisBtn');
+    const hfTestTokenBtn = document.getElementById('hfTestTokenBtn');
+    const hfClearTokenBtn = document.getElementById('hfClearTokenBtn');
+    const hfTokenStatusBox = document.getElementById('hfTokenStatusBox');
+    const hfEndpointInput = document.getElementById('hfEndpointInput');
+    const hfPingBtn = document.getElementById('hfPingBtn');
+    const hfLatencyBadge = document.getElementById('hfLatencyBadge');
+    const saveHfLiveConfigBtn = document.getElementById('saveHfLiveConfigBtn');
+
+    // Modelfile Builder DOM refs
+    const modelfileModal = document.getElementById('modelfileModal');
+    const closeModelfileModalX = document.getElementById('closeModelfileModalX');
+    const closeModelfileBtn = document.getElementById('closeModelfileBtn');
+    const mfModelTargetName = document.getElementById('mfModelTargetName');
+    const mfEditor = document.getElementById('mfEditor');
+    const mfCopyBtn = document.getElementById('mfCopyBtn');
+    const mfExecuteCreateBtn = document.getElementById('mfExecuteCreateBtn');
+    const mfBuildStatus = document.getElementById('mfBuildStatus');
+    const mfBuildStatusText = document.getElementById('mfBuildStatusText');
+
+    function init() {
+      // Open Hub
+      document.getElementById('modelHubBtn')?.addEventListener('click', open);
+
+      // Close Hub
+      document.getElementById('hubCloseBtn')?.addEventListener('click', close);
+      overlay?.addEventListener('click', (e) => {
+        if (e.target === overlay) close();
+      });
+
+      // Search
+      document.getElementById('hubSearchBtn')?.addEventListener('click', () => search());
+      searchInput?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          search();
+        }
+      });
+
+      // Sort
+      sortSelect?.addEventListener('change', () => {
+        currentSort = sortSelect.value;
+        if (currentSource === 'huggingface') {
+          hfConfig.sort = currentSort;
+          search();
+        } else {
+          renderResults();
+        }
+      });
+
+      // Source tabs
+      sourceTabs?.querySelectorAll('.hub-source-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          setSource(tab.dataset.source);
+        });
+      });
+
+      // Category chips
+      categoryBar?.querySelectorAll('.hub-cat-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          categoryBar.querySelectorAll('.hub-cat-chip').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          currentCategory = chip.dataset.cat;
+          if (currentSource === 'huggingface') {
+            search();
+          } else {
+            renderResults();
+          }
+        });
+      });
+
+      // Refresh
+      document.getElementById('hubRefreshBtn')?.addEventListener('click', () => {
+        search(true);
+      });
+
+      // ESC to close
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && overlay?.classList.contains('open')) {
+          e.stopPropagation();
+          close();
+        }
+      });
+
+      // Setup Real-time Hugging Face UI controls
+      setupHfControls();
+
+      // Setup Modelfile Builder Modal
+      setupModelfileModal();
+
+      // Synchronize Settings Modal HF Tab
+      setupSettingsModalHfTab();
+    }
+
+    function setSource(src) {
+      currentSource = src;
+      sourceTabs?.querySelectorAll('.hub-source-tab').forEach(t => {
+        t.classList.toggle('active', t.dataset.source === src);
+      });
+
+      if (sourceLabel) {
+        sourceLabel.textContent = `Source: ${currentSource === 'ollama' ? 'Ollama Registry (ollama.com)' : 'HuggingFace Hub'}`;
+      }
+
+      if (searchInput) {
+        searchInput.placeholder = currentSource === 'ollama'
+          ? 'Search models... (e.g. llama, deepseek, coder, vision, whisper)'
+          : 'Search GGUF models on HuggingFace... (e.g. bartowski, Qwen2.5, Gemma, Mistral)';
+      }
+
+      // Show/hide HF toolbar
+      if (hfToolbar) {
+        hfToolbar.style.display = currentSource === 'huggingface' ? 'flex' : 'none';
+      }
+      if (hfConfigPanel && currentSource !== 'huggingface') {
+        hfConfigPanel.classList.remove('open');
+      }
+
+      search();
+    }
+
+    function setupHfControls() {
+      // Sync UI inputs with saved hfConfig
+      applyHfConfigToUI();
+
+      // Auth badge / Token button
+      hfAuthBtn?.addEventListener('click', () => {
+        toggleHfConfigPanel();
+      });
+
+      // Open/close config panel
+      openHfConfigBtn?.addEventListener('click', () => {
+        toggleHfConfigPanel();
+      });
+      closeHfConfigPanelBtn?.addEventListener('click', () => {
+        hfConfigPanel?.classList.remove('open');
+      });
+
+      // Mirror select
+      hfMirrorSelect?.addEventListener('change', () => {
+        hfConfig.endpoint = hfMirrorSelect.value;
+        if (hfEndpointInput) hfEndpointInput.value = hfConfig.endpoint;
+        saveHfConfig();
+        showToast(`Hugging Face endpoint switched to: ${hfConfig.endpoint}`, 'info');
+        pingHfEndpointLive(hfConfig.endpoint);
+        search();
+      });
+
+      // GGUF Only checkbox
+      hfGgufOnlyCheckbox?.addEventListener('change', () => {
+        hfConfig.ggufOnly = hfGgufOnlyCheckbox.checked;
+        saveHfConfig();
+        showToast(`GGUF filter: ${hfConfig.ggufOnly ? 'GGUF weights only' : 'All formats'}`, 'info');
+        search();
+      });
+
+      // Quant filter select
+      hfQuantFilterSelect?.addEventListener('change', () => {
+        hfConfig.defaultQuant = hfQuantFilterSelect.value;
+        saveHfConfig();
+        renderResults();
+      });
+
+      // Limit select
+      hfLimitSelect?.addEventListener('change', () => {
+        hfConfig.limit = parseInt(hfLimitSelect.value) || 40;
+        saveHfConfig();
+        search();
+      });
+
+      // Token visibility toggle
+      hfTokenToggleVisBtn?.addEventListener('click', () => {
+        if (!hfTokenInput) return;
+        hfTokenInput.type = hfTokenInput.type === 'password' ? 'text' : 'password';
+      });
+
+      // Test token button
+      hfTestTokenBtn?.addEventListener('click', async () => {
+        const token = (hfTokenInput ? hfTokenInput.value : '').trim();
+        await verifyHfTokenLive(token, hfConfig.endpoint);
+      });
+
+      // Clear token button
+      hfClearTokenBtn?.addEventListener('click', () => {
+        if (hfTokenInput) hfTokenInput.value = '';
+        hfConfig.token = '';
+        hfConfig.verifiedUser = null;
+        saveHfConfig();
+        updateHfAuthStatusUI(null);
+        showToast('Hugging Face token cleared. Operating in guest mode.', 'info');
+        search();
+      });
+
+      // Endpoint input change
+      hfEndpointInput?.addEventListener('change', () => {
+        hfConfig.endpoint = hfEndpointInput.value.trim() || 'https://huggingface.co';
+        saveHfConfig();
+      });
+
+      // Ping endpoint button
+      hfPingBtn?.addEventListener('click', async () => {
+        const ep = (hfEndpointInput ? hfEndpointInput.value : '').trim() || hfConfig.endpoint;
+        await pingHfEndpointLive(ep);
+      });
+
+      // Save HF Live config button
+      saveHfLiveConfigBtn?.addEventListener('click', async () => {
+        const token = (hfTokenInput ? hfTokenInput.value : '').trim();
+        const ep = (hfEndpointInput ? hfEndpointInput.value : '').trim() || 'https://huggingface.co';
+        hfConfig.token = token;
+        hfConfig.endpoint = ep;
+        saveHfConfig();
+
+        if (token) {
+          await verifyHfTokenLive(token, ep);
+        } else {
+          updateHfAuthStatusUI(null);
+        }
+
+        hfConfigPanel?.classList.remove('open');
+        showToast('Hugging Face settings updated live!', 'success');
+        search();
+      });
+
+      // Initial token verification if token was already saved
+      if (hfConfig.token) {
+        verifyHfTokenLive(hfConfig.token, hfConfig.endpoint, true);
+      } else {
+        updateHfAuthStatusUI(null);
+      }
+    }
+
+    function toggleHfConfigPanel() {
+      if (!hfConfigPanel) return;
+      const isOpen = hfConfigPanel.classList.toggle('open');
+      if (isOpen && hfTokenInput) {
+        hfTokenInput.value = hfConfig.token || '';
+        if (hfEndpointInput) hfEndpointInput.value = hfConfig.endpoint || 'https://huggingface.co';
+        hfTokenInput.focus();
+      }
+    }
+
+    function setHfEndpoint(ep) {
+      hfConfig.endpoint = ep;
+      if (hfEndpointInput) hfEndpointInput.value = ep;
+      if (hfMirrorSelect) hfMirrorSelect.value = ep;
+      saveHfConfig();
+      pingHfEndpointLive(ep);
+      showToast(`Hugging Face endpoint: ${ep}`, 'info');
+      search();
+    }
+
+    function applyHfConfigToUI() {
+      if (hfMirrorSelect) hfMirrorSelect.value = hfConfig.endpoint || 'https://huggingface.co';
+      if (hfGgufOnlyCheckbox) hfGgufOnlyCheckbox.checked = Boolean(hfConfig.ggufOnly);
+      if (hfQuantFilterSelect) hfQuantFilterSelect.value = hfConfig.defaultQuant || 'Q4_K_M';
+      if (hfLimitSelect) hfLimitSelect.value = String(hfConfig.limit || 40);
+      if (hfTokenInput) hfTokenInput.value = hfConfig.token || '';
+      if (hfEndpointInput) hfEndpointInput.value = hfConfig.endpoint || 'https://huggingface.co';
+    }
+
+    function saveHfConfig() {
+      localStorage.setItem(HF_CONFIG_KEY, JSON.stringify(hfConfig));
+      // Sync with Settings modal
+      syncToSettingsModal();
+    }
+
+    async function verifyHfTokenLive(token, endpoint, silent = false) {
+      if (!token) {
+        updateHfAuthStatusUI(null);
+        if (!silent) showToast('Please enter a Hugging Face API token', 'warning');
+        return false;
+      }
+
+      if (hfTokenStatusBox) {
+        hfTokenStatusBox.className = 'hub-hf-status-box';
+        hfTokenStatusBox.innerHTML = '<span class="typing-caret-block">▌</span> Verifying token with Hugging Face API...';
+      }
+
+      try {
+        const res = await fetch(`/hub/hf/whoami?token=${encodeURIComponent(token)}&endpoint=${encodeURIComponent(endpoint || '')}`);
+        const data = await res.json();
+
+        if (data.valid) {
+          hfConfig.token = token;
+          hfConfig.verifiedUser = data;
+          saveHfConfig();
+          updateHfAuthStatusUI(data);
+
+          if (hfTokenStatusBox) {
+            hfTokenStatusBox.className = 'hub-hf-status-box success';
+            hfTokenStatusBox.innerHTML = `
+              <strong>✓ Verified Account:</strong> @${escapeHtml(data.username)} (${escapeHtml(data.fullname || data.username)})
+              <br>Plan: <strong>${escapeHtml((data.plan || 'Free').toUpperCase())}</strong> · Auth: ${escapeHtml(data.auth_type || 'token')}
+              ${data.orgs && data.orgs.length ? `<br>Orgs: ${data.orgs.map(escapeHtml).join(', ')}` : ''}
+            `;
+          }
+
+          if (!silent) showToast(`Verified Hugging Face account: @${data.username}`, 'success');
+          return true;
+        } else {
+          hfConfig.verifiedUser = null;
+          updateHfAuthStatusUI(null, data.error);
+
+          if (hfTokenStatusBox) {
+            hfTokenStatusBox.className = 'hub-hf-status-box error';
+            hfTokenStatusBox.innerHTML = `✕ ${escapeHtml(data.error || 'Invalid Hugging Face token')}`;
+          }
+
+          if (!silent) showToast(`Token Verification Failed: ${data.error}`, 'error');
+          return false;
+        }
+      } catch (err) {
+        if (hfTokenStatusBox) {
+          hfTokenStatusBox.className = 'hub-hf-status-box error';
+          hfTokenStatusBox.innerHTML = `✕ Verification error: ${escapeHtml(err.message)}`;
+        }
+        if (!silent) showToast(`Verification error: ${err.message}`, 'error');
+        return false;
+      }
+    }
+
+    function updateHfAuthStatusUI(user, errorMsg = '') {
+      if (user && user.username) {
+        if (hfAuthBtn) {
+          hfAuthBtn.className = 'hub-hf-auth-badge verified';
+          hfAuthBtn.title = `Authenticated as @${user.username} (${user.plan || 'Free'}) · Click to configure`;
+        }
+        if (hfAuthDot) hfAuthDot.style.color = 'var(--success)';
+        if (hfAuthText) hfAuthText.textContent = `Token: @${user.username}`;
+      } else {
+        if (hfAuthBtn) {
+          hfAuthBtn.className = 'hub-hf-auth-badge unauth';
+          hfAuthBtn.title = errorMsg ? `Auth notice: ${errorMsg} · Click to configure token` : 'Guest / No Token · Click to configure HF token';
+        }
+        if (hfAuthDot) hfAuthDot.style.color = 'var(--warning)';
+        if (hfAuthText) hfAuthText.textContent = 'Token: Guest';
+      }
+    }
+
+    async function pingHfEndpointLive(endpoint) {
+      if (hfLatencyBadge) {
+        hfLatencyBadge.textContent = 'Pinging...';
+        hfLatencyBadge.style.color = 'var(--text-muted)';
+      }
+
+      try {
+        const res = await fetch(`/hub/hf/ping?endpoint=${encodeURIComponent(endpoint || '')}`);
+        const data = await res.json();
+        if (data.online) {
+          if (hfLatencyBadge) {
+            hfLatencyBadge.textContent = `✓ ${data.latency_ms} ms (Online)`;
+            hfLatencyBadge.style.color = 'var(--success)';
+          }
+        } else {
+          if (hfLatencyBadge) {
+            hfLatencyBadge.textContent = `✕ Unreachable (${data.error || 'Offline'})`;
+            hfLatencyBadge.style.color = 'var(--danger)';
+          }
+        }
+      } catch (e) {
+        if (hfLatencyBadge) {
+          hfLatencyBadge.textContent = '✕ Error';
+          hfLatencyBadge.style.color = 'var(--danger)';
+        }
+      }
+    }
+
+    function setupSettingsModalHfTab() {
+      const sHfToken = document.getElementById('settingsHfToken');
+      const sHfVisBtn = document.getElementById('settingsHfVisBtn');
+      const sHfTestTokenBtn = document.getElementById('settingsHfTestTokenBtn');
+      const sHfEndpoint = document.getElementById('settingsHfEndpoint');
+      const sHfPingBtn = document.getElementById('settingsHfPingBtn');
+      const sHfDefaultQuant = document.getElementById('settingsHfDefaultQuant');
+      const sHfGgufOnly = document.getElementById('settingsHfGgufOnly');
+
+      sHfVisBtn?.addEventListener('click', () => {
+        if (!sHfToken) return;
+        sHfToken.type = sHfToken.type === 'password' ? 'text' : 'password';
+      });
+
+      sHfTestTokenBtn?.addEventListener('click', async () => {
+        const t = (sHfToken ? sHfToken.value : '').trim();
+        const ep = (sHfEndpoint ? sHfEndpoint.value : '').trim() || hfConfig.endpoint;
+        await verifyHfTokenLive(t, ep);
+        syncFromSettingsModal();
+      });
+
+      sHfPingBtn?.addEventListener('click', async () => {
+        const ep = (sHfEndpoint ? sHfEndpoint.value : '').trim() || hfConfig.endpoint;
+        await pingHfEndpointLive(ep);
+      });
+
+      // Hook into main Save Settings button
+      const origSaveSettingsBtn = document.getElementById('saveSettingsBtn');
+      origSaveSettingsBtn?.addEventListener('click', () => {
+        syncFromSettingsModal();
+      });
+    }
+
+    function syncFromSettingsModal() {
+      const sHfToken = document.getElementById('settingsHfToken');
+      const sHfEndpoint = document.getElementById('settingsHfEndpoint');
+      const sHfDefaultQuant = document.getElementById('settingsHfDefaultQuant');
+      const sHfGgufOnly = document.getElementById('settingsHfGgufOnly');
+
+      if (sHfToken) hfConfig.token = sHfToken.value.trim();
+      if (sHfEndpoint) hfConfig.endpoint = sHfEndpoint.value.trim() || 'https://huggingface.co';
+      if (sHfDefaultQuant) hfConfig.defaultQuant = sHfDefaultQuant.value;
+      if (sHfGgufOnly) hfConfig.ggufOnly = sHfGgufOnly.checked;
+
+      saveHfConfig();
+      applyHfConfigToUI();
+    }
+
+    function syncToSettingsModal() {
+      const sHfToken = document.getElementById('settingsHfToken');
+      const sHfEndpoint = document.getElementById('settingsHfEndpoint');
+      const sHfDefaultQuant = document.getElementById('settingsHfDefaultQuant');
+      const sHfGgufOnly = document.getElementById('settingsHfGgufOnly');
+
+      if (sHfToken) sHfToken.value = hfConfig.token || '';
+      if (sHfEndpoint) sHfEndpoint.value = hfConfig.endpoint || 'https://huggingface.co';
+      if (sHfDefaultQuant) sHfDefaultQuant.value = hfConfig.defaultQuant || 'Q4_K_M';
+      if (sHfGgufOnly) sHfGgufOnly.checked = Boolean(hfConfig.ggufOnly);
+    }
+
+    function setupModelfileModal() {
+      closeModelfileModalX?.addEventListener('click', () => modelfileModal?.classList.remove('open'));
+      closeModelfileBtn?.addEventListener('click', () => modelfileModal?.classList.remove('open'));
+      modelfileModal?.addEventListener('click', (e) => {
+        if (e.target === modelfileModal) modelfileModal.classList.remove('open');
+      });
+
+      mfCopyBtn?.addEventListener('click', () => {
+        if (!mfEditor) return;
+        navigator.clipboard.writeText(mfEditor.value).then(() => {
+          showToast('Modelfile copied to clipboard', 'success');
+        });
+      });
+
+      mfExecuteCreateBtn?.addEventListener('click', async () => {
+        const targetName = (mfModelTargetName ? mfModelTargetName.value : '').trim();
+        const modelfileContent = (mfEditor ? mfEditor.value : '').trim();
+
+        if (!targetName) {
+          showToast('Please specify a model name for Ollama', 'warning');
+          return;
+        }
+        if (!modelfileContent) {
+          showToast('Modelfile definition cannot be empty', 'warning');
+          return;
+        }
+
+        executeModelfileCreate(targetName, modelfileContent);
+      });
+    }
+
+    async function executeModelfileCreate(name, modelfile) {
+      if (mfBuildStatus) {
+        mfBuildStatus.style.display = 'block';
+        if (mfBuildStatusText) mfBuildStatusText.textContent = `Connecting to Ollama to create "${name}"...`;
+      }
+      if (mfExecuteCreateBtn) mfExecuteCreateBtn.disabled = true;
+
+      try {
+        const res = await fetch(`${config.host}/api/create`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: name, modelfile: modelfile, stream: true })
+        });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status} (${res.statusText})`);
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder('utf-8');
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop();
+
+          for (const line of lines) {
+            if (!line.trim()) continue;
+            try {
+              const data = JSON.parse(line);
+              if (data.error) throw new Error(data.error);
+              if (data.status && mfBuildStatusText) {
+                mfBuildStatusText.textContent = data.status;
+              }
+            } catch (e) {
+              if (e.message && !e.message.includes('JSON')) throw e;
+            }
+          }
+        }
+
+        if (mfBuildStatusText) mfBuildStatusText.textContent = `✓ Model "${name}" successfully created in Ollama!`;
+        showToast(`Model "${name}" successfully created in Ollama!`, 'success');
+        await checkOllamaHealthAndModels();
+        updateInstalledSet();
+
+        setTimeout(() => {
+          modelfileModal?.classList.remove('open');
+          if (mfBuildStatus) mfBuildStatus.style.display = 'none';
+          if (mfExecuteCreateBtn) mfExecuteCreateBtn.disabled = false;
+        }, 1800);
+
+      } catch (err) {
+        if (mfBuildStatusText) mfBuildStatusText.textContent = `Error: ${err.message}`;
+        showToast(`Modelfile Create Error: ${err.message}`, 'error');
+        if (mfExecuteCreateBtn) mfExecuteCreateBtn.disabled = false;
+      }
+    }
+
+    function openModelfileBuilder(modelId, fileName = '', quant = '') {
+      if (!modelfileModal) return;
+      const cleanModel = modelId.trim();
+      const baseName = cleanModel.split('/').pop().toLowerCase().replace(/-gguf$/i, '');
+      const targetName = quant ? `${baseName}:${quant.toLowerCase()}` : `${baseName}:latest`;
+
+      if (mfModelTargetName) mfModelTargetName.value = targetName;
+
+      // Construct clean Modelfile
+      let mfLines = [];
+      if (fileName) {
+        mfLines.push(`# Ollama Modelfile for HuggingFace model`);
+        mfLines.push(`FROM hf.co/${cleanModel}:${fileName}`);
+      } else if (quant) {
+        mfLines.push(`# Ollama Modelfile for HuggingFace model`);
+        mfLines.push(`FROM hf.co/${cleanModel}:${quant}`);
+      } else {
+        mfLines.push(`# Ollama Modelfile for HuggingFace model`);
+        mfLines.push(`FROM hf.co/${cleanModel}`);
+      }
+      mfLines.push(``);
+      mfLines.push(`# Runtime Parameters`);
+      mfLines.push(`PARAMETER temperature 0.7`);
+      mfLines.push(`PARAMETER top_p 0.9`);
+      mfLines.push(`PARAMETER num_ctx 4096`);
+      mfLines.push(``);
+      mfLines.push(`# System Prompt`);
+      mfLines.push(`SYSTEM """You are a helpful, accurate, and concise AI assistant."""`);
+
+      if (mfEditor) mfEditor.value = mfLines.join('\n');
+      if (mfBuildStatus) mfBuildStatus.style.display = 'none';
+      if (mfExecuteCreateBtn) mfExecuteCreateBtn.disabled = false;
+
+      modelfileModal.classList.add('open');
+    }
+
+    function open() {
+      updateInstalledSet();
+      overlay?.classList.add('open');
+      searchInput?.focus();
+      if (hubModels.length === 0) {
+        search();
+      }
+    }
+
+    function close() {
+      overlay?.classList.remove('open');
+      hfConfigPanel?.classList.remove('open');
+    }
+
+    function updateInstalledSet() {
+      installedModelNames = new Set();
+      if (window.installedModels && Array.isArray(window.installedModels)) {
+        window.installedModels.forEach(m => {
+          const name = (m.name || m.model || '').toLowerCase();
+          installedModelNames.add(name);
+          const base = name.split(':')[0];
+          installedModelNames.add(base);
+        });
+      }
+    }
+
+    function isInstalled(modelName) {
+      if (!modelName) return false;
+      const name = modelName.toLowerCase();
+      return installedModelNames.has(name) ||
+             installedModelNames.has(name.split(':')[0]) ||
+             installedModelNames.has(name + ':latest') ||
+             installedModelNames.has(`hf.co/${name}`) ||
+             installedModelNames.has(name.replace(/^hf\.co\//, ''));
+    }
+
+    async function search(forceRefresh = false) {
+      currentQuery = (searchInput ? searchInput.value : '').trim();
+      showLoading();
+
+      try {
+        let data;
+        if (currentSource === 'ollama') {
+          data = await fetchOllamaModels(currentQuery, forceRefresh);
+        } else {
+          data = await fetchHuggingFaceModels(currentQuery, forceRefresh);
+        }
+
+        hubModels = data.models || [];
+        renderResults();
+
+        if (data.error) {
+          showToast(`Hub Notice: ${data.error}`, 'warning');
+        }
+      } catch (e) {
+        showError(e.message);
+      }
+    }
+
+    async function fetchOllamaModels(query, force) {
+      const params = new URLSearchParams();
+      if (query) params.set('q', query);
+      if (currentCategory) params.set('c', currentCategory);
+
+      const url = `/hub/ollama/search?${params.toString()}`;
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return await res.json();
+      } catch (e) {
+        console.warn('Ollama Hub backend fetch failed, using fallback:', e);
+        return { models: [], error: `Backend unreachable: ${e.message}. Ensure server.py is running.` };
+      }
+    }
+
+    async function fetchHuggingFaceModels(query, force) {
+      const params = new URLSearchParams();
+      if (query) params.set('q', query);
+      if (currentCategory) params.set('type', currentCategory);
+      params.set('sort', hfConfig.sort || 'downloads');
+      params.set('limit', String(hfConfig.limit || 40));
+      params.set('gguf_only', hfConfig.ggufOnly ? 'true' : 'false');
+      if (hfConfig.endpoint) params.set('endpoint', hfConfig.endpoint);
+      if (hfConfig.token) params.set('token', hfConfig.token);
+
+      const url = `/hub/hf/search?${params.toString()}`;
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return await res.json();
+      } catch (e) {
+        return { models: [], error: `Backend unreachable: ${e.message}` };
+      }
+    }
+
+    async function fetchModelTags(modelName) {
+      if (tagsCache[modelName]) return tagsCache[modelName];
+
+      try {
+        const res = await fetch(`/hub/ollama/tags?model=${encodeURIComponent(modelName)}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        tagsCache[modelName] = data.tags || [];
+        return tagsCache[modelName];
+      } catch (e) {
+        console.warn('Failed to fetch tags for', modelName, e);
+        return [];
+      }
+    }
+
+    function filterModels(models) {
+      let filtered = models;
+      if (currentCategory && currentSource === 'ollama') {
+        filtered = filtered.filter(m => {
+          const types = m.types || [];
+          return types.includes(currentCategory);
+        });
+      }
+
+      // HF Quantization filter
+      const quantFilter = hfConfig.defaultQuant;
+      if (currentSource === 'huggingface' && quantFilter) {
+        filtered = filtered.filter(m => {
+          if (!m.gguf_files || m.gguf_files.length === 0) return true;
+          return m.gguf_files.some(f => {
+            const q = (f.quantization || f.name || '').toUpperCase();
+            return q.includes(quantFilter.toUpperCase());
+          });
+        });
+      }
+
+      return filtered;
+    }
+
+    function sortModels(models) {
+      const sorted = [...models];
+      if (currentSort === 'popular') {
+        sorted.sort((a, b) => {
+          const aP = parsePullCount(a.pulls || a.downloads || 0);
+          const bP = parsePullCount(b.pulls || b.downloads || 0);
+          return bP - aP;
+        });
+      } else if (currentSort === 'newest') {
+        sorted.sort((a, b) => {
+          const aD = a.updated || a.last_modified || '';
+          const bD = b.updated || b.last_modified || '';
+          return bD.localeCompare(aD);
+        });
+      } else if (currentSort === 'name') {
+        sorted.sort((a, b) => {
+          const aName = (a.name || a.id || '').toLowerCase();
+          const bName = (b.name || b.id || '').toLowerCase();
+          return aName.localeCompare(bName);
+        });
+      }
+      return sorted;
+    }
+
+    function parsePullCount(val) {
+      if (typeof val === 'number') return val;
+      const str = String(val).replace(/[,+]/g, '').trim().toUpperCase();
+      const match = str.match(/^([\d.]+)\s*([KMB])?$/);
+      if (!match) return 0;
+      const num = parseFloat(match[1]);
+      const suffix = match[2] || '';
+      if (suffix === 'K') return num * 1000;
+      if (suffix === 'M') return num * 1000000;
+      if (suffix === 'B') return num * 1000000000;
+      return num;
+    }
+
+    function renderResults() {
+      const filtered = filterModels(hubModels);
+      const sorted = sortModels(filtered);
+
+      if (resultCount) {
+        resultCount.textContent = `${sorted.length} model${sorted.length !== 1 ? 's' : ''} found`;
+      }
+
+      if (sorted.length === 0) {
+        if (resultsArea) {
+          resultsArea.innerHTML = `
+            <div class="hub-empty">
+              <div class="hub-empty-title">No models found</div>
+              <div class="hub-empty-desc">
+                ${currentQuery
+                  ? `No results for "${escapeHtml(currentQuery)}" in ${currentSource === 'ollama' ? 'Ollama Registry' : 'HuggingFace Hub'}.`
+                  : 'Try searching for a model name like "llama", "deepseek", "coder", "vision", or "whisper".'}
+                ${currentCategory ? `<br>Active category: <strong>${escapeHtml(currentCategory)}</strong> — try "All Models".` : ''}
+                ${currentSource === 'huggingface' && hfConfig.defaultQuant ? `<br>Active quant filter: <strong>${escapeHtml(hfConfig.defaultQuant)}</strong> — try "All Quants".` : ''}
+              </div>
+            </div>
+          `;
+        }
+        return;
+      }
+
+      let html = `<div class="hub-results-header">
+        <span>${sorted.length} model${sorted.length !== 1 ? 's' : ''} · ${currentCategory ? currentCategory.toUpperCase() : 'All Modalities'} ${currentSource === 'huggingface' ? `· Mirror: ${new URL(hfConfig.endpoint).host}` : ''}</span>
+      </div>`;
+
+      sorted.forEach((model, idx) => {
+        html += renderModelCard(model, idx);
+      });
+
+      if (resultsArea) {
+        resultsArea.innerHTML = html;
+
+        // Attach event listeners
+        resultsArea.querySelectorAll('.hub-model-card').forEach(card => {
+          const modelName = card.dataset.model;
+          const modelIdx = parseInt(card.dataset.idx);
+
+          // Card header click -> expand
+          card.querySelector('.hub-model-info')?.addEventListener('click', (e) => {
+            if (e.target.closest('button') || e.target.closest('a') || e.target.closest('input')) return;
+            toggleExpand(card, modelName, modelIdx);
+          });
+
+          // Ollama pull button
+          card.querySelectorAll('.hub-pull-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const pullName = btn.dataset.pullName || modelName;
+              pullModel(pullName, btn, card);
+            });
+          });
+
+          // HF Pull with hf.co syntax
+          card.querySelectorAll('.hub-hf-pull-quick-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const pullTag = btn.dataset.hfPullTag;
+              pullModel(pullTag, btn, card);
+            });
+          });
+
+          // Modelfile builder button
+          card.querySelectorAll('.hub-hf-mf-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const mId = btn.dataset.modelId;
+              const fName = btn.dataset.fileName || '';
+              const qVal = btn.dataset.quant || '';
+              openModelfileBuilder(mId, fName, qVal);
+            });
+          });
+        });
+      }
+    }
+
+    function renderModelCard(model, idx) {
+      const name = model.name || model.id || '—';
+      const displayName = currentSource === 'huggingface' ? (model.id || name) : name;
+      const author = model.author || '';
+      const desc = model.description || '';
+      const types = model.types || [];
+      const pulls = model.pulls || '';
+      const downloads = model.downloads || 0;
+      const likes = model.likes || 0;
+      const sizes = model.sizes || [];
+      const updated = model.updated || model.last_modified || '';
+      const isExpanded = expandedCards.has(displayName);
+      const installed = isInstalled(displayName);
+
+      // Type badges
+      const typeBadgesHtml = types.map(t =>
+        `<span class="hub-type-badge ${t}">${t}</span>`
+      ).join('');
+
+      // Stats
+      let statsHtml = '';
+      if (currentSource === 'ollama') {
+        if (pulls) statsHtml += `<span class="hub-model-stat">↓ ${escapeHtml(String(pulls))}</span>`;
+        if (sizes.length > 0) statsHtml += `<span class="hub-model-stat">Sizes: ${sizes.join(', ')}</span>`;
+      } else {
+        if (downloads) statsHtml += `<span class="hub-model-stat">↓ ${Number(downloads).toLocaleString()}</span>`;
+        if (likes) statsHtml += `<span class="hub-model-stat">♥ ${Number(likes).toLocaleString()}</span>`;
+        const ggufCount = (model.gguf_files || []).length;
+        if (ggufCount > 0) statsHtml += `<span class="hub-model-stat">📦 ${ggufCount} GGUF files</span>`;
+        if (model.pipeline_tag) statsHtml += `<span class="hub-type-badge">${escapeHtml(model.pipeline_tag)}</span>`;
+      }
+      if (updated) statsHtml += `<span class="hub-model-stat">🕒 ${escapeHtml(formatRelativeTime(updated))}</span>`;
+
+      // Download progress
+      const dlState = activeDownloads[displayName];
+      const dlHtml = dlState ? renderDownloadProgress(dlState) : '';
+
+      return `
+        <div class="hub-model-card ${isExpanded ? 'expanded' : ''}" data-model="${escapeHtml(displayName)}" data-idx="${idx}">
+          <div class="hub-model-card-top">
+            <div class="hub-model-info">
+              <div class="hub-model-name">
+                ${escapeHtml(displayName)}
+                ${author && currentSource === 'huggingface' ? `<span class="hub-model-author">by ${escapeHtml(author)}</span>` : ''}
+                ${installed ? '<span class="hub-installed-badge">INSTALLED</span>' : ''}
+              </div>
+              ${desc ? `<div class="hub-model-desc">${escapeHtml(desc)}</div>` : ''}
+              <div class="hub-model-meta">
+                ${typeBadgesHtml}
+                ${statsHtml}
+              </div>
+            </div>
+            <div class="hub-model-actions">
+              ${currentSource === 'ollama'
+                ? `<button class="hub-pull-btn ${installed ? 'done' : ''}" data-pull-name="${escapeHtml(name)}">${installed ? '✓ Installed' : 'Pull'}</button>`
+                : `<div style="display:flex; gap:4px; align-items:center;">
+                    <button type="button" class="hub-pull-btn hub-hf-pull-quick-btn" data-hf-pull-tag="hf.co/${escapeHtml(displayName)}:${escapeHtml(hfConfig.defaultQuant || 'Q4_K_M')}" title="1-Click Pull to Ollama (hf.co/${displayName}:${hfConfig.defaultQuant || 'Q4_K_M'})">
+                      ${installed ? '✓ Installed' : '↓ Pull to Ollama'}
+                    </button>
+                    <button type="button" class="top-btn hub-hf-mf-btn" data-model-id="${escapeHtml(displayName)}" title="Build Ollama Modelfile">Modelfile</button>
+                    <a href="${model.url || '#'}" target="_blank" class="top-btn" style="text-decoration:none; padding:2px 6px;" title="Open on Hugging Face">HF ↗</a>
+                   </div>`
+              }
+            </div>
+          </div>
+          <div class="hub-tags-section" id="hubTags_${idx}">
+            <div class="hub-loading" style="padding:12px; font-size:11px;">Loading variants...</div>
+          </div>
+          ${dlHtml}
+        </div>
+      `;
+    }
+
+    function renderDownloadProgress(dlState) {
+      return `
+        <div class="hub-download-bar active">
+          <div class="hub-dl-progress-track">
+            <div class="hub-dl-progress-fill" style="width:${dlState.percent || 0}%"></div>
+          </div>
+          <div class="hub-dl-status">
+            <span>${escapeHtml(dlState.status || 'Starting...')} ${dlState.percent ? dlState.percent + '%' : ''} ${dlState.speed ? '· ' + dlState.speed : ''}</span>
+            <button class="hub-dl-cancel-btn" onclick="HUB.cancelDownload('${escapeHtml(dlState.modelName)}')">Cancel</button>
+          </div>
+        </div>
+      `;
+    }
+
+    async function toggleExpand(cardEl, modelName, modelIdx) {
+      const isExpanded = cardEl.classList.contains('expanded');
+
+      if (isExpanded) {
+        cardEl.classList.remove('expanded');
+        expandedCards.delete(modelName);
+        return;
+      }
+
+      cardEl.classList.add('expanded');
+      expandedCards.add(modelName);
+
+      const tagsSection = cardEl.querySelector('.hub-tags-section');
+      if (!tagsSection) return;
+
+      // Load tags/variants
+      if (currentSource === 'ollama') {
+        const tags = await fetchModelTags(modelName);
+        renderOllamaTags(tagsSection, modelName, tags);
+      } else {
+        const model = hubModels[modelIdx];
+        renderHuggingFaceFiles(tagsSection, model);
+      }
+    }
+
+    function renderOllamaTags(container, modelName, tags) {
+      if (!tags || tags.length === 0) {
+        container.innerHTML = `
+          <div class="hub-empty-desc" style="padding:8px 0; font-size:10.5px;">
+            No specific tags reported. Pull the default tag: <strong>${escapeHtml(modelName)}:latest</strong>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '<div class="hub-tags-grid">';
+      tags.forEach(tag => {
+        const fullName = tag.full_name || `${modelName}:${tag.tag}`;
+        const installed = isInstalled(fullName);
+        html += `
+          <div class="hub-tag-chip" title="Pull ${escapeHtml(fullName)}">
+            <span class="tag-name">${escapeHtml(tag.tag)}</span>
+            ${tag.parameters ? `<span class="tag-size">${escapeHtml(tag.parameters)}</span>` : ''}
+            ${tag.quantization ? `<span class="tag-quant">${escapeHtml(tag.quantization)}</span>` : ''}
+            ${tag.size ? `<span class="tag-size">${escapeHtml(tag.size)}</span>` : ''}
+            ${installed
+              ? '<span class="hub-installed-badge" style="font-size:8px;">✓</span>'
+              : `<button class="hub-tag-pull-btn" data-pull-name="${escapeHtml(fullName)}">Pull</button>`
+            }
+          </div>
+        `;
+      });
+      html += '</div>';
+      container.innerHTML = html;
+
+      // Attach pull event listeners
+      container.querySelectorAll('.hub-tag-pull-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const card = btn.closest('.hub-model-card');
+          pullModel(btn.dataset.pullName, btn, card);
+        });
+      });
+    }
+
+    function renderHuggingFaceFiles(container, model) {
+      const files = model.gguf_files || [];
+      const modelId = model.id || model.name;
+
+      if (files.length === 0) {
+        container.innerHTML = `
+          <div class="hub-empty-desc" style="padding:8px 0; font-size:10.5px;">
+            No individual GGUF weights listed in repository root.
+            <br>You can still pull with Ollama via: <code>ollama pull hf.co/${escapeHtml(modelId)}</code>
+            <br>Or view files on <a href="${model.url || '#'}" target="_blank" style="color:var(--text-main); font-weight:700;">Hugging Face ↗</a>.
+          </div>
+        `;
+        return;
+      }
+
+      let html = `
+        <div style="font-size:10.5px; font-weight:700; margin-bottom:4px; display:flex; justify-content:space-between; align-items:center;">
+          <span>GGUF QUANTIZATIONS & WEIGHTS (${files.length} variants):</span>
+          <span style="font-weight:400; color:var(--text-muted); font-size:10px;">Click 'Pull' to download directly into Ollama via hf.co</span>
+        </div>
+        <div class="hub-hf-file-list">
+      `;
+
+      files.forEach(f => {
+        const quant = f.quantization || extractQuantFromName(f.name);
+        const pullTag = `hf.co/${modelId}:${quant || f.name}`;
+        const installed = isInstalled(pullTag) || isInstalled(`${modelId}:${quant}`);
+
+        html += `
+          <div class="hub-hf-file">
+            <span class="hub-hf-filename" title="${escapeHtml(f.name)}">${escapeHtml(f.name)}</span>
+            ${quant ? `<span class="hub-hf-quant">${escapeHtml(quant)}</span>` : ''}
+            <span class="hub-hf-filesize">${escapeHtml(f.size || '—')}</span>
+            <div class="hub-hf-file-actions">
+              ${installed
+                ? '<span class="hub-installed-badge" style="font-size:8.5px;">INSTALLED</span>'
+                : `<button type="button" class="hub-tag-pull-btn hub-hf-file-pull" data-pull-tag="${escapeHtml(pullTag)}" title="Pull ${escapeHtml(pullTag)}">Pull</button>`
+              }
+              <button type="button" class="top-btn hub-hf-file-mf" data-model-id="${escapeHtml(modelId)}" data-file-name="${escapeHtml(f.name)}" data-quant="${escapeHtml(quant)}" style="font-size:9px; height:18px; padding:0 4px;" title="Create Custom Modelfile">Modelfile</button>
+              <button type="button" class="top-btn hub-hf-copy-cmd" data-cmd="ollama run ${escapeHtml(pullTag)}" style="font-size:9px; height:18px; padding:0 4px;" title="Copy terminal command">Copy</button>
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+
+      container.innerHTML = html;
+
+      // Event handlers for individual file actions
+      container.querySelectorAll('.hub-hf-file-pull').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const card = btn.closest('.hub-model-card');
+          pullModel(btn.dataset.pullTag, btn, card);
+        });
+      });
+
+      container.querySelectorAll('.hub-hf-file-mf').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openModelfileBuilder(btn.dataset.modelId, btn.dataset.fileName, btn.dataset.quant);
+        });
+      });
+
+      container.querySelectorAll('.hub-hf-copy-cmd').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          navigator.clipboard.writeText(btn.dataset.cmd).then(() => {
+            showToast(`Copied: ${btn.dataset.cmd}`, 'success');
+          });
+        });
+      });
+    }
+
+    function extractQuantFromName(fname) {
+      if (!fname) return '';
+      const m = fname.match(/(Q[0-9]_[A-Z0-9_]+|FP16|BF16|F16|F32)/i);
+      return m ? m[0].toUpperCase() : '';
+    }
+
+    async function pullModel(modelName, btn, cardEl) {
+      if (!modelName) return;
+
+      // Check if already downloading
+      if (activeDownloads[modelName]) {
+        showToast(`"${modelName}" is already downloading`, 'warning');
+        return;
+      }
+
+      const controller = new AbortController();
+      activeDownloads[modelName] = {
+        modelName: modelName,
+        controller: controller,
+        status: 'Connecting...',
+        percent: 0,
+        speed: ''
+      };
+
+      // Update button
+      if (btn) {
+        btn.classList.add('pulling');
+        btn.textContent = 'Pulling...';
+        btn.disabled = true;
+      }
+
+      // Add download progress bar to card
+      let dlBar = cardEl?.querySelector('.hub-download-bar');
+      if (!dlBar && cardEl) {
+        dlBar = document.createElement('div');
+        dlBar.className = 'hub-download-bar active';
+        dlBar.innerHTML = `
+          <div class="hub-dl-progress-track">
+            <div class="hub-dl-progress-fill" style="width:0%"></div>
+          </div>
+          <div class="hub-dl-status">
+            <span class="hub-dl-status-text">Connecting...</span>
+            <button class="hub-dl-cancel-btn">Cancel</button>
+          </div>
+        `;
+        cardEl.appendChild(dlBar);
+        dlBar.querySelector('.hub-dl-cancel-btn').addEventListener('click', (e) => {
+          e.stopPropagation();
+          cancelDownload(modelName);
+        });
+      }
+
+      let lastCompletedBytes = 0;
+      let lastTime = performance.now();
+
+      try {
+        showToast(`Pulling "${modelName}" into Ollama...`, 'info');
+
+        const response = await fetch(`${config.host}/api/pull`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: modelName, stream: true }),
+          signal: controller.signal
+        });
+
+        if (!response.ok) throw new Error(`HTTP ${response.status} (${response.statusText})`);
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder('utf-8');
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop();
+
+          for (const line of lines) {
+            if (!line.trim()) continue;
+            let data;
+            try {
+              data = JSON.parse(line);
+            } catch (e) {
+              continue;
+            }
+
+            if (data.error) throw new Error(data.error);
+
+            const dl = activeDownloads[modelName];
+            if (!dl) break; // cancelled
+
+            if (data.status) {
+              dl.status = data.status;
+            }
+
+            if (data.total && data.completed) {
+              const pct = Math.round((data.completed / data.total) * 100);
+              dl.percent = pct;
+
+              // Calculate speed
+              const now = performance.now();
+              const elapsed = (now - lastTime) / 1000;
+              if (elapsed > 0.5) {
+                const diffBytes = data.completed - lastCompletedBytes;
+                if (diffBytes > 0) {
+                  const speedMBs = (diffBytes / (1024 * 1024 * elapsed)).toFixed(1);
+                  dl.speed = `${speedMBs} MB/s`;
+                }
+                lastCompletedBytes = data.completed;
+                lastTime = now;
+              }
+
+              // Update progress UI
+              if (dlBar) {
+                const fill = dlBar.querySelector('.hub-dl-progress-fill');
+                const statusText = dlBar.querySelector('.hub-dl-status-text');
+                if (fill) fill.style.width = `${pct}%`;
+                if (statusText) {
+                  statusText.textContent = `${data.status || 'Downloading...'} ${pct}% ${dl.speed ? '· ' + dl.speed : ''}`;
+                }
+              }
+            } else if (dlBar) {
+              const statusText = dlBar.querySelector('.hub-dl-status-text');
+              if (statusText) statusText.textContent = data.status || 'Processing...';
+            }
+          }
+        }
+
+        // Success!
+        delete activeDownloads[modelName];
+
+        if (btn) {
+          btn.classList.remove('pulling');
+          btn.classList.add('done');
+          btn.textContent = '✓ Installed';
+          btn.disabled = false;
+        }
+
+        if (dlBar) {
+          const fill = dlBar.querySelector('.hub-dl-progress-fill');
+          const statusText = dlBar.querySelector('.hub-dl-status-text');
+          if (fill) fill.style.width = '100%';
+          if (statusText) statusText.textContent = '✓ Download complete!';
+
+          setTimeout(() => {
+            dlBar.classList.remove('active');
+            dlBar.style.display = 'none';
+          }, 3000);
+        }
+
+        showToast(`Model "${modelName}" installed successfully!`, 'success');
+
+        // Refresh local models
+        await checkOllamaHealthAndModels();
+        updateInstalledSet();
+
+        // Update installed badges
+        resultsArea?.querySelectorAll('.hub-model-card').forEach(card => {
+          const name = card.dataset.model;
+          if (isInstalled(name)) {
+            const badge = card.querySelector('.hub-installed-badge');
+            if (!badge) {
+              const nameEl = card.querySelector('.hub-model-name');
+              if (nameEl) {
+                const span = document.createElement('span');
+                span.className = 'hub-installed-badge';
+                span.textContent = 'INSTALLED';
+                nameEl.appendChild(span);
+              }
+            }
+          }
+        });
+
+      } catch (err) {
+        delete activeDownloads[modelName];
+
+        if (btn) {
+          btn.classList.remove('pulling');
+          btn.textContent = 'Pull';
+          btn.disabled = false;
+        }
+
+        if (dlBar) {
+          dlBar.classList.remove('active');
+          dlBar.style.display = 'none';
+        }
+
+        if (err.name === 'AbortError') {
+          showToast(`Download of "${modelName}" cancelled`, 'warning');
+        } else {
+          showToast(`Pull error: ${err.message}`, 'error');
+        }
+      }
+    }
+
+    function cancelDownload(modelName) {
+      const dl = activeDownloads[modelName];
+      if (dl && dl.controller) {
+        dl.controller.abort();
+        delete activeDownloads[modelName];
+        showToast(`Download of "${modelName}" cancelled`, 'warning');
+      }
+    }
+
+    function showLoading() {
+      if (resultsArea) {
+        resultsArea.innerHTML = `
+          <div class="hub-loading">
+            <span class="typing-caret-block">▌</span> Searching ${currentSource === 'ollama' ? 'Ollama Registry' : 'HuggingFace Hub'}...
+          </div>
+        `;
+      }
+      if (resultCount) resultCount.textContent = 'Searching...';
+    }
+
+    function showError(message) {
+      if (resultsArea) {
+        resultsArea.innerHTML = `
+          <div class="hub-empty">
+            <div class="hub-empty-title">Connection Error</div>
+            <div class="hub-empty-desc">
+              ${escapeHtml(message)}
+              <br><br>Make sure the Ollama Studio server (server.py) is running.
+              <br>Run: <code>python3 server.py</code> or <code>./start.command</code>
+            </div>
+          </div>
+        `;
+      }
+      if (resultCount) resultCount.textContent = 'Error';
+    }
+
+    function formatRelativeTime(dateStr) {
+      if (!dateStr) return '';
+      try {
+        const date = new Date(dateStr);
+        if (isNaN(date.getTime())) return dateStr;
+        const now = new Date();
+        const diffMs = now - date;
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        if (diffDays === 0) return 'today';
+        if (diffDays === 1) return 'yesterday';
+        if (diffDays < 7) return `${diffDays}d ago`;
+        if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
+        if (diffDays < 365) return `${Math.floor(diffDays / 30)}mo ago`;
+        return `${Math.floor(diffDays / 365)}y ago`;
+      } catch (e) {
+        return dateStr;
+      }
+    }
+
+    // Public API
+    return {
+      init,
+      open,
+      close,
+      cancelDownload,
+      search,
+      setSource,
+      setHfEndpoint,
+      verifyHfToken: verifyHfTokenLive,
+      openModelfileBuilder,
+      getHfConfig: () => hfConfig
+    };
+  })();
+
+  // Initialize Hub
+  HUB.init();
+
+  // Make HUB globally accessible for inline event handlers
+  window.HUB = HUB;
+
+  // Also hook into switchSettingsTab so switching to hfTab synchronizes properly
+  const _origSwitchSettingsTab = switchSettingsTab;
+  switchSettingsTab = function(tabId) {
+    _origSwitchSettingsTab(tabId);
+    if (tabId === 'hfTab') {
+      const hfConf = HUB.getHfConfig();
+      const sHfToken = document.getElementById('settingsHfToken');
+      const sHfEndpoint = document.getElementById('settingsHfEndpoint');
+      const sHfDefaultQuant = document.getElementById('settingsHfDefaultQuant');
+      const sHfGgufOnly = document.getElementById('settingsHfGgufOnly');
+      if (sHfToken) sHfToken.value = hfConf.token || '';
+      if (sHfEndpoint) sHfEndpoint.value = hfConf.endpoint || 'https://huggingface.co';
+      if (sHfDefaultQuant) sHfDefaultQuant.value = hfConf.defaultQuant || 'Q4_K_M';
+      if (sHfGgufOnly) sHfGgufOnly.checked = Boolean(hfConf.ggufOnly);
+    }
+  };
+
+  // Update the Models Library modal to keep installed models synchronized
+  const _origLoadModelsLibrary = loadModelsLibrary;
+  loadModelsLibrary = async function() {
+    await _origLoadModelsLibrary();
+    window.installedModels = installedModels;
   };
 
 
