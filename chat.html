@@ -1122,15 +1122,19 @@ html, body {
 .modal-tab-btn {
   border: 1px solid var(--border-dark);
   background: #FFFFFF;
-  padding: 3px 8px;
+  padding: 4px 10px;
   font-family: var(--font-mono);
   font-size: 11px;
   cursor: pointer;
+  color: var(--text-main);
+  text-decoration: none;
+  -webkit-appearance: none;
+  box-sizing: border-box;
 }
 
 .modal-tab-btn.active {
   background: #1A1816;
-  color: #FFFFFF;
+  color: #FFFFFF !important;
 }
 
 .modal-tab-pane {
@@ -1185,6 +1189,72 @@ html, body {
   border-top: 1px solid var(--border-frame);
   padding-top: 10px;
   flex-shrink: 0;
+}
+
+/* Unified Form Action & Control Architecture */
+.form-action-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form-action-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-sizing: border-box;
+}
+
+.form-action-row .form-input {
+  width: 270px;
+  height: 30px;
+  box-sizing: border-box;
+}
+
+.form-action-row .top-btn,
+.form-action-row .composer-btn {
+  height: 30px;
+  min-height: 30px;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+}
+
+.form-action-row #settingsHfVisBtn {
+  width: 30px;
+  min-width: 30px;
+  padding: 0;
+}
+
+.form-action-row #settingsHfTestTokenBtn,
+.form-action-row #settingsHfPingBtn {
+  padding: 0 12px;
+}
+
+.form-status-slot {
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.form-status-slot .inline-status-badge {
+  height: 30px;
+}
+
+.endpoint-presets-grid {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.endpoint-presets-grid .preset-btn {
+  font-size: 10px;
+  height: 22px;
+  padding: 0 6px;
 }
 
 /* Professional Inline Status Badges (Big-Tech Workstation Standard) */
@@ -2831,10 +2901,11 @@ html, body {
     display: none;
   }
 
-  /* 7. Drawers & Modals Full Width */
+  /* 7. Drawers & Modals Full Width & Zero Horizontal Overflow */
   .drawer-overlay {
     align-items: flex-end;
     padding: 0;
+    overflow-x: hidden !important;
   }
 
   .drawer-card {
@@ -2845,16 +2916,196 @@ html, body {
     padding: 12px 14px max(16px, env(safe-area-inset-bottom)) 14px;
     border: 2px solid var(--border-dark);
     border-bottom: none;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
   }
 
   #settingsModal .drawer-card {
     height: 85vh !important;
     height: 85dvh !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
   }
 
+  #settingsModal .modal-tab-pane,
+  #settingsModal .modal-tab-pane.active {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+    padding-right: 0 !important;
+  }
+
+  /* Segmented 3-Column Tab Bar for Settings on Mobile */
+  #settingsTabBar {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 4px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding-bottom: 8px !important;
+    overflow-x: hidden !important;
+  }
+
+  #settingsTabBar .modal-tab-btn {
+    width: 100% !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    padding: 0 2px !important;
+    font-size: 11px !important;
+    color: var(--text-main) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    box-sizing: border-box !important;
+    border: 1px solid var(--border-dark) !important;
+    background: #FFFFFF !important;
+  }
+
+  #settingsTabBar .modal-tab-btn.active {
+    background: #1A1816 !important;
+    color: #FFFFFF !important;
+  }
+
+  /* Strategic Mobile Unified Input & Action Heights (36px Everywhere) */
   .form-input {
-    font-size: 16px !important; /* Prevent iOS zoom */
-    min-height: 36px;
+    font-size: 15px !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    box-sizing: border-box !important;
+    max-width: 100% !important;
+  }
+
+  .form-action-group {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 6px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .form-action-row {
+    display: flex !important;
+    align-items: stretch !important;
+    gap: 4px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .form-action-row .form-input {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    box-sizing: border-box !important;
+  }
+
+  .form-action-row .top-btn,
+  .form-action-row #settingsHfVisBtn {
+    height: 36px !important;
+    min-height: 36px !important;
+    width: 36px !important;
+    min-width: 36px !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+  }
+
+  .form-action-row .composer-btn,
+  .form-action-row #settingsHfTestTokenBtn,
+  .form-action-row #settingsHfPingBtn {
+    height: 36px !important;
+    min-height: 36px !important;
+    padding: 0 14px !important;
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    box-sizing: border-box !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+
+  .form-status-slot {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .form-status-slot .inline-status-badge {
+    height: 28px !important;
+    min-height: 28px !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  /* 2-Column Balanced Grid for Endpoint Presets on Mobile */
+  .endpoint-presets-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+    width: 100% !important;
+    margin-top: 6px !important;
+    box-sizing: border-box !important;
+  }
+
+  .endpoint-presets-grid .preset-btn {
+    height: 30px !important;
+    min-height: 30px !important;
+    width: 100% !important;
+    font-size: 10.5px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    padding: 0 4px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Full Width Select & Form Elements */
+  #settingsHfDefaultQuant,
+  #settingNumCtx,
+  #settingSystemPromptPreset {
+    width: 100% !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    font-size: 13.5px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Pinned Footer with Balanced Touch Targets */
+  #settingsModal .drawer-footer {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding-top: 10px !important;
+  }
+
+  #settingsModal .drawer-footer .composer-btn {
+    width: 100% !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    font-size: 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
   }
 
   .modal-tab-bar {
@@ -3046,9 +3297,13 @@ html, body {
       <div class="form-group">
         <label for="settingOllamaHost">Ollama Host URL:</label>
         <input type="text" id="settingOllamaHost" class="form-input" value="http://127.0.0.1:11434">
-        <div style="display:flex; gap:6px; margin-top:4px; align-items:center;">
-          <button class="composer-btn" id="testConnBtn" style="height:28px;">Test Connection</button>
-          <span id="hostTestResult" class="inline-status-badge"></span>
+        <div class="form-action-group" style="margin-top:6px;">
+          <div class="form-action-row">
+            <button class="composer-btn" id="testConnBtn">Test Connection</button>
+          </div>
+          <div class="form-status-slot">
+            <span id="hostTestResult" class="inline-status-badge"></span>
+          </div>
         </div>
       </div>
       <div class="form-group" style="margin-top:8px;">
@@ -3087,26 +3342,34 @@ html, body {
     <div class="modal-tab-pane" id="hfTab">
       <div class="form-group">
         <label for="settingsHfToken">Hugging Face API Access Token:</label>
-        <div style="display:flex; gap:6px; align-items:center;">
-          <input type="password" id="settingsHfToken" class="form-input" style="width:250px;" placeholder="hf_xxxxxxxxxxxxxxxxxxxxxxx" spellcheck="false">
-          <button type="button" class="top-btn" id="settingsHfVisBtn" style="height:28px; padding:0 8px;" title="Show / Hide token">👁</button>
-          <button type="button" class="composer-btn" id="settingsHfTestTokenBtn" style="height:28px; padding:0 12px;">Verify</button>
-          <span id="settingsHfVerifyResult" class="inline-status-badge"></span>
+        <div class="form-action-group">
+          <div class="form-action-row">
+            <input type="password" id="settingsHfToken" class="form-input" placeholder="hf_xxxxxxxxxxxxxxxxxxxxxxx" spellcheck="false">
+            <button type="button" class="top-btn" id="settingsHfVisBtn" title="Show / Hide token">👁</button>
+            <button type="button" class="composer-btn" id="settingsHfTestTokenBtn">Verify</button>
+          </div>
+          <div class="form-status-slot">
+            <span id="settingsHfVerifyResult" class="inline-status-badge"></span>
+          </div>
         </div>
         <div id="settingsHfTokenFeedback" style="font-size:10.5px; color:var(--text-muted); margin-top:3px;">
           Enables downloading gated models (e.g. Llama 3, Gemma) and provides 1000+ req/min rate limits.
         </div>
       </div>
-      <div class="form-group" style="margin-top:8px;">
+      <div class="form-group" style="margin-top:10px;">
         <label for="settingsHfEndpoint">Hugging Face Mirror / Endpoint:</label>
-        <div style="display:flex; gap:6px; align-items:center;">
-          <input type="text" id="settingsHfEndpoint" class="form-input" style="width:250px;" value="https://huggingface.co" spellcheck="false">
-          <button type="button" class="composer-btn" id="settingsHfPingBtn" style="height:28px; padding:0 12px;">Ping</button>
-          <span id="settingsHfPingResult" class="inline-status-badge"></span>
+        <div class="form-action-group">
+          <div class="form-action-row">
+            <input type="text" id="settingsHfEndpoint" class="form-input" value="https://huggingface.co" spellcheck="false">
+            <button type="button" class="composer-btn" id="settingsHfPingBtn">Ping</button>
+          </div>
+          <div class="form-status-slot">
+            <span id="settingsHfPingResult" class="inline-status-badge"></span>
+          </div>
         </div>
-        <div style="display:flex; gap:6px; margin-top:4px;">
-          <button type="button" class="top-btn" style="font-size:10px; height:22px; padding:0 6px;" onclick="setSettingsHfEndpoint('https://huggingface.co')">Official (huggingface.co)</button>
-          <button type="button" class="top-btn" style="font-size:10px; height:22px; padding:0 6px;" onclick="setSettingsHfEndpoint('https://hf-mirror.com')">Mirror (hf-mirror.com)</button>
+        <div class="endpoint-presets-grid">
+          <button type="button" class="top-btn preset-btn" onclick="setSettingsHfEndpoint('https://huggingface.co')">Official (huggingface.co)</button>
+          <button type="button" class="top-btn preset-btn" onclick="setSettingsHfEndpoint('https://hf-mirror.com')">Mirror (hf-mirror.com)</button>
         </div>
       </div>
       <div class="form-group" style="margin-top:8px;">
