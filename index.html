@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#ECEBE5" id="metaThemeColor">
   <title>Ollama Studio · Local AI Workstation</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -37,6 +40,73 @@
   --text-main: #1A1816;
   --text-muted: #555555;
   --font-mono: 'IBM Plex Mono', Menlo, Consolas, 'Courier New', Courier, monospace;
+  --count-update-color: #0b57d0;
+  --count-update-glow: rgba(11, 87, 208, 0.22);
+}
+
+[data-theme="dark"] {
+  --count-update-color: #38bdf8;
+  --count-update-glow: rgba(56, 189, 248, 0.35);
+}
+
+/* Precision Numeric Live Update & Highlight System */
+.count-num-val {
+  display: inline;
+  color: inherit;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1, 'zero' 1;
+  transition: color 0.45s cubic-bezier(0.4, 0, 0.2, 1), text-shadow 0.45s ease;
+}
+
+.count-num-val.is-updating {
+  color: var(--count-update-color) !important;
+  font-weight: 700 !important;
+  text-shadow: 0 0 1px var(--count-update-glow);
+  transition: none !important;
+}
+
+[data-theme="dark"] .count-num-val.is-updating {
+  text-shadow: 0 0 4px var(--count-update-glow);
+}
+
+/* Tactile Digit Micro-Bounce Animation */
+.count-digit {
+  display: inline-block;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  vertical-align: baseline;
+}
+
+.count-digit.is-bump {
+  animation: char-micro-bump 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.25) both;
+}
+
+@keyframes char-micro-bump {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  32% {
+    transform: translate3d(0, -2.4px, 0) scale(1.12);
+  }
+  68% {
+    transform: translate3d(0, 0.5px, 0) scale(0.98);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+body.eco-mode .count-digit.is-bump {
+  animation: none !important;
+}
+
+.composer-token-counter {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  align-self: center;
+  padding: 0 4px;
+  white-space: nowrap;
 }
 
 * {
@@ -49,20 +119,26 @@
 
 html, body {
   width: 100%;
+  max-width: 100%;
   height: 100%;
   background: var(--bg-parchment);
   color: var(--text-main);
   font-family: var(--font-mono);
   overflow: hidden;
+  overflow-x: hidden !important;
+  position: relative;
 }
 
 .window-frame {
   display: flex;
   flex-direction: column;
-  width: 100vw;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   height: 100vh;
   border: 1px solid var(--border-frame);
   background: var(--bg-parchment);
+  overflow-x: hidden !important;
 }
 
 .top-header {
@@ -314,6 +390,9 @@ html, body {
   padding: 10px 18px 8px 18px;
   overflow: hidden;
   background: var(--bg-parchment);
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .transcript-area {
@@ -324,27 +403,43 @@ html, body {
   flex-direction: column;
   padding: 0;
   overflow: hidden;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .transcript-scroll {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden !important;
   padding-right: 6px;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .chat-container {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .msg-row {
   display: flex;
   flex-direction: column;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  flex-shrink: 0;
+  overflow: visible;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .msg-header {
@@ -358,11 +453,23 @@ html, body {
   white-space: nowrap;
   margin-bottom: 4px;
   margin-top: 6px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.header-label {
+  min-width: 0;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .msg-header::after {
   content: "";
-  flex: 1;
+  flex: 1 1 8px;
+  min-width: 8px;
   height: 1px;
   background: var(--border-rule);
 }
@@ -371,7 +478,260 @@ html, body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.role-tag {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Big-Company Image & Document Attachments Styling */
+.msg-attached-images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 6px 0 8px 0;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.msg-attached-img-wrap {
+  position: relative;
+  display: inline-flex;
+  border: 1px solid var(--border-dark);
+  background: var(--bg-card);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.msg-attached-img {
+  display: block;
+  max-width: 280px;
+  max-height: 200px;
+  width: auto;
+  height: auto;
+  object-fit: cover;
+  cursor: zoom-in;
+  transition: filter 0.15s ease, transform 0.1s ease;
+}
+
+.msg-attached-img:hover {
+  filter: contrast(1.05);
+}
+
+.msg-attached-zoom-badge {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  background: rgba(26, 24, 22, 0.85);
+  color: #FFFFFF;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 1px 5px;
+  pointer-events: none;
+  opacity: 0.9;
+  letter-spacing: 0.2px;
+}
+
+.msg-attached-doc {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: #FFFFFF;
+  border: 1px solid var(--border-dark);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  margin: 6px 0 8px 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.msg-attached-doc .doc-icon {
+  font-size: 14px;
   flex-shrink: 0;
+}
+
+.msg-attached-doc .doc-name {
+  font-weight: 700;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 260px;
+}
+
+.msg-attached-doc .doc-size {
+  color: var(--text-muted);
+  font-size: 10.5px;
+  flex-shrink: 0;
+}
+
+.msg-bubble img,
+.markdown-body img {
+  max-width: 100%;
+  height: auto;
+  max-height: 400px;
+  object-fit: contain;
+  border: 1px solid var(--border-rule);
+  background: var(--bg-card);
+  margin: 6px 0;
+  display: block;
+  cursor: zoom-in;
+}
+
+/* Composer Attachment Card */
+.composer-attachment-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px 4px 5px;
+  background: #FFFFFF;
+  border: 1px solid var(--border-dark);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  margin-bottom: 6px;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.attachment-thumb {
+  width: 28px;
+  height: 28px;
+  object-fit: cover;
+  border: 1px solid var(--border-rule);
+  flex-shrink: 0;
+  background: var(--bg-card);
+}
+
+.attachment-info {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.attachment-name {
+  font-weight: 700;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+
+.attachment-size {
+  font-size: 10px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.attachment-remove-btn {
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--text-muted);
+  background: var(--bg-btn);
+  border: 1px solid var(--border-rule);
+  margin-left: 2px;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.attachment-remove-btn:hover {
+  background: #1A1816;
+  color: #FFFFFF;
+  border-color: #1A1816;
+}
+
+/* Big-Company Fullscreen Lightbox Modal */
+.lightbox-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  background: rgba(14, 12, 10, 0.94);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  flex-direction: column;
+  box-sizing: border-box;
+  padding: 12px;
+  cursor: zoom-out;
+}
+
+.lightbox-modal.open {
+  display: flex !important;
+}
+
+.lightbox-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto 10px auto;
+  padding: 6px 10px;
+  background: #181614;
+  border: 1px solid var(--border-dark);
+  color: #EDE8D8;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  flex-shrink: 0;
+  cursor: default;
+}
+
+.lightbox-caption {
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #EDE8D8;
+}
+
+.lightbox-close-btn {
+  background: var(--bg-btn);
+  border: 1px solid var(--border-dark);
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  cursor: pointer;
+}
+
+.lightbox-close-btn:hover {
+  background: #FFFFFF;
+  color: #000000;
+}
+
+.lightbox-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#lightboxImg {
+  max-width: min(94vw, 1200px);
+  max-height: 84vh;
+  max-height: 84dvh;
+  object-fit: contain;
+  border: 1px solid #333330;
+  background: #0D0C0B;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.75);
+  cursor: default;
 }
 
 .stream-stage-tag {
@@ -911,12 +1271,606 @@ html, body {
   color: #FAF8F2;
 }
 
+.mobile-ledger-toggle {
+  display: none;
+}
+
+.ledger-close-btn {
+  display: none;
+}
+
+.desktop-text {
+  display: inline;
+}
+
+.mobile-text {
+  display: none;
+}
+
+/* ==========================================================================
+   CLASSIC WORKSTATION MOBILE RESPONSIVE SYSTEM (iPhone 16 / Mobile Screens)
+   High-density, sharp 0px architectural mobile layout
+   ========================================================================== */
+@media (max-width: 768px) {
+  .desktop-text {
+    display: none !important;
+  }
+
+  .mobile-text {
+    display: inline !important;
+  }
+
+  /* 1. Dynamic Viewport & Window Frame */
+  html, body {
+    height: 100vh;
+    height: 100dvh;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    overscroll-behavior-y: none;
+    overscroll-behavior-x: none;
+  }
+
+  .window-frame {
+    height: 100vh;
+    height: 100dvh;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    border: none;
+    position: relative;
+    overflow-x: hidden !important;
+  }
+
+  /* 2. Top Command Header: Strategic 2-Tier Balanced Grid */
+  .top-header {
+    height: auto !important;
+    min-height: auto !important;
+    display: grid !important;
+    grid-template-columns: auto 1fr auto auto;
+    grid-template-rows: auto auto;
+    gap: 5px 4px;
+    padding: max(6px, env(safe-area-inset-top)) 6px 6px 6px;
+    background: var(--bg-top-bar);
+    border-bottom: 1px solid var(--border-dark);
+    flex-shrink: 0;
+  }
+
+  .top-header-left {
+    display: contents !important;
+  }
+
+  .top-header-right {
+    display: contents !important;
+  }
+
+  .app-title {
+    display: none !important;
+  }
+
+  .mobile-ledger-toggle {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    grid-column: 1;
+    grid-row: 1;
+    height: 28px;
+    padding: 0 8px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+    background: var(--bg-btn);
+    border: 1px solid var(--border-dark);
+    color: var(--text-main);
+    touch-action: manipulation;
+  }
+
+  .mobile-ledger-toggle:active {
+    background: #1A1816;
+    color: #FFFFFF;
+  }
+
+  select#modelSelect.top-select-btn {
+    grid-column: 2;
+    grid-row: 1;
+    height: 28px;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 0 4px;
+    border: 1px solid var(--border-dark);
+    background: #FFFFFF;
+    color: var(--text-main);
+    text-overflow: ellipsis;
+  }
+
+  #newChatBtn {
+    grid-column: 3;
+    grid-row: 1;
+    height: 28px;
+    padding: 0 8px;
+    font-size: 11px;
+    font-weight: 700;
+    background: var(--bg-btn);
+    border: 1px solid var(--border-dark);
+    color: var(--text-main);
+    white-space: nowrap;
+    touch-action: manipulation;
+  }
+
+  #settingsBtn {
+    grid-column: 4;
+    grid-row: 1;
+    height: 28px;
+    width: 28px;
+    min-width: 28px;
+    padding: 0;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    background: var(--bg-btn);
+    border: 1px solid var(--border-dark);
+    color: var(--text-main);
+    touch-action: manipulation;
+  }
+
+  select#modelModeSelect.top-select-btn {
+    grid-column: 1 / 3;
+    grid-row: 2;
+    height: 26px;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 0 4px;
+    border: 1px solid var(--border-dark);
+    background: var(--bg-btn);
+    color: var(--text-main);
+  }
+
+  #modelsLibraryBtn {
+    grid-column: 3;
+    grid-row: 2;
+    height: 26px;
+    padding: 0 8px;
+    font-size: 10.5px;
+    font-weight: 700;
+    background: var(--bg-btn);
+    border: 1px solid var(--border-dark);
+    color: var(--text-main);
+    white-space: nowrap;
+    touch-action: manipulation;
+  }
+
+  #vramPurgeQuickBtn {
+    grid-column: 4;
+    grid-row: 2;
+    height: 26px;
+    padding: 0 6px;
+    font-size: 10.5px;
+    font-weight: 700;
+    background: var(--bg-btn);
+    border: 1px solid var(--border-dark);
+    color: var(--text-main);
+    white-space: nowrap;
+    touch-action: manipulation;
+  }
+
+  /* 3. Session Ledger Off-Canvas Drawer */
+  .session-ledger-pane {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: min(300px, 84vw);
+    min-width: 0;
+    max-width: 320px;
+    z-index: 250;
+    transform: translateX(-100%);
+    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    background: var(--bg-parchment);
+    border-right: 2px solid var(--border-dark);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.45) !important;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .session-ledger-pane.mobile-open {
+    transform: translateX(0);
+  }
+
+  .sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26, 24, 22, 0.55);
+    z-index: 240;
+  }
+
+  .sidebar-backdrop.active {
+    display: block;
+  }
+
+  .ledger-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: max(12px, env(safe-area-inset-top)) 10px 8px 10px;
+    font-size: 12px;
+    background: var(--bg-top-bar);
+    border-bottom: 1px solid var(--border-dark);
+    flex-shrink: 0;
+  }
+
+  .ledger-close-btn {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-btn);
+    border: 1px solid var(--border-dark);
+    color: var(--text-main);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+  }
+
+  .ledger-close-btn:active {
+    background: #1A1816;
+    color: #FFFFFF;
+  }
+
+  .session-item {
+    padding: 8px 10px;
+    min-height: 38px;
+    font-size: 11.5px;
+    touch-action: manipulation;
+  }
+
+  /* 4. Transcript & Messages Full-Width Canvas */
+  .work-area {
+    flex: 1;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    position: relative;
+    overflow: hidden !important;
+  }
+
+  .transcript-wrapper {
+    flex: 1;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    padding: 6px 8px 4px 8px;
+    overflow: hidden !important;
+  }
+
+  .transcript-area {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .transcript-scroll {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow-x: hidden !important;
+    padding-right: 2px;
+  }
+
+  .chat-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow: visible !important;
+    gap: 12px;
+  }
+
+  .msg-row {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    flex-shrink: 0 !important;
+    overflow: visible !important;
+    margin-bottom: 2px;
+  }
+
+  .msg-header {
+    font-size: 10.5px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 3px 6px;
+    margin-top: 8px;
+    margin-bottom: 6px;
+    padding-bottom: 3px;
+    border-bottom: 1px solid var(--border-rule);
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .header-label {
+    white-space: normal !important;
+    word-break: break-word !important;
+    line-height: 1.4;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .msg-header::after {
+    display: none !important;
+  }
+
+  .msg-meta {
+    flex-wrap: wrap;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .role-tag {
+    max-width: 100%;
+    word-break: break-word;
+  }
+
+  /* Mobile Attachment Styling (Big-Company Standard) */
+  .msg-attached-images {
+    gap: 6px;
+    margin: 4px 0 6px 0;
+  }
+
+  .msg-attached-img {
+    max-width: min(180px, 60vw) !important;
+    max-height: 140px !important;
+  }
+
+  .msg-attached-doc {
+    padding: 5px 8px;
+    font-size: 11px;
+    max-width: 100%;
+  }
+
+  .msg-attached-doc .doc-name {
+    max-width: 150px;
+  }
+
+  .msg-bubble img,
+  .markdown-body img {
+    max-height: 220px !important;
+    max-width: 100% !important;
+  }
+
+  .composer-attachment-card {
+    padding: 3px 6px 3px 4px;
+    margin-bottom: 4px;
+    max-width: 100% !important;
+  }
+
+  .attachment-name {
+    max-width: 120px !important;
+  }
+
+  .msg-bubble {
+    font-size: 13px;
+    line-height: 1.55;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow: visible !important;
+  }
+
+  .msg-actions-bar {
+    display: flex;
+    gap: 4px;
+    margin-top: 6px;
+    margin-bottom: 4px;
+    flex-wrap: wrap;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .msg-action-btn {
+    height: 24px;
+    padding: 0 8px;
+    font-size: 10.5px;
+    line-height: 18px;
+    background: var(--bg-btn);
+    border: 1px solid var(--border-rule);
+    color: var(--text-main);
+  }
+
+  .code-container {
+    max-width: 100%;
+    overflow: hidden;
+    margin: 6px 0;
+  }
+
+  .code-container pre code {
+    font-size: 11.5px;
+    padding: 6px 8px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .markdown-body table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+  }
+
+  .reasoning-box {
+    margin: 6px 0 8px 0;
+  }
+
+  .reasoning-box summary {
+    padding: 5px 8px;
+    font-size: 11px;
+  }
+
+  .reasoning-content {
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 6px 8px;
+    font-size: 11.5px;
+    margin: 4px;
+  }
+
+  /* 5. Composer Command Row */
+  .composer-row {
+    margin-top: 4px;
+    padding: 6px 6px max(6px, env(safe-area-inset-bottom)) 6px;
+    gap: 5px;
+    flex-wrap: nowrap;
+    align-items: flex-end;
+  }
+
+  .composer-input {
+    font-size: 16px !important; /* Critical: prevents iOS Safari auto-zoom on focus */
+    height: 38px;
+    min-height: 38px;
+    max-height: 120px;
+    padding: 8px 10px;
+    line-height: 20px;
+  }
+
+  .composer-btn {
+    height: 38px;
+    min-height: 38px;
+    padding: 0 12px;
+    font-size: 12px;
+    font-weight: 700;
+    touch-action: manipulation;
+  }
+
+  .composer-btn.secondary {
+    height: 38px;
+    min-height: 38px;
+    padding: 0 9px;
+  }
+
+  .composer-token-counter {
+    display: none; /* Hide on small screens to prioritize textarea and send button */
+  }
+
+  /* 6. Telemetry Status Bar */
+  .status-bar {
+    height: 22px;
+    min-height: 22px;
+    font-size: 9.5px;
+    padding: 0 max(6px, env(safe-area-inset-left));
+    gap: 6px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+    border-top: 1px solid var(--border-frame);
+    background: var(--bg-top-bar);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    border-bottom: max(0px, env(safe-area-inset-bottom)) solid var(--bg-top-bar);
+  }
+
+  .status-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* 7. Drawers & Modals Full Width */
+  .drawer-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .drawer-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 88vh;
+    max-height: 88dvh;
+    padding: 12px 14px max(16px, env(safe-area-inset-bottom)) 14px;
+    border: 2px solid var(--border-dark);
+    border-bottom: none;
+  }
+
+  .form-input {
+    font-size: 16px !important; /* Prevent iOS zoom */
+    min-height: 36px;
+  }
+
+  .modal-tab-bar {
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .modal-tab-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* 8. Mobile Toast Placement (Centered below Top Bar, Safe from Dynamic Island) */
+  .toast-container {
+    top: calc(max(6px, env(safe-area-inset-top)) + 66px) !important;
+    left: 12px !important;
+    right: 12px !important;
+    align-items: center !important;
+    gap: 6px;
+    z-index: 99999;
+    pointer-events: none;
+  }
+
+  .toast {
+    width: auto !important;
+    max-width: min(360px, calc(100vw - 24px)) !important;
+    padding: 6px 12px;
+    font-size: 11.5px;
+    line-height: 1.35;
+    background: #181614;
+    color: #FAF8F2;
+    border: 1px solid #333330;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    transform: translateY(-8px);
+    transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .toast.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .toast-msg {
+    font-size: 11.5px;
+    flex: 1;
+    word-break: break-word;
+  }
+
+  .toast-close {
+    font-size: 12px;
+    padding: 4px;
+    touch-action: manipulation;
+  }
+}
+
 </style>
 <body>
 
 <div class="window-frame">
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
   <header class="top-header">
     <div class="top-header-left">
+      <button class="top-btn mobile-ledger-toggle" id="mobileMenuToggle" title="Toggle Session Ledger">☰ Ledger</button>
       <span class="app-title">Ollama Studio · Workstation</span>
     </div>
     <div class="top-header-right">
@@ -927,10 +1881,19 @@ html, body {
         <option value="json">Mode: JSON</option>
         <option value="raw">Mode: Raw</option>
       </select>
-      <button class="top-btn" id="newChatBtn">New Session</button>
-      <button class="top-btn" id="modelsLibraryBtn">Models</button>
-      <button class="top-btn" id="vramPurgeQuickBtn">Evict VRAM</button>
-      <button class="top-btn" id="settingsBtn">Settings ⚙</button>
+      <button class="top-btn" id="newChatBtn" title="Start New Session">
+        <span class="desktop-text">New Session</span>
+        <span class="mobile-text">+ New</span>
+      </button>
+      <button class="top-btn" id="modelsLibraryBtn" title="Local Models Library">Models</button>
+      <button class="top-btn" id="vramPurgeQuickBtn" title="Evict Model from VRAM">
+        <span class="desktop-text">Evict VRAM</span>
+        <span class="mobile-text">Evict</span>
+      </button>
+      <button class="top-btn" id="settingsBtn" title="Settings & Diagnostics">
+        <span class="desktop-text">Settings ⚙</span>
+        <span class="mobile-text">⚙</span>
+      </button>
 
       <button id="refreshModelsBtn" style="display:none;"></button>
       <button id="themeToggle" style="display:none;"></button>
@@ -940,13 +1903,15 @@ html, body {
       <button id="systemPromptQuickBtn" style="display:none;"></button>
       <button id="openTelemetryDashboardBtn" style="display:none;"></button>
       <button id="ecoModeToggleBtn" style="display:none;"></button>
-      <button id="mobileMenuToggle" style="display:none;"></button>
     </div>
   </header>
 
   <div class="work-area">
     <aside class="session-ledger-pane" id="sidebar">
-      <div class="ledger-header">Session Ledger</div>
+      <div class="ledger-header">
+        <span>Session Ledger</span>
+        <button class="ledger-close-btn" id="mobileLedgerCloseBtn" title="Close Session Ledger">✕</button>
+      </div>
       <input type="text" id="sessionSearchInput" style="display:none;">
       <div class="ledger-list" id="sessionList"></div>
     </aside>
@@ -958,21 +1923,23 @@ html, body {
           <button id="scrollBottomBtn" style="display:none;"></button>
         </div>
 
-        <div id="imageAttachmentChip" style="display:none; font-family:var(--font-mono); font-size:11px; margin-bottom:4px;">
-          <img id="attachedThumbnail" style="height:20px; vertical-align:middle;">
-          <span id="attachedFileName">image.png</span>
-          <span id="attachedFileSize"></span>
-          <span id="removeImgBtn" style="cursor:pointer; margin-left:4px;">✕</span>
+        <div id="imageAttachmentChip" class="composer-attachment-card" style="display:none;">
+          <img id="attachedThumbnail" class="attachment-thumb" alt="Attachment Preview">
+          <div class="attachment-info">
+            <span id="attachedFileName" class="attachment-name">image.png</span>
+            <span id="attachedFileSize" class="attachment-size"></span>
+          </div>
+          <button type="button" id="removeImgBtn" class="attachment-remove-btn" title="Remove attachment">✕</button>
         </div>
 
         <div class="composer-row">
-          <textarea id="promptInput" class="composer-input" placeholder="Type prompt... (Enter or Ctrl+Enter to send)" rows="1"></textarea>
-          <input type="file" id="imageInput" accept="image/*" style="display:none;">
-          <button class="composer-btn secondary" id="triggerImageBtn" title="Attach Image">Attach</button>
+          <textarea id="promptInput" class="composer-input" placeholder="Type prompt..." rows="1"></textarea>
+          <span id="promptTokenCounter" class="composer-token-counter" title="Prompt token estimate">0 tok</span>
+          <input type="file" id="imageInput" accept="image/*,.txt,.md,.json,.csv,.py,.js,.ts,.html,.css,.yaml,.yml,.sh,.log,.sql,.xml" style="display:none;">
+          <button class="composer-btn secondary" id="triggerImageBtn" title="Attach Image or Document">Attach</button>
           <button class="composer-btn" id="sendBtn">Send</button>
           <button class="composer-btn stream-stop-btn" id="streamInlineStopBtn" style="display:none;">Abort</button>
           <button class="composer-btn stream-purge-btn" id="streamInlinePurgeBtn" style="display:none;">Evict</button>
-          <span id="promptTokenCounter" style="display:none;">0</span>
         </div>
       </div>
     </main>
@@ -1123,7 +2090,15 @@ html, body {
   <div class="session-context-item danger" id="ctxMenuDelete">Delete</div>
 </div>
 
-<div id="lightboxModal" style="display:none;"><img id="lightboxImg"></div>
+<div id="lightboxModal" class="lightbox-modal" role="dialog" aria-modal="true" aria-label="Attachment Preview">
+  <div class="lightbox-toolbar">
+    <span class="lightbox-caption" id="lightboxCaption">Attachment Preview</span>
+    <button type="button" class="lightbox-close-btn" id="lightboxCloseBtn" title="Close Preview (Esc)">✕ CLOSE [ESC]</button>
+  </div>
+  <div class="lightbox-content">
+    <img id="lightboxImg" alt="Enlarged attachment preview">
+  </div>
+</div>
 <div id="commandPaletteModal" style="display:none;"><input id="commandPaletteInput"><div id="commandPaletteList"></div><button id="closeCmdPaletteX"></button></div>
 <div id="pullModelModal" style="display:none;"><input id="pullModelInput"><span id="pullStatusText"></span><span id="pullPercentageText"></span><div id="pullProgressBar"></div><span id="pullBytesText"></span><span id="pullSpeedText"></span><div id="pullProgressContainer"></div><button id="executePullBtn"></button><button id="cancelPullBtn"></button><button id="closePullModalX"></button><button id="closePullBtn"></button></div>
 <div id="exportModal" style="display:none;"><button id="exportMarkdownBtn"></button><button id="exportJsonBtn"></button><button id="copyConversationBtn"></button><button id="closeExportModalX"></button><button id="closeExportBtn"></button></div>
@@ -1267,8 +2242,20 @@ html, body {
   let activeModelCapabilities = null;
   let activeModelManifest = null;
 
+  function resolveEffectiveHost(customHost) {
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const isHttps = window.location.protocol === 'https:';
+    if (!isLocalhost || isHttps) {
+      if (!customHost || customHost.includes('127.0.0.1') || customHost.includes('localhost')) {
+        return ''; // Uses same-origin reverse proxy: /api/tags, /api/chat
+      }
+    }
+    return customHost || 'http://127.0.0.1:11434';
+  }
+
+  const savedSettings = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
   let config = {
-    host: 'http://127.0.0.1:11434',
+    host: resolveEffectiveHost(savedSettings.host || 'http://127.0.0.1:11434'),
     num_ctx: 4096,
     temperature: 0.7,
     top_p: 0.9,
@@ -1276,8 +2263,9 @@ html, body {
     operatingMode: 'reasoning',
     systemPrompt: PERSONA_PRESETS.academic,
     expandThinking: false,
-    ...JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}')
+    ...savedSettings
   };
+  config.host = resolveEffectiveHost(config.host);
   config.expandThinking = Boolean(config.expandThinking);
 
   let sessions = JSON.parse(localStorage.getItem(SESSIONS_KEY) || '{}');
@@ -1287,6 +2275,7 @@ html, body {
   let activeStreamReader = null;
   let pullAbortController = null;
   let attachedBase64Image = null;
+  let attachedDocPayload = null;
   let installedModels = [];
   let runningModelsCache = [];
   let lastBenchmarkProfile = null;
@@ -1359,6 +2348,172 @@ html, body {
     updateBeaconState();
   }
 
+  // ==========================================================================
+  // REAL-TIME NUMERIC & COUNT LIVE UPDATE SYSTEM
+  // Visually highlights updating counts/numbers across the entire app
+  // (tokens, rates, metrics, durations) in high-contrast blue while in motion,
+  // then gracefully transitions back to resting tone after a quiet delay.
+  // ==========================================================================
+  const COUNT_UPDATE_LINGER_MS = 1400;
+  const COUNT_NUMBER_REGEX = /(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?/g;
+
+  function escapeCountHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function getChangedCharIndices(oldStr, newStr) {
+    if (!oldStr) return new Set(Array.from({ length: newStr.length }, (_, i) => i));
+    if (oldStr === newStr) return new Set();
+    const changed = new Set();
+    if (oldStr.length === newStr.length) {
+      for (let i = 0; i < newStr.length; i++) {
+        if (newStr[i] !== oldStr[i]) changed.add(i);
+      }
+      return changed;
+    }
+    let prefixLen = 0;
+    while (prefixLen < oldStr.length && prefixLen < newStr.length && oldStr[prefixLen] === newStr[prefixLen]) {
+      prefixLen++;
+    }
+    let suffixLen = 0;
+    while (
+      suffixLen < (oldStr.length - prefixLen) &&
+      suffixLen < (newStr.length - prefixLen) &&
+      oldStr[oldStr.length - 1 - suffixLen] === newStr[newStr.length - 1 - suffixLen]
+    ) {
+      suffixLen++;
+    }
+    for (let i = prefixLen; i < (newStr.length - suffixLen); i++) {
+      changed.add(i);
+    }
+    return changed;
+  }
+
+  function formatStaticCountHtml(numStr) {
+    return String(numStr ?? '').split('').map(c => `<span class="count-digit">${escapeCountHtml(c)}</span>`).join('');
+  }
+
+  function updateCountDisplay(el, rawText, options = {}) {
+    if (!el) return;
+    const text = String(rawText ?? '');
+    const isInitial = Boolean(options.initial);
+    const lingerMs = options.delayMs || COUNT_UPDATE_LINGER_MS;
+
+    if (!el._countTracker) {
+      el._countTracker = {
+        numbers: [],
+        timers: {},
+        updatingIndices: new Set(),
+        lastRaw: null
+      };
+    }
+    const tracker = el._countTracker;
+
+    // Scan for all number segments
+    const matches = [];
+    let match;
+    const regex = new RegExp(COUNT_NUMBER_REGEX);
+    while ((match = regex.exec(text)) !== null) {
+      matches.push({ num: match[0], start: match.index, end: regex.lastIndex });
+    }
+
+    // No numbers detected in text: render string directly
+    if (matches.length === 0) {
+      tracker.numbers = [];
+      tracker.updatingIndices.clear();
+      Object.values(tracker.timers).forEach(t => clearTimeout(t));
+      tracker.timers = {};
+      tracker.lastRaw = text;
+      el.textContent = text;
+      return;
+    }
+
+    // If text and number values are identical to current DOM, skip re-rendering
+    if (tracker.lastRaw === text && el.querySelector('.count-num-val')) {
+      return;
+    }
+
+    const currentNumbers = matches.map(item => item.num);
+    let html = '';
+    let lastIdx = 0;
+
+    matches.forEach((item, idx) => {
+      if (item.start > lastIdx) {
+        html += escapeCountHtml(text.slice(lastIdx, item.start));
+      }
+
+      const prevVal = tracker.numbers[idx];
+      const hasChanged = !isInitial && (prevVal !== undefined ? prevVal !== item.num : true);
+
+      if (hasChanged) {
+        tracker.updatingIndices.add(idx);
+        if (tracker.timers[idx]) {
+          clearTimeout(tracker.timers[idx]);
+        }
+        tracker.timers[idx] = setTimeout(() => {
+          tracker.updatingIndices.delete(idx);
+          delete tracker.timers[idx];
+          const spans = el.querySelectorAll ? el.querySelectorAll('.count-num-val') : [];
+          if (spans && spans[idx]) {
+            spans[idx].classList.remove('is-updating');
+          }
+        }, lingerMs);
+      }
+
+      const isUpdating = tracker.updatingIndices.has(idx);
+      const cls = isUpdating ? 'count-num-val is-updating' : 'count-num-val';
+
+      // Character-level targeted bump bounce
+      const changedCharIndices = hasChanged ? getChangedCharIndices(prevVal, item.num) : new Set();
+      const digitsHtml = item.num.split('').map((char, charIdx) => {
+        const isBump = changedCharIndices.has(charIdx);
+        const charCls = isBump ? 'count-digit is-bump' : 'count-digit';
+        return `<span class="${charCls}">${escapeCountHtml(char)}</span>`;
+      }).join('');
+
+      html += `<span class="${cls}">${digitsHtml}</span>`;
+      lastIdx = item.end;
+    });
+
+    if (lastIdx < text.length) {
+      html += escapeCountHtml(text.slice(lastIdx));
+    }
+
+    tracker.numbers = currentNumbers;
+    tracker.lastRaw = text;
+    el.innerHTML = html;
+  }
+
+  // Safe non-recursive monitor stub
+  function monitorCountElement(el) {
+    return el;
+  }
+
+  function initAllCountMonitors() {
+    // Format initial static telemetry values safely on startup without DOM listeners
+    const initTargets = [
+      metricPromptTokens,
+      metricEvalTokens,
+      metricTps,
+      metricStreamTime,
+      metricTtft,
+      metricCtxLabel,
+      promptTokenCounter
+    ];
+
+    initTargets.forEach(el => {
+      if (el && el.textContent && el.textContent.trim()) {
+        updateCountDisplay(el, el.textContent, { initial: true });
+      }
+    });
+  }
+
   function isVramResident(modelName) {
     if (!modelName || !runningModelsCache) return false;
     const clean = modelName.trim().toLowerCase();
@@ -1374,7 +2529,7 @@ html, body {
     try {
       const res = await fetch(`${config.host}/api/ps`);
       if (!res.ok) {
-        metricVram.innerText = 'Standby';
+        updateCountDisplay(metricVram, 'Standby');
         metricVram.style.color = 'var(--text-muted)';
         updateHeapTelemetry();
         return;
@@ -1395,23 +2550,23 @@ html, body {
         const pctGpu = totalBytes > 0 ? Math.round((vramBytes / totalBytes) * 100) : 100;
 
         if (isFullGpu) {
-          metricVram.innerText = `${vramGB}G GPU (100%)`;
+          updateCountDisplay(metricVram, `${vramGB}G GPU (100%)`);
           metricVram.style.color = 'var(--success)';
           metricVram.title = `Model is 100% resident in GPU VRAM (${vramGB} GB)`;
         } else {
           const ramGB = Math.max(0, (totalBytes - vramBytes) / (1024*1024*1024)).toFixed(1);
-          metricVram.innerText = `${vramGB}G GPU · ${ramGB}G RAM (${pctGpu}%)`;
+          updateCountDisplay(metricVram, `${vramGB}G GPU · ${ramGB}G RAM (${pctGpu}%)`);
           metricVram.style.color = 'var(--warning)';
           metricVram.title = `Partial CPU offload: ${vramGB}GB in GPU, ${ramGB}GB in system RAM.`;
         }
       } else {
-        metricVram.innerText = 'Standby';
+        updateCountDisplay(metricVram, 'Standby');
         metricVram.style.color = 'var(--text-muted)';
         metricVram.title = 'Model weights not currently resident in memory';
       }
       updateHeapTelemetry();
     } catch (e) {
-      metricVram.innerText = 'Standby';
+      updateCountDisplay(metricVram, 'Standby');
       metricVram.style.color = 'var(--text-muted)';
       updateHeapTelemetry();
     }
@@ -1422,7 +2577,7 @@ html, body {
     if (window.performance && window.performance.memory) {
       const usedMB = Math.round(performance.memory.usedJSHeapSize / (1024 * 1024));
       const totalMB = Math.round(performance.memory.totalJSHeapSize / (1024 * 1024));
-      metricHeap.innerText = `${usedMB}MB`;
+      updateCountDisplay(metricHeap, `${usedMB}MB`);
       metricHeap.title = `Browser Tab Heap: ${usedMB} MB used / ${totalMB} MB total allocated`;
       if (usedMB > 200) {
         metricHeap.style.color = 'var(--danger)';
@@ -1434,7 +2589,7 @@ html, body {
     } else {
       const session = getActiveSession ? getActiveSession() : null;
       const count = session && session.messages ? session.messages.length : 0;
-      metricHeap.innerText = `${count} msgs`;
+      updateCountDisplay(metricHeap, `${count} msgs`);
       metricHeap.title = `Conversation length: ${count} messages`;
     }
   }
@@ -1577,6 +2732,7 @@ html, body {
     setupImageHandlers();
     setupScrollMonitoring();
     setupModeAndTelemetryListeners();
+    initAllCountMonitors();
     loadSessions();
     renderActiveSession();
     updatePersonaLabel();
@@ -1913,7 +3069,7 @@ html, body {
       const elapsed = Math.round(performance.now() - start);
       if (res.ok) {
         const verData = await res.json().catch(() => ({}));
-        pingEl.innerText = `${elapsed} ms (Ollama ${verData.version || 'Active'})`;
+        updateCountDisplay(pingEl, `${elapsed} ms (Ollama ${verData.version || 'Active'})`);
         pingEl.style.color = 'var(--success)';
       } else {
         pingEl.innerText = `HTTP ${res.status}`;
@@ -1943,7 +3099,7 @@ html, body {
     const modeEl = document.getElementById('diagActiveMode');
     if (modeEl) modeEl.innerText = currentMode ? currentMode.label : 'Standard';
     const ctxEl = document.getElementById('diagContextWindow');
-    if (ctxEl) ctxEl.innerText = `${config.num_ctx || 4096} tokens`;
+    if (ctxEl) updateCountDisplay(ctxEl, `${config.num_ctx || 4096} tokens`);
 
     
     const vramEl = document.getElementById('diagVramSize');
@@ -1953,35 +3109,35 @@ html, body {
       const totalBytes = currentRunning.size || 0;
       const vramMB = (vramBytes / (1024 * 1024)).toFixed(0);
       const ramMB = Math.max(0, ((totalBytes - vramBytes) / (1024 * 1024))).toFixed(0);
-      if (vramEl) vramEl.innerText = `${vramMB} MB`;
+      if (vramEl) updateCountDisplay(vramEl, `${vramMB} MB`);
       if (ramEl) {
         if (parseInt(ramMB) > 50) {
-          ramEl.innerText = `${ramMB} MB (Partial CPU Offload - Slower)`;
+          updateCountDisplay(ramEl, `${ramMB} MB (Partial CPU Offload - Slower)`);
           ramEl.style.color = 'var(--warning)';
         } else {
-          ramEl.innerText = `0 MB (100% GPU Accelerated)`;
+          updateCountDisplay(ramEl, `0 MB (100% GPU Accelerated)`);
           ramEl.style.color = 'var(--success)';
         }
       }
     } else {
-      if (vramEl) vramEl.innerText = '0 MB (Standby)';
+      if (vramEl) updateCountDisplay(vramEl, '0 MB (Standby)');
       if (ramEl) {
-        ramEl.innerText = '0 MB (Standby)';
+        updateCountDisplay(ramEl, '0 MB (Standby)');
         ramEl.style.color = 'var(--text-primary)';
       }
     }
 
     const cpuEl = document.getElementById('diagCpuCores');
-    if (cpuEl) cpuEl.innerText = navigator.hardwareConcurrency ? `${navigator.hardwareConcurrency} Logical Threads` : 'Unavailable';
+    if (cpuEl) updateCountDisplay(cpuEl, navigator.hardwareConcurrency ? `${navigator.hardwareConcurrency} Logical Threads` : 'Unavailable');
     const memEl = document.getElementById('diagDeviceMem');
-    if (memEl) memEl.innerText = navigator.deviceMemory ? `~${navigator.deviceMemory} GB Reported RAM` : 'Unavailable (Security Sandbox)';
+    if (memEl) updateCountDisplay(memEl, navigator.deviceMemory ? `~${navigator.deviceMemory} GB Reported RAM` : 'Unavailable (Security Sandbox)');
 
     const jsHeapEl = document.getElementById('diagJsHeap');
     if (jsHeapEl) {
       if (window.performance && window.performance.memory) {
         const usedMB = Math.round(performance.memory.usedJSHeapSize / (1024 * 1024));
         const limitMB = Math.round(performance.memory.jsHeapSizeLimit / (1024 * 1024));
-        jsHeapEl.innerText = `${usedMB} MB / ${limitMB} MB Limit`;
+        updateCountDisplay(jsHeapEl, `${usedMB} MB / ${limitMB} MB Limit`);
       } else {
         jsHeapEl.innerText = 'Standard Browser Heap';
       }
@@ -1990,15 +3146,15 @@ html, body {
     
     if (lastBenchmarkProfile) {
       const ttftEl = document.getElementById('diagTtftVal');
-      if (ttftEl) ttftEl.innerText = lastBenchmarkProfile.ttft ? `${lastBenchmarkProfile.ttft} ms` : '— ms';
+      if (ttftEl) updateCountDisplay(ttftEl, lastBenchmarkProfile.ttft ? `${lastBenchmarkProfile.ttft} ms` : '— ms');
       
       const pRateEl = document.getElementById('diagPromptRate');
       if (pRateEl) {
         if (lastBenchmarkProfile.prompt_eval_duration && lastBenchmarkProfile.prompt_eval_count) {
           const pRate = (lastBenchmarkProfile.prompt_eval_count / (lastBenchmarkProfile.prompt_eval_duration / 1e9)).toFixed(1);
-          pRateEl.innerText = `${pRate} t/s`;
+          updateCountDisplay(pRateEl, `${pRate} t/s`);
         } else {
-          pRateEl.innerText = '— t/s';
+          updateCountDisplay(pRateEl, '— t/s');
         }
       }
 
@@ -2006,9 +3162,9 @@ html, body {
       if (gRateEl) {
         if (lastBenchmarkProfile.eval_duration && lastBenchmarkProfile.eval_count) {
           const gRate = (lastBenchmarkProfile.eval_count / (lastBenchmarkProfile.eval_duration / 1e9)).toFixed(1);
-          gRateEl.innerText = `${gRate} t/s`;
+          updateCountDisplay(gRateEl, `${gRate} t/s`);
         } else {
-          gRateEl.innerText = '— t/s';
+          updateCountDisplay(gRateEl, '— t/s');
         }
       }
 
@@ -2018,7 +3174,7 @@ html, body {
         const promptSec = (lastBenchmarkProfile.prompt_eval_duration / 1e9).toFixed(2);
         const evalSec = (lastBenchmarkProfile.eval_duration / 1e9).toFixed(2);
         const totalSec = (lastBenchmarkProfile.total_duration / 1e9).toFixed(2);
-        durEl.innerText = `Model Load: ${loadSec}s | Prompt Eval: ${promptSec}s | Eval: ${evalSec}s | Total Turnaround: ${totalSec}s | Peak: ${lastBenchmarkProfile.peakTps || 0} t/s`;
+        updateCountDisplay(durEl, `Model Load: ${loadSec}s | Prompt Eval: ${promptSec}s | Eval: ${evalSec}s | Total Turnaround: ${totalSec}s | Peak: ${lastBenchmarkProfile.peakTps || 0} t/s`);
       }
     }
   }
@@ -2047,6 +3203,23 @@ html, body {
   sidebarBackdrop.addEventListener('click', () => {
     sidebar.classList.remove('mobile-open');
     sidebarBackdrop.classList.remove('active');
+  });
+
+  const mobileLedgerCloseBtn = document.getElementById('mobileLedgerCloseBtn');
+  if (mobileLedgerCloseBtn) {
+    mobileLedgerCloseBtn.addEventListener('click', () => {
+      sidebar.classList.remove('mobile-open');
+      sidebarBackdrop.classList.remove('active');
+    });
+  }
+
+  // Tap-to-dismiss for modal overlays
+  document.querySelectorAll('.drawer-overlay').forEach(overlay => {
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        overlay.classList.remove('open');
+      }
+    });
   });
 
   
@@ -2148,7 +3321,7 @@ html, body {
       if (!promptTokenCounter) return;
       const text = promptInput.value.trim();
       const est = estimateTokens(text);
-      promptTokenCounter.innerText = `${est} tok`;
+      updateCountDisplay(promptTokenCounter, `${est} tok`);
     }
 
     promptInput.addEventListener('input', () => {
@@ -2372,8 +3545,11 @@ html, body {
         if (file.type.startsWith('image/')) {
           processImageFile(file);
           showToast(`Image attached: ${file.name}`, 'info');
+        } else if (file.type.startsWith('text/') || /\.(md|txt|json|csv|py|js|ts|html|css|yaml|yml|sh|log|sql|xml)$/i.test(file.name)) {
+          processImageFile(file);
+          showToast(`Document attached: ${file.name}`, 'info');
         } else {
-          showToast('Please attach an image file (PNG, JPG, WebP).', 'warning');
+          showToast('Please attach an image or text document (PNG, JPG, WebP, TXT, MD, CSV, Code).', 'warning');
         }
       }
     });
@@ -2382,22 +3558,60 @@ html, body {
   }
 
   function processImageFile(file) {
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const result = event.target.result;
-      attachedBase64Image = result.split(',')[1];
-      document.getElementById('attachedThumbnail').src = result;
-      document.getElementById('attachedFileName').innerText = file.name;
-      document.getElementById('attachedFileSize').innerText = `(${(file.size/1024).toFixed(0)} KB)`;
-      document.getElementById('imageAttachmentChip').style.display = 'inline-flex';
-    };
-    reader.readAsDataURL(file);
+    if (!file) return;
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const result = event.target.result;
+        attachedBase64Image = result.split(',')[1];
+        attachedDocPayload = null;
+        const thumb = document.getElementById('attachedThumbnail');
+        if (thumb) {
+          thumb.style.display = 'block';
+          thumb.src = result;
+        }
+        const nameEl = document.getElementById('attachedFileName');
+        if (nameEl) nameEl.innerText = file.name;
+        const sizeEl = document.getElementById('attachedFileSize');
+        if (sizeEl) sizeEl.innerText = `(${(file.size/1024).toFixed(0)} KB)`;
+        const chip = document.getElementById('imageAttachmentChip');
+        if (chip) chip.style.display = 'inline-flex';
+      };
+      reader.readAsDataURL(file);
+    } else if (file.type.startsWith('text/') || /\.(md|txt|json|csv|py|js|ts|html|css|yaml|yml|sh|log|sql|xml)$/i.test(file.name)) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        attachedDocPayload = {
+          name: file.name,
+          size: file.size,
+          content: event.target.result
+        };
+        attachedBase64Image = null;
+        const thumb = document.getElementById('attachedThumbnail');
+        if (thumb) {
+          thumb.style.display = 'block';
+          thumb.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="%231A1816" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>';
+        }
+        const nameEl = document.getElementById('attachedFileName');
+        if (nameEl) nameEl.innerText = file.name;
+        const sizeEl = document.getElementById('attachedFileSize');
+        if (sizeEl) sizeEl.innerText = `(${(file.size/1024).toFixed(0)} KB)`;
+        const chip = document.getElementById('imageAttachmentChip');
+        if (chip) chip.style.display = 'inline-flex';
+      };
+      reader.readAsText(file);
+    } else {
+      showToast('Supported files: Images (PNG, JPG, WebP) and Text Documents (TXT, MD, CSV, Code).', 'warning');
+    }
   }
 
   function removeAttachment() {
     attachedBase64Image = null;
-    document.getElementById('imageInput').value = '';
-    document.getElementById('imageAttachmentChip').style.display = 'none';
+    attachedDocPayload = null;
+    const input = document.getElementById('imageInput');
+    if (input) input.value = '';
+    const chip = document.getElementById('imageAttachmentChip');
+    if (chip) chip.style.display = 'none';
   }
 
   
@@ -2439,7 +3653,8 @@ html, body {
       const data = await res.json();
       
       serverStatusDot.classList.add('online');
-      serverStatusText.innerText = `Connected (${new URL(config.host).host})`;
+      const hostDisplay = config.host ? (new URL(config.host).host || config.host) : 'Proxy (Tunnel)';
+      serverStatusText.innerText = `Connected (${hostDisplay})`;
       installedModels = data.models || [];
       hideCorsBanner();
 
@@ -2806,6 +4021,8 @@ html, body {
     saveSessions();
     renderActiveSession();
     resetTelemetry();
+    sidebar.classList.remove('mobile-open');
+    sidebarBackdrop.classList.remove('active');
     showToast('New conversation started', 'info');
   });
 
@@ -2826,17 +4043,17 @@ html, body {
   });
 
   function resetTelemetry() {
-    metricTtft.innerText = '— ms';
-    metricPromptTokens.innerText = '0';
-    metricEvalTokens.innerText = '0';
-    metricTps.innerText = '0.0 t/s';
-    if (metricStreamTime) metricStreamTime.innerText = '0.0s';
+    updateCountDisplay(metricTtft, '— ms', { initial: true });
+    updateCountDisplay(metricPromptTokens, '0', { initial: true });
+    updateCountDisplay(metricEvalTokens, '0', { initial: true });
+    updateCountDisplay(metricTps, '0.0 t/s', { initial: true });
+    if (metricStreamTime) updateCountDisplay(metricStreamTime, '0.0s', { initial: true });
     if (metricStreamStatus) {
       metricStreamStatus.innerText = 'Standby';
       metricStreamStatus.style.color = 'var(--text-muted)';
     }
     const maxCtx = parseInt(config.num_ctx) || 4096;
-    metricCtxLabel.innerText = `0 / ${maxCtx.toLocaleString()}`;
+    updateCountDisplay(metricCtxLabel, `0 / ${maxCtx.toLocaleString()}`, { initial: true });
     ctxMeterFill.style.width = '0%';
     ctxMeterFill.className = 'ctx-meter-fill';
     streamProgressStrip.classList.remove('active');
@@ -2856,10 +4073,10 @@ html, body {
     let sessionTotalTokens = 0;
     session.messages.forEach((msg, idx) => {
       sessionTotalTokens += estimateTokens(msg.content);
-      appendMessageToDOM(msg.role, msg.content, msg.images, idx, msg.telemetry);
+      appendMessageToDOM(msg.role, msg.content, msg.images, idx, msg.telemetry, msg.doc);
     });
     const maxCtx = parseInt(config.num_ctx) || 4096;
-    metricCtxLabel.innerText = `${sessionTotalTokens.toLocaleString()} / ${maxCtx.toLocaleString()}`;
+    updateCountDisplay(metricCtxLabel, `${sessionTotalTokens.toLocaleString()} / ${maxCtx.toLocaleString()}`, { initial: true });
     const pct = Math.min(100, Math.round((sessionTotalTokens / maxCtx) * 100));
     ctxMeterFill.style.width = `${pct}%`;
     if (pct > 90) ctxMeterFill.className = 'ctx-meter-fill danger';
@@ -2880,7 +4097,7 @@ html, body {
   };
 
   
-  function appendMessageToDOM(role, content, images = null, msgIndex = -1, telemetry = null) {
+  function appendMessageToDOM(role, content, images = null, msgIndex = -1, telemetry = null, doc = null) {
     const emptyHero = chatContainer.querySelector('.empty-chat-hero');
     if (emptyHero) emptyHero.remove();
 
@@ -2895,13 +4112,14 @@ html, body {
     const estTokens = estimateTokens(content).toLocaleString();
 
     if (role === 'user') {
-      header.innerHTML = `<span class="header-label">USER ${timeStr} · ${estTokens} tokens</span>`;
+      header.innerHTML = `<span class="header-label">USER ${timeStr} · <span class="count-num-val">${formatStaticCountHtml(estTokens)}</span> tokens</span>`;
     } else {
-      const modelName = modelSelect ? modelSelect.value : 'Model';
+      const rawModel = (telemetry && telemetry.model) || (modelSelect && modelSelect.value ? modelSelect.value : '');
+      const modelSegment = rawModel ? ` · ${escapeHtml(rawModel)}` : '';
       const tokStr = telemetry && telemetry.eval_tokens ? Number(telemetry.eval_tokens).toLocaleString() : estTokens;
-      const tpsStr = telemetry && telemetry.tps ? ` · ${telemetry.tps} tok/s` : '';
-      const ttftStr = telemetry && telemetry.ttft ? ` · TTFT: ${telemetry.ttft}ms` : '';
-      header.innerHTML = `<span class="header-label">ASSISTANT · ${escapeHtml(modelName)} · ${tokStr} tokens${tpsStr}${ttftStr}</span>`;
+      const tpsStr = telemetry && telemetry.tps ? ` · <span class="count-num-val">${formatStaticCountHtml(telemetry.tps)}</span> tok/s` : '';
+      const ttftStr = telemetry && telemetry.ttft ? ` · TTFT: <span class="count-num-val">${formatStaticCountHtml(telemetry.ttft)}</span>ms` : '';
+      header.innerHTML = `<span class="header-label">ASSISTANT${modelSegment} · <span class="count-num-val">${formatStaticCountHtml(tokStr)}</span> tokens${tpsStr}${ttftStr}</span>`;
     }
 
     row.appendChild(header);
@@ -2910,19 +4128,43 @@ html, body {
       const imgContainer = document.createElement('div');
       imgContainer.className = 'msg-attached-images';
       images.forEach(imgBase64 => {
+        const wrap = document.createElement('div');
+        wrap.className = 'msg-attached-img-wrap';
         const img = document.createElement('img');
         img.className = 'msg-attached-img';
         img.src = `data:image/png;base64,${imgBase64}`;
-        img.addEventListener('click', () => openLightbox(img.src));
-        imgContainer.appendChild(img);
+        img.alt = 'User Attached Image';
+        img.title = 'Click to inspect in fullscreen lightbox';
+        img.addEventListener('click', () => openLightbox(img.src, 'User Attached Image'));
+        const badge = document.createElement('span');
+        badge.className = 'msg-attached-zoom-badge';
+        badge.textContent = 'ZOOM';
+        wrap.appendChild(img);
+        wrap.appendChild(badge);
+        imgContainer.appendChild(wrap);
       });
       row.appendChild(imgContainer);
+    }
+
+    if (doc) {
+      const docDiv = document.createElement('div');
+      docDiv.className = 'msg-attached-doc';
+      docDiv.innerHTML = `
+        <span class="doc-icon">📄</span>
+        <span class="doc-name" title="${escapeHtml(doc.name || 'document.txt')}">${escapeHtml(doc.name || 'document.txt')}</span>
+        <span class="doc-size">(${((doc.size || 0)/1024).toFixed(0)} KB)</span>
+      `;
+      row.appendChild(docDiv);
     }
 
     const bubble = document.createElement('div');
     bubble.className = 'msg-bubble';
     bubble.innerHTML = formatMessageContent(content);
     row.appendChild(bubble);
+
+    if (role === 'assistant' || role === 'bot') {
+      attachAssistantActions(row, content, role);
+    }
 
     chatContainer.appendChild(row);
     renderMathAndCode(bubble);
@@ -2950,6 +4192,14 @@ html, body {
 
     element.querySelectorAll('pre code').forEach((block) => {
       hljs.highlightElement(block);
+    });
+
+    element.querySelectorAll('img').forEach((img) => {
+      if (!img.classList.contains('lightbox-bound')) {
+        img.classList.add('lightbox-bound');
+        img.title = 'Click to inspect in fullscreen lightbox';
+        img.addEventListener('click', () => openLightbox(img.src, img.alt || 'Inline Image'));
+      }
     });
   }
 
@@ -3085,24 +4335,50 @@ html, body {
   function regenerateLastAssistant() {
     if (isGenerating) return;
     const session = getActiveSession();
-    if (session.messages.length === 0) return;
+    if (!session || session.messages.length === 0) return;
 
     if (session.messages[session.messages.length - 1].role === 'assistant') {
       session.messages.pop();
     }
+    const hasUserMsg = session.messages.some(m => m.role === 'user');
+    if (!hasUserMsg) {
+      showToast('No user prompt found to regenerate.', 'warning');
+      return;
+    }
+
     saveSessions();
     renderActiveSession();
     executeGeneration();
   }
+  window.regenerateLastAssistant = regenerateLastAssistant;
+  window.regenerateLastResponse = regenerateLastAssistant;
 
   
-  function openLightbox(src) {
+  function openLightbox(src, caption) {
     const modal = document.getElementById('lightboxModal');
-    document.getElementById('lightboxImg').src = src;
-    modal.classList.add('open');
+    const img = document.getElementById('lightboxImg');
+    const cap = document.getElementById('lightboxCaption');
+    if (img) img.src = src;
+    if (cap) cap.textContent = caption || 'Attachment Preview · Click outside or ESC to close';
+    if (modal) modal.classList.add('open');
   }
-  document.getElementById('lightboxModal').addEventListener('click', () => {
-    document.getElementById('lightboxModal').classList.remove('open');
+  function closeLightbox() {
+    const modal = document.getElementById('lightboxModal');
+    if (modal) modal.classList.remove('open');
+  }
+  window.openLightbox = openLightbox;
+  window.closeLightbox = closeLightbox;
+
+  const lbModal = document.getElementById('lightboxModal');
+  if (lbModal) {
+    lbModal.addEventListener('click', (e) => {
+      if (e.target === lbModal || e.target.id === 'lightboxCloseBtn' || e.target.closest('#lightboxCloseBtn') || e.target.classList.contains('lightbox-content')) {
+        closeLightbox();
+      }
+    });
+  }
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeLightbox();
   });
 
   
@@ -3110,13 +4386,12 @@ html, body {
 
   async function handleSend() {
     if (isGenerating) {
-      
       await abortGeneration(false);
       return;
     }
 
     const text = promptInput.value.trim();
-    if (!text && !attachedBase64Image) return;
+    if (!text && !attachedBase64Image && !attachedDocPayload) return;
 
     if (!modelSelect.value) {
       showToast('Please select a model first.', 'warning');
@@ -3125,23 +4400,33 @@ html, body {
 
     const session = getActiveSession();
 
-    
-    const userMessage = { role: 'user', content: text };
+    let finalPromptContent = text;
+    if (attachedDocPayload) {
+      const docHeader = `\n\n--- Document Attached: ${attachedDocPayload.name} ---\n${attachedDocPayload.content}\n--- End Document ---`;
+      finalPromptContent = text ? `${text}\n${docHeader}` : `Please analyze this attached document:\n${docHeader}`;
+    }
+
+    const userMessage = { role: 'user', content: finalPromptContent };
     if (attachedBase64Image) {
       userMessage.images = [attachedBase64Image];
     }
+    if (attachedDocPayload) {
+      userMessage.doc = {
+        name: attachedDocPayload.name,
+        size: attachedDocPayload.size
+      };
+    }
     session.messages.push(userMessage);
 
-    
     if (session.messages.filter(m => m.role === 'user').length === 1) {
-      session.title = text.slice(0, 36) + (text.length > 36 ? '...' : '');
+      session.title = (text || (attachedDocPayload ? attachedDocPayload.name : 'Image Session')).slice(0, 36);
     }
     saveSessions();
 
-    appendMessageToDOM('user', text, userMessage.images);
+    appendMessageToDOM('user', text || (attachedDocPayload ? `Attached document: ${attachedDocPayload.name}` : ''), userMessage.images, session.messages.length - 1, null, userMessage.doc);
     promptInput.value = '';
     promptInput.style.height = '32px';
-    if (promptTokenCounter) promptTokenCounter.innerText = '0 TOKENS';
+    if (promptTokenCounter) updateCountDisplay(promptTokenCounter, '0 TOKENS');
     removeAttachment();
 
     await executeGeneration();
@@ -3224,6 +4509,9 @@ html, body {
     const inlinePurgeBtn = botRow.querySelector('#streamInlinePurgeBtn');
     const activeStreamBar = botRow.querySelector('#activeStreamControlBar');
 
+    if (streamMeta) monitorCountElement(streamMeta);
+    if (thoughtTimer) monitorCountElement(thoughtTimer);
+
     if (inlineStopBtn) {
       inlineStopBtn.addEventListener('click', () => abortGeneration(false));
     }
@@ -3268,16 +4556,16 @@ html, body {
     const maxCtx = parseInt(config.num_ctx) || 4096;
 
     
-    metricPromptTokens.innerText = Number(estimatedPromptTokens).toLocaleString();
-    metricEvalTokens.innerText = '0';
-    metricTps.innerText = '0.0 t/s';
-    metricStreamTime.innerText = '0.0s';
+    updateCountDisplay(metricPromptTokens, Number(estimatedPromptTokens).toLocaleString());
+    updateCountDisplay(metricEvalTokens, '0');
+    updateCountDisplay(metricTps, '0.0 t/s');
+    updateCountDisplay(metricStreamTime, '0.0s');
     const resident = isVramResident(modelSelect.value);
     const initialStageText = resident ? 'Processing Prompt...' : 'Loading Model...';
     metricStreamStatus.innerText = initialStageText;
     metricStreamStatus.style.color = resident ? 'var(--accent-rubric)' : 'var(--warning)';
     if (streamStageLabel) streamStageLabel.innerText = initialStageText;
-    metricCtxLabel.innerText = `${Number(estimatedPromptTokens).toLocaleString()} / ${maxCtx.toLocaleString()}`;
+    updateCountDisplay(metricCtxLabel, `${Number(estimatedPromptTokens).toLocaleString()} / ${maxCtx.toLocaleString()}`);
     const initialPct = Math.min(100, Math.round((estimatedPromptTokens / maxCtx) * 100));
     ctxMeterFill.style.width = `${initialPct}%`;
 
@@ -3289,13 +4577,13 @@ html, body {
       if (!thoughtTimer || !isInsideThink || !thoughtStartTime) return;
       const elapsed = ((performance.now() - thoughtStartTime) / 1000).toFixed(1);
       const tCount = estimateTokens(accumulatedThought).toLocaleString();
-      thoughtTimer.innerText = `Thinking... ${elapsed}s (${tCount} tokens)`;
+      updateCountDisplay(thoughtTimer, `Thinking... ${elapsed}s (${tCount} tokens)`);
     };
 
     const stopwatchInterval = setInterval(() => {
       if (!isGenerating) return;
       const totalElapsedSec = ((performance.now() - requestStartTime) / 1000).toFixed(1);
-      metricStreamTime.innerText = `${totalElapsedSec}s`;
+      updateCountDisplay(metricStreamTime, `${totalElapsedSec}s`);
 
       updateLiveThoughtTimer();
 
@@ -3324,8 +4612,8 @@ html, body {
         const genElapsed = (performance.now() - firstTokenTime) / 1000;
         if (genElapsed > 0.1 && liveGeneratedTokens > 0) {
           const currentTps = (liveGeneratedTokens / genElapsed).toFixed(1);
-          metricTps.innerText = `${currentTps} t/s`;
-          metricEvalTokens.innerText = liveGeneratedTokens;
+          updateCountDisplay(metricTps, `${currentTps} t/s`);
+          updateCountDisplay(metricEvalTokens, liveGeneratedTokens.toLocaleString());
         }
       }
     }, 100);
@@ -3355,14 +4643,14 @@ html, body {
         if (streamElapsed > 0.05) {
           const currentTps = parseFloat((liveGeneratedTokens / streamElapsed).toFixed(1));
           if (currentTps > peakTps) peakTps = currentTps;
-          metricTps.innerText = `${currentTps} t/s`;
-          if (streamMeta) streamMeta.innerText = `${liveGeneratedTokens.toLocaleString()} tokens · ${currentTps} t/s`;
+          updateCountDisplay(metricTps, `${currentTps} t/s`);
+          if (streamMeta) updateCountDisplay(streamMeta, `${liveGeneratedTokens.toLocaleString()} tokens · ${currentTps} t/s`);
         }
       }
 
-      metricEvalTokens.innerText = liveGeneratedTokens.toLocaleString();
+      updateCountDisplay(metricEvalTokens, liveGeneratedTokens.toLocaleString());
       const totalUsed = estimatedPromptTokens + liveGeneratedTokens;
-      metricCtxLabel.innerText = `${totalUsed.toLocaleString()} / ${maxCtx.toLocaleString()}`;
+      updateCountDisplay(metricCtxLabel, `${totalUsed.toLocaleString()} / ${maxCtx.toLocaleString()}`);
       const pct = Math.min(100, Math.round((totalUsed / maxCtx) * 100));
       ctxMeterFill.style.width = `${pct}%`;
       if (pct > 90) ctxMeterFill.className = 'ctx-meter-fill danger';
@@ -3454,7 +4742,7 @@ html, body {
           if (!firstTokenTime && (thinkPart || contentPart)) {
             firstTokenTime = performance.now();
             const ttft = Math.round(firstTokenTime - requestStartTime);
-            metricTtft.innerText = `${ttft} ms`;
+            updateCountDisplay(metricTtft, `${ttft} ms`);
             const stageText = thinkPart ? 'Reasoning...' : 'Generating...';
             metricStreamStatus.innerText = stageText;
             metricStreamStatus.style.color = 'var(--accent-rubric)';
@@ -3502,7 +4790,7 @@ html, body {
                   accumulatedAnswer += parts[1] || '';
                   if (thoughtPulse) thoughtPulse.style.display = 'none';
                   const duration = thoughtStartTime ? ((thoughtEndTime - thoughtStartTime) / 1000).toFixed(1) : '0.0';
-                  if (thoughtTimer) thoughtTimer.innerText = `Thought for ${duration}s (${estimateTokens(accumulatedThought).toLocaleString()} tokens)`;
+                  if (thoughtTimer) updateCountDisplay(thoughtTimer, `Thought for ${duration}s (${estimateTokens(accumulatedThought).toLocaleString()} tokens)`);
                   const stageText = 'Generating...';
                   metricStreamStatus.innerText = stageText;
                   metricStreamStatus.style.color = 'var(--accent-rubric)';
@@ -3513,7 +4801,7 @@ html, body {
                   thoughtEndTime = performance.now();
                   if (thoughtPulse) thoughtPulse.style.display = 'none';
                   const duration = thoughtStartTime ? ((thoughtEndTime - thoughtStartTime) / 1000).toFixed(1) : '0.0';
-                  if (thoughtTimer) thoughtTimer.innerText = `Thought for ${duration}s (${estimateTokens(accumulatedThought).toLocaleString()} tokens)`;
+                  if (thoughtTimer) updateCountDisplay(thoughtTimer, `Thought for ${duration}s (${estimateTokens(accumulatedThought).toLocaleString()} tokens)`);
                   const stageText = 'Generating...';
                   metricStreamStatus.innerText = stageText;
                   metricStreamStatus.style.color = 'var(--accent-rubric)';
@@ -3541,7 +4829,7 @@ html, body {
                   accumulatedAnswer += parts[1] || '';
                   if (thoughtPulse) thoughtPulse.style.display = 'none';
                   const duration = ((thoughtEndTime - thoughtStartTime) / 1000).toFixed(1);
-                  if (thoughtTimer) thoughtTimer.innerText = `Thought for ${duration}s (${estimateTokens(accumulatedThought).toLocaleString()} tokens)`;
+                  if (thoughtTimer) updateCountDisplay(thoughtTimer, `Thought for ${duration}s (${estimateTokens(accumulatedThought).toLocaleString()} tokens)`);
                   const stageText2 = 'Generating...';
                   metricStreamStatus.innerText = stageText2;
                   metricStreamStatus.style.color = 'var(--accent-rubric)';
@@ -3571,7 +4859,7 @@ html, body {
         thoughtEndTime = performance.now();
         if (thoughtPulse) thoughtPulse.style.display = 'none';
         const duration = thoughtStartTime ? ((thoughtEndTime - thoughtStartTime) / 1000).toFixed(1) : '0.0';
-        if (thoughtTimer) thoughtTimer.innerText = `Thought for ${duration}s (${estimateTokens(accumulatedThought).toLocaleString()} tokens)`;
+        if (thoughtTimer) updateCountDisplay(thoughtTimer, `Thought for ${duration}s (${estimateTokens(accumulatedThought).toLocaleString()} tokens)`);
       }
 
       
@@ -3590,22 +4878,23 @@ html, body {
       let totalSec = ((performance.now() - requestStartTime) / 1000).toFixed(1);
       if (finalChunkData) {
         if (finalChunkData.prompt_eval_count) {
-          metricPromptTokens.innerText = Number(finalChunkData.prompt_eval_count).toLocaleString();
+          updateCountDisplay(metricPromptTokens, Number(finalChunkData.prompt_eval_count).toLocaleString());
         }
         if (finalChunkData.eval_count) {
-          metricEvalTokens.innerText = Number(finalChunkData.eval_count).toLocaleString();
+          updateCountDisplay(metricEvalTokens, Number(finalChunkData.eval_count).toLocaleString());
         }
         if (finalChunkData.eval_duration && finalChunkData.eval_count) {
           const seconds = finalChunkData.eval_duration / 1e9;
           finalTps = (finalChunkData.eval_count / seconds).toFixed(1);
-          metricTps.innerText = `${finalTps} t/s`;
+          updateCountDisplay(metricTps, `${finalTps} t/s`);
         }
         if (finalChunkData.total_duration) {
           totalSec = (finalChunkData.total_duration / 1e9).toFixed(1);
         }
-        metricStreamTime.innerText = `${totalSec}s`;
+        updateCountDisplay(metricStreamTime, `${totalSec}s`);
         metricStreamStatus.innerText = 'Completed';
         metricStreamStatus.style.color = 'var(--success)';
+        if (streamMeta) updateCountDisplay(streamMeta, `${(finalChunkData.eval_count || liveGeneratedTokens).toLocaleString()} tokens · ${finalTps} t/s`);
 
         
         lastBenchmarkProfile = {
@@ -3658,7 +4947,7 @@ html, body {
       clearInterval(stopwatchInterval);
       if (err.name === 'AbortError') {
         const elapsedSec = ((performance.now() - requestStartTime) / 1000).toFixed(1);
-        metricStreamTime.innerText = `${elapsedSec}s`;
+        updateCountDisplay(metricStreamTime, `${elapsedSec}s`);
         const statusLabel = wasHardPurged ? 'Evicted' : 'Stopped';
         metricStreamStatus.innerText = statusLabel;
         metricStreamStatus.style.color = 'var(--danger)';
@@ -3668,17 +4957,17 @@ html, body {
         } else {
           const genDuration = (performance.now() - firstTokenTime) / 1000;
           if (genDuration > 0.1 && liveGeneratedTokens > 0) {
-            metricTps.innerText = `${(liveGeneratedTokens / genDuration).toFixed(1)} t/s`;
+            updateCountDisplay(metricTps, `${(liveGeneratedTokens / genDuration).toFixed(1)} t/s`);
           }
         }
-        metricEvalTokens.innerText = liveGeneratedTokens.toLocaleString();
+        updateCountDisplay(metricEvalTokens, liveGeneratedTokens.toLocaleString());
 
         if (isInsideThink) {
           isInsideThink = false;
           thoughtEndTime = performance.now();
           if (thoughtPulse) thoughtPulse.style.display = 'none';
           const duration = thoughtStartTime ? ((thoughtEndTime - thoughtStartTime) / 1000).toFixed(1) : '0.0';
-          if (thoughtTimer) thoughtTimer.innerText = `Thought for ${duration}s (${estimateTokens(accumulatedThought).toLocaleString()} tokens)`;
+          if (thoughtTimer) updateCountDisplay(thoughtTimer, `Thought for ${duration}s (${estimateTokens(accumulatedThought).toLocaleString()} tokens)`);
         }
 
         accumulatedContent = (accumulatedThought ? `<think>${accumulatedThought}</think>` : '') + accumulatedAnswer;
@@ -3799,7 +5088,7 @@ html, body {
     regenBtn.innerText = 'Regenerate';
     regenBtn.title = 'Re-generate response';
     regenBtn.addEventListener('click', () => {
-      regenerateLastResponse();
+      regenerateLastAssistant();
     });
     actionsBar.appendChild(regenBtn);
 
@@ -3897,8 +5186,8 @@ html, body {
           if (data.total && data.completed) {
             const pct = Math.round((data.completed / data.total) * 100);
             pullProgressBar.style.width = `${pct}%`;
-            pullPercentageText.innerText = `${pct}%`;
-            pullBytesText.innerText = `${formatBytes(data.completed)} / ${formatBytes(data.total)}`;
+            updateCountDisplay(pullPercentageText, `${pct}%`);
+            updateCountDisplay(pullBytesText, `${formatBytes(data.completed)} / ${formatBytes(data.total)}`);
 
             const now = performance.now();
             const elapsed = (now - lastTime) / 1000;
@@ -3906,7 +5195,7 @@ html, body {
               const diffBytes = data.completed - lastCompletedBytes;
               if (diffBytes > 0) {
                 const speedMBs = (diffBytes / (1024 * 1024 * elapsed)).toFixed(1);
-                pullSpeedText.innerText = `${speedMBs} MB/s`;
+                updateCountDisplay(pullSpeedText, `${speedMBs} MB/s`);
               }
               lastCompletedBytes = data.completed;
               lastTime = now;
@@ -4052,7 +5341,7 @@ html, body {
     document.getElementById('settingOllamaHost').value = config.host;
     document.getElementById('settingNumCtx').value = config.num_ctx;
     document.getElementById('settingTemperature').value = config.temperature;
-    document.getElementById('tempValueLabel').innerText = config.temperature;
+    updateCountDisplay(document.getElementById('tempValueLabel'), config.temperature);
     document.getElementById('settingSystemPromptPreset').value = config.systemPreset || 'academic';
     document.getElementById('settingOperatingMode').value = config.operatingMode || 'reasoning';
     document.getElementById('settingSystemPrompt').value = config.systemPrompt || '';
@@ -4067,7 +5356,7 @@ html, body {
 
   document.getElementById('settingTemperature').addEventListener('input', (e) => {
     const val = parseFloat(e.target.value).toFixed(2);
-    document.getElementById('tempValueLabel').innerText = val;
+    updateCountDisplay(document.getElementById('tempValueLabel'), val);
     let label = 'Balanced';
     if (val < 0.3) label = 'Deterministic / Precise';
     else if (val < 0.6) label = 'Focused';
