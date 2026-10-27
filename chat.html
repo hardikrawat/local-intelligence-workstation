@@ -3758,7 +3758,7 @@ html, body {
 /* ─── Image Generation Studio ────────────────────────────────────────── */
 .image-studio-grid {
   display: grid;
-  grid-template-columns: 340px 1fr;
+  grid-template-columns: 350px 1fr;
   height: 100%;
   width: 100%;
 }
@@ -3768,9 +3768,10 @@ html, body {
   border-right: 1px solid var(--border-frame);
   display: flex;
   flex-direction: column;
-  padding: 14px;
+  padding: 12px 14px;
   overflow-y: auto;
-  gap: 12px;
+  gap: 10px;
+  box-sizing: border-box;
 }
 
 .inspector-section-header {
@@ -3784,21 +3785,30 @@ html, body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-shrink: 0;
+}
+
+.inspector-title {
+  color: var(--text-main);
+  letter-spacing: 0.4px;
 }
 
 .backend-status-indicator {
   font-family: var(--font-mono);
   font-size: 9.5px;
-  font-weight: 600;
-  padding: 1px 5px;
-  border: 1px solid var(--border-frame);
+  font-weight: 700;
+  padding: 2px 6px;
+  border: 1px solid var(--border-dark);
   background: var(--bg-btn);
+  color: var(--text-muted);
+  border-radius: 0;
+  line-height: 1;
 }
 
 .backend-status-indicator.online {
   color: #1e7e34;
   border-color: #28a745;
-  background: rgba(40, 167, 69, 0.08);
+  background: rgba(40, 167, 69, 0.1);
 }
 
 .inspector-field {
@@ -3807,42 +3817,134 @@ html, body {
   gap: 4px;
 }
 
-.inspector-field label {
+.field-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.inspector-field label,
+.field-label-row label {
   font-size: 11px;
   font-weight: 600;
   color: var(--text-main);
   font-family: var(--font-mono);
+  margin: 0;
+}
+
+.field-hint {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--text-muted);
 }
 
 .inspector-textarea {
   font-family: var(--font-mono);
   font-size: 11.5px;
+  border: 1px solid var(--border-dark);
+  background: #FFFFFF;
+  color: var(--text-main);
+  padding: 6px 8px;
   resize: vertical;
   line-height: 1.4;
+  border-radius: 0;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.inspector-textarea:focus {
+  border-color: #000000;
 }
 
 .inspector-aspect-presets {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 4px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 3px;
+  margin-top: 2px;
 }
 
 .aspect-preset-btn {
   font-family: var(--font-mono);
   font-size: 10px;
-  padding: 4px 2px;
+  font-weight: 600;
+  padding: 4px 1px;
   background: var(--bg-btn);
-  border: 1px solid var(--border-frame);
-  color: var(--text-muted);
+  border: 1px solid var(--border-dark);
+  color: var(--text-main);
   cursor: pointer;
   text-align: center;
   border-radius: 0;
+  white-space: nowrap;
+  box-sizing: border-box;
+  transition: all 0.1s ease;
+}
+
+.aspect-preset-btn:hover {
+  background: #333333;
+  color: #FFFFFF;
 }
 
 .aspect-preset-btn.active {
-  background: var(--text-main);
-  color: var(--bg-parchment);
-  border-color: var(--border-dark);
+  background: #1A1816;
+  color: #FFFFFF;
+  border-color: #000000;
+  font-weight: 700;
+}
+
+.dimension-inputs-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.dim-input-col {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border-dark);
+  background: #FFFFFF;
+  height: 25px;
+  box-sizing: border-box;
+}
+
+.dim-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 0 6px;
+  background: var(--bg-top-bar);
+  height: 100%;
+  display: inline-flex;
+  align-items: center;
+  border-right: 1px solid var(--border-frame);
+  color: var(--text-muted);
+}
+
+.dim-field {
+  border: none !important;
+  background: transparent !important;
+  width: 100% !important;
+  height: 100% !important;
+  font-family: var(--font-mono) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  padding: 0 6px !important;
+  outline: none !important;
+  box-sizing: border-box !important;
+}
+
+.dim-multiply {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.dim-px {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
 }
 
 .inspector-field-row {
@@ -3850,30 +3952,116 @@ html, body {
   gap: 10px;
 }
 
+/* Custom Precision Sliders */
+.slider-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  background: var(--bg-btn);
+  border: 1px solid var(--border-rule);
+  padding: 1px 5px;
+  color: var(--text-main);
+  min-width: 28px;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.workstation-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 16px;
+  background: transparent;
+  cursor: pointer;
+  margin: 3px 0 0 0;
+  outline: none;
+}
+
+.workstation-slider::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 4px;
+  background: var(--border-frame);
+  border: none;
+  border-radius: 0;
+}
+
+.workstation-slider::-moz-range-track {
+  width: 100%;
+  height: 4px;
+  background: var(--border-frame);
+  border: none;
+  border-radius: 0;
+}
+
+.workstation-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 14px;
+  width: 10px;
+  background: #1A1816;
+  border: 1px solid #000000;
+  border-radius: 0;
+  margin-top: -5px;
+  cursor: ew-resize;
+  transition: background 0.1s;
+}
+
+.workstation-slider::-moz-range-thumb {
+  height: 14px;
+  width: 10px;
+  background: #1A1816;
+  border: 1px solid #000000;
+  border-radius: 0;
+  cursor: ew-resize;
+  transition: background 0.1s;
+}
+
+.workstation-slider:hover::-webkit-slider-thumb {
+  background: #444444;
+}
+
+.workstation-slider:hover::-moz-range-thumb {
+  background: #444444;
+}
+
 .inspector-actions {
   display: flex;
   gap: 6px;
-  margin-top: 6px;
+  margin-top: 4px;
 }
 
 .generate-btn {
   background: #1A1816 !important;
-  color: #F8F6ED !important;
+  color: #FFFFFF !important;
+  border: 1px solid #000000 !important;
+  border-radius: 0 !important;
+  font-family: var(--font-mono) !important;
+  font-size: 11px !important;
   font-weight: 700 !important;
   letter-spacing: 0.5px;
   flex: 1;
-  padding: 8px 12px !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer;
+  box-sizing: border-box !important;
+  transition: background 0.1s ease;
 }
 
-[data-theme="dark"] .generate-btn {
-  background: #FAF8F2 !important;
-  color: #1A1816 !important;
+.generate-btn:hover {
+  background: #333333 !important;
+}
+
+.generate-btn:active {
+  background: #000000 !important;
 }
 
 .generation-progress-box {
   background: var(--bg-btn);
-  border: 1px solid var(--border-frame);
-  padding: 8px;
+  border: 1px solid var(--border-dark);
+  padding: 8px 10px;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -3881,15 +4069,15 @@ html, body {
 
 .progress-bar-rail {
   height: 6px;
-  background: var(--bg-transcript);
-  border: 1px solid var(--border-frame);
+  background: #FFFFFF;
+  border: 1px solid var(--border-dark);
   position: relative;
   overflow: hidden;
 }
 
 .progress-bar-fill {
   height: 100%;
-  background: var(--count-update-color);
+  background: #1A1816;
   transition: width 0.2s ease;
 }
 
@@ -3898,37 +4086,49 @@ html, body {
   justify-content: space-between;
   font-family: var(--font-mono);
   font-size: 10px;
-  color: var(--text-muted);
+  font-weight: 600;
+  color: var(--text-main);
 }
 
-/* Stage Canvas */
+/* ─── Stage Canvas ─── */
 .image-studio-stage {
   display: flex;
   flex-direction: column;
   height: 100%;
   overflow: hidden;
-  background: #141312;
+  background: #121110;
 }
 
 .stage-toolbar {
   background: var(--bg-top-bar);
-  border-bottom: 1px solid var(--border-frame);
-  padding: 6px 12px;
+  border-bottom: 1px solid var(--border-dark);
+  padding: 0 12px;
+  height: 34px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .stage-meta-info {
   font-family: var(--font-mono);
   font-size: 11px;
-  color: var(--text-muted);
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stage-status-dot {
+  color: #73C991;
+  font-size: 10px;
 }
 
 .stage-actions {
   display: flex;
   gap: 6px;
+  align-items: center;
 }
 
 .stage-canvas-area {
@@ -3938,64 +4138,109 @@ html, body {
   justify-content: center;
   position: relative;
   overflow: auto;
-  padding: 16px;
-  background: radial-gradient(circle, #252422 10%, #141312 90%);
+  padding: 24px;
+  background-color: #121110;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 
+/* Technical Reticle Placeholder */
 .stage-placeholder {
   text-align: center;
-  color: #8C877D;
   font-family: var(--font-mono);
-  max-width: 420px;
+  max-width: 440px;
 }
 
-.placeholder-icon {
-  font-size: 40px;
-  margin-bottom: 8px;
+.placeholder-crosshair-box {
+  position: relative;
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.25);
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
 }
 
-.placeholder-text {
+.corner-mark {
+  position: absolute;
+  color: rgba(255, 255, 255, 0.4);
+  font-family: monospace;
   font-size: 14px;
+  line-height: 1;
+  pointer-events: none;
+}
+.corner-mark.top-left { top: 4px; left: 6px; }
+.corner-mark.top-right { top: 4px; right: 6px; }
+.corner-mark.btm-left { bottom: 4px; left: 6px; }
+.corner-mark.btm-right { bottom: 4px; right: 6px; }
+
+.placeholder-glyph {
+  font-size: 20px;
+  color: #E5C07B;
+  margin-bottom: 2px;
+}
+
+.placeholder-title {
+  font-size: 11.5px;
   font-weight: 700;
-  letter-spacing: 0.5px;
-  margin-bottom: 4px;
-  color: #DDD8CD;
+  letter-spacing: 0.8px;
+  color: #ECEBE5;
+}
+
+.placeholder-desc {
+  font-size: 11px;
+  line-height: 1.5;
+  color: #8E8A7E;
 }
 
 .placeholder-sub {
-  font-size: 11px;
-  line-height: 1.5;
+  font-size: 9.5px;
+  color: #66645E;
+  margin-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 8px;
+  width: 100%;
 }
 
 .stage-active-image {
   max-width: 100%;
   max-height: 100%;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
-  border: 1px solid #444;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+  border: 1px solid var(--border-dark);
   image-rendering: -webkit-optimize-contrast;
   cursor: zoom-in;
 }
 
+/* ─── Bottom History Filmstrip ─── */
 .stage-filmstrip-bar {
-  height: 96px;
+  height: 76px;
+  min-height: 76px;
   background: var(--bg-parchment);
-  border-top: 1px solid var(--border-frame);
+  border-top: 1px solid var(--border-dark);
   display: flex;
   align-items: center;
-  padding: 6px 12px;
-  gap: 10px;
+  padding: 0 12px;
+  gap: 12px;
   flex-shrink: 0;
+  box-sizing: border-box;
 }
 
-.filmstrip-label {
+.filmstrip-header-tag {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 10.5px;
   font-weight: 700;
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-  transform: rotate(180deg);
   letter-spacing: 0.5px;
-  color: var(--text-muted);
+  color: var(--text-main);
+  white-space: nowrap;
+  border-right: 1px solid var(--border-frame);
+  padding-right: 12px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
 }
 
 .filmstrip-scroll {
@@ -4005,30 +4250,31 @@ html, body {
   overflow-x: auto;
   align-items: center;
   height: 100%;
+  scrollbar-width: thin;
 }
 
 .filmstrip-thumb {
-  height: 76px;
-  width: 76px;
+  height: 56px;
+  width: 56px;
   object-fit: cover;
-  border: 1px solid var(--border-frame);
+  border: 1px solid var(--border-dark);
   cursor: pointer;
   opacity: 0.85;
-  transition: all 0.15s ease;
+  transition: all 0.1s ease;
   flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .filmstrip-thumb:hover, .filmstrip-thumb.active {
   opacity: 1;
-  border-color: var(--text-main);
-  transform: scale(1.04);
+  border-color: #000000;
+  outline: 2px solid #1A1816;
 }
 
 .filmstrip-empty-text {
   font-family: var(--font-mono);
   font-size: 11px;
   color: var(--text-muted);
-  font-style: italic;
 }
 
 /* ─── Audio Lab Studio ───────────────────────────────────────────────── */
@@ -4572,32 +4818,44 @@ html, body {
       <!-- Left Control Inspector -->
       <aside class="image-studio-inspector">
         <div class="inspector-section-header">
-          <span>DIFFUSION SYNTHESIS CONTROLS</span>
+          <span class="inspector-title">DIFFUSION SYNTHESIS CONTROLS</span>
           <span class="backend-status-indicator" id="sdBackendStatusBadge">○ STANDBY</span>
         </div>
 
         <div class="inspector-field">
-          <label for="imgModelSelect">Active Checkpoint / Model:</label>
+          <div class="field-label-row">
+            <label for="imgModelSelect">Active Checkpoint / Model:</label>
+            <span class="field-hint" id="sdBackendTypeBadge">SD / Forge / ComfyUI</span>
+          </div>
           <div style="display:flex; gap:4px;">
-            <select id="imgModelSelect" class="form-input" style="flex:1;">
+            <select id="imgModelSelect" class="top-select-btn" style="flex:1; width:100%; height:25px;">
               <option value="">Detecting SD Checkpoints...</option>
             </select>
-            <button type="button" class="composer-btn" id="refreshImgModelsBtn" title="Refresh local checkpoints">↻</button>
+            <button type="button" class="top-btn" id="refreshImgModelsBtn" title="Refresh local checkpoints" style="height:25px; padding:0 8px;">↻</button>
           </div>
         </div>
 
         <div class="inspector-field">
-          <label for="imgPromptInput">Synthesis Prompt:</label>
-          <textarea id="imgPromptInput" class="form-input inspector-textarea" rows="4" placeholder="Detailed prompt describing subjects, lighting, artistic style, lens, composition..."></textarea>
+          <div class="field-label-row">
+            <label for="imgPromptInput">Synthesis Prompt:</label>
+            <span class="field-hint">Positive</span>
+          </div>
+          <textarea id="imgPromptInput" class="form-input inspector-textarea" rows="3" placeholder="Detailed prompt describing subjects, lighting, artistic style, lens, composition..."></textarea>
         </div>
 
         <div class="inspector-field">
-          <label for="imgNegPromptInput">Negative Prompt:</label>
+          <div class="field-label-row">
+            <label for="imgNegPromptInput">Negative Prompt:</label>
+            <span class="field-hint">Undesired</span>
+          </div>
           <textarea id="imgNegPromptInput" class="form-input inspector-textarea" rows="2" placeholder="blurry, distorted, artifacts, lowres, watermark..."></textarea>
         </div>
 
         <div class="inspector-field">
-          <label>Aspect Ratio & Dimensions:</label>
+          <div class="field-label-row">
+            <label>Aspect Ratio & Dimensions:</label>
+            <span class="field-hint" id="imgResTotalPx">512×512 (0.26 MP)</span>
+          </div>
           <div class="inspector-aspect-presets" id="imgAspectPresets">
             <button type="button" class="aspect-preset-btn active" data-w="512" data-h="512">1:1 (512²)</button>
             <button type="button" class="aspect-preset-btn" data-w="768" data-h="768">1:1 (768²)</button>
@@ -4605,21 +4863,23 @@ html, body {
             <button type="button" class="aspect-preset-btn" data-w="768" data-h="1024">3:4 Port</button>
             <button type="button" class="aspect-preset-btn" data-w="1024" data-h="576">16:9 Land</button>
           </div>
-          <div style="display:flex; gap:8px; margin-top:4px;">
-            <div style="flex:1;">
-              <span style="font-size:10px; color:var(--text-muted);">Width:</span>
-              <input type="number" id="imgWidthInput" class="form-input" value="512" min="256" max="2048" step="64">
+          <div class="dimension-inputs-row">
+            <div class="dim-input-col">
+              <span class="dim-label">W</span>
+              <input type="number" id="imgWidthInput" class="dim-field" value="512" min="256" max="2048" step="64">
             </div>
-            <div style="flex:1;">
-              <span style="font-size:10px; color:var(--text-muted);">Height:</span>
-              <input type="number" id="imgHeightInput" class="form-input" value="512" min="256" max="2048" step="64">
+            <span class="dim-multiply">×</span>
+            <div class="dim-input-col">
+              <span class="dim-label">H</span>
+              <input type="number" id="imgHeightInput" class="dim-field" value="512" min="256" max="2048" step="64">
             </div>
+            <span class="dim-px">px</span>
           </div>
         </div>
 
         <div class="inspector-field">
           <label for="imgSamplerSelect">Sampling Method:</label>
-          <select id="imgSamplerSelect" class="form-input">
+          <select id="imgSamplerSelect" class="top-select-btn" style="width:100%; height:25px;">
             <option value="Euler a">Euler a</option>
             <option value="Euler">Euler</option>
             <option value="DPM++ 2M Karras">DPM++ 2M Karras</option>
@@ -4630,29 +4890,39 @@ html, body {
 
         <div class="inspector-field-row">
           <div style="flex:1;">
-            <label for="imgStepsInput">Steps: <span id="imgStepsLabel">25</span></label>
-            <input type="range" id="imgStepsInput" min="10" max="100" value="25" step="1">
+            <div class="field-label-row">
+              <label for="imgStepsInput">Steps:</label>
+              <span class="slider-badge" id="imgStepsLabel">25</span>
+            </div>
+            <input type="range" id="imgStepsInput" class="workstation-slider" min="10" max="100" value="25" step="1">
           </div>
           <div style="flex:1;">
-            <label for="imgCfgInput">CFG Scale: <span id="imgCfgLabel">7.0</span></label>
-            <input type="range" id="imgCfgInput" min="1.0" max="20.0" value="7.0" step="0.5">
+            <div class="field-label-row">
+              <label for="imgCfgInput">CFG Scale:</label>
+              <span class="slider-badge" id="imgCfgLabel">7.0</span>
+            </div>
+            <input type="range" id="imgCfgInput" class="workstation-slider" min="1.0" max="20.0" value="7.0" step="0.5">
           </div>
         </div>
 
         <div class="inspector-field-row">
-          <div style="flex:1;">
-            <label for="imgSeedInput">Seed (-1 = Random):</label>
-            <input type="number" id="imgSeedInput" class="form-input" value="-1">
+          <div style="flex:1.2;">
+            <div class="field-label-row">
+              <label for="imgSeedInput">Seed (-1 = Random):</label>
+            </div>
+            <input type="number" id="imgSeedInput" class="form-input" style="height:25px; width:100%; box-sizing:border-box;" value="-1">
           </div>
-          <div style="flex:1;">
-            <label for="imgBatchInput">Batch Size:</label>
-            <input type="number" id="imgBatchInput" class="form-input" value="1" min="1" max="4">
+          <div style="flex:0.8;">
+            <div class="field-label-row">
+              <label for="imgBatchInput">Batch Size:</label>
+            </div>
+            <input type="number" id="imgBatchInput" class="form-input" style="height:25px; width:100%; box-sizing:border-box;" value="1" min="1" max="4">
           </div>
         </div>
 
         <div class="inspector-actions">
-          <button type="button" class="composer-btn generate-btn" id="imgGenerateBtn">⚡ GENERATE IMAGE</button>
-          <button type="button" class="composer-btn" id="imgRandomizePromptBtn" title="Randomize Seed & Add Quality Modifiers">🎲 Randomize</button>
+          <button type="button" class="generate-btn" id="imgGenerateBtn">⚡ GENERATE IMAGE</button>
+          <button type="button" class="top-btn" id="imgRandomizePromptBtn" title="Randomize Seed & Add Quality Modifiers" style="height:32px; padding:0 12px; font-weight:700;">🎲 Random</button>
         </div>
 
         <div id="imgGenerationProgress" class="generation-progress-box" style="display:none;">
@@ -4669,7 +4939,10 @@ html, body {
       <!-- Center Stage Canvas -->
       <section class="image-studio-stage">
         <div class="stage-toolbar">
-          <div class="stage-meta-info" id="stageMetaInfo">Ready for image synthesis</div>
+          <div class="stage-meta-info" id="stageMetaInfo">
+            <span class="stage-status-dot">●</span>
+            <span>Diffusion Standby · 512×512 · Euler a</span>
+          </div>
           <div class="stage-actions">
             <button type="button" class="top-btn" id="stageZoomBtn" title="Lightbox Zoom Fullscreen">🔍 Lightbox</button>
             <button type="button" class="top-btn" id="stageDownloadBtn" title="Download PNG">⬇ Download</button>
@@ -4680,20 +4953,27 @@ html, body {
 
         <div class="stage-canvas-area" id="stageCanvasArea">
           <div class="stage-placeholder" id="stagePlaceholder">
-            <div class="placeholder-icon">🎨</div>
-            <div class="placeholder-text">Local Diffusion Canvas</div>
-            <div class="placeholder-sub">Configure prompts & parameters on the left, then click Generate Image.<br>Requires Stable Diffusion WebUI or ComfyUI running locally.</div>
+            <div class="placeholder-crosshair-box">
+              <span class="corner-mark top-left">┌</span>
+              <span class="corner-mark top-right">┐</span>
+              <span class="corner-mark btm-left">└</span>
+              <span class="corner-mark btm-right">┘</span>
+              <div class="placeholder-glyph">◈</div>
+              <div class="placeholder-title">DIFFUSION CANVAS VIEWPORT</div>
+              <div class="placeholder-desc">Configure synthesis prompt and parameters on the left, then click Generate Image.</div>
+              <div class="placeholder-sub">Engine: Automatic1111 / SD WebUI / Forge / ComfyUI</div>
+            </div>
           </div>
           <img id="stageImage" class="stage-active-image" style="display:none;" alt="Generated Artwork">
         </div>
 
         <!-- Bottom History Filmstrip -->
         <div class="stage-filmstrip-bar">
-          <span class="filmstrip-label">RECENT GENERATIONS</span>
+          <div class="filmstrip-header-tag">GALLERY (<span id="filmstripCount">0</span>)</div>
           <div class="filmstrip-scroll" id="imageFilmstripScroll">
-            <span class="filmstrip-empty-text">Past generated images will appear here.</span>
+            <span class="filmstrip-empty-text">No images generated in this session yet.</span>
           </div>
-          <button type="button" class="top-btn" id="clearFilmstripBtn" title="Clear gallery history">Clear</button>
+          <button type="button" class="top-btn" id="clearFilmstripBtn" title="Clear gallery history" style="height:24px; font-size:10px; padding:0 8px;">Clear All</button>
         </div>
       </section>
     </main>
@@ -4717,8 +4997,8 @@ html, body {
             <div class="recorder-vu-bar" id="audioRecordVuBar" style="width:0%;"></div>
           </div>
           <div class="recorder-controls">
-            <button type="button" class="composer-btn mic-record-btn" id="audioRecordToggleBtn">● Record Audio</button>
-            <button type="button" class="composer-btn" id="audioRecordResetBtn" style="display:none;">Reset</button>
+            <button type="button" class="generate-btn mic-record-btn" id="audioRecordToggleBtn" style="height:32px;">● Record Audio</button>
+            <button type="button" class="top-btn" id="audioRecordResetBtn" style="display:none; height:32px; padding:0 10px;">Reset</button>
           </div>
         </div>
 
@@ -4739,7 +5019,7 @@ html, body {
 
         <div class="inspector-field">
           <label for="audioLangSelect">Spoken Language:</label>
-          <select id="audioLangSelect" class="form-input">
+          <select id="audioLangSelect" class="top-select-btn" style="width:100%; height:25px;">
             <option value="auto">Auto-Detect Language</option>
             <option value="en">English</option>
             <option value="es">Spanish</option>
@@ -4754,7 +5034,7 @@ html, body {
         </div>
 
         <div class="inspector-actions">
-          <button type="button" class="composer-btn generate-btn" id="audioTranscribeBtn">⚡ TRANSCRIBE SPEECH</button>
+          <button type="button" class="generate-btn" id="audioTranscribeBtn">⚡ TRANSCRIBE SPEECH</button>
         </div>
 
         <div id="audioTranscribeStatus" class="inline-status-badge" style="display:none; margin-top:8px;"></div>
@@ -4763,11 +5043,14 @@ html, body {
       <!-- Center Transcript & TTS Synthesis Stage -->
       <section class="audio-lab-stage">
         <div class="stage-toolbar">
-          <div class="stage-meta-info" id="audioStageMetaInfo">Audio Document & Transcript Viewer</div>
+          <div class="stage-meta-info" id="audioStageMetaInfo">
+            <span class="stage-status-dot">●</span>
+            <span>Audio Document & Transcript Viewer</span>
+          </div>
           <div class="stage-actions">
-            <button type="button" class="top-btn" id="copyAudioTranscriptBtn">📋 Copy Text</button>
-            <button type="button" class="top-btn" id="sendAudioToChatBtn">💬 Send to Chat</button>
-            <button type="button" class="top-btn" id="downloadAudioTranscriptBtn">⬇ Export TXT</button>
+            <button type="button" class="top-btn" id="copyAudioTranscriptBtn">📋 Copy</button>
+            <button type="button" class="top-btn" id="sendAudioToChatBtn">💬 To Chat</button>
+            <button type="button" class="top-btn" id="downloadAudioTranscriptBtn">⬇ Export</button>
           </div>
         </div>
 
@@ -10850,6 +11133,16 @@ html, body {
 
   // ─── 3. Image Generation Studio ───────────────────────────────────────
 
+  function updateResolutionHint() {
+    const w = parseInt(document.getElementById('imgWidthInput')?.value) || 512;
+    const h = parseInt(document.getElementById('imgHeightInput')?.value) || 512;
+    const hint = document.getElementById('imgResTotalPx');
+    if (hint) {
+      const mp = ((w * h) / 1000000).toFixed(2);
+      hint.textContent = `${w}×${h} (${mp} MP)`;
+    }
+  }
+
   // Aspect Ratio Preset Buttons
   document.getElementById('imgAspectPresets')?.addEventListener('click', (e) => {
     const btn = e.target.closest('.aspect-preset-btn');
@@ -10862,7 +11155,11 @@ html, body {
     const hInp = document.getElementById('imgHeightInput');
     if (wInp) wInp.value = w;
     if (hInp) hInp.value = h;
+    updateResolutionHint();
   });
+
+  document.getElementById('imgWidthInput')?.addEventListener('input', updateResolutionHint);
+  document.getElementById('imgHeightInput')?.addEventListener('input', updateResolutionHint);
 
   // Sliders
   document.getElementById('imgStepsInput')?.addEventListener('input', (e) => {
@@ -11037,7 +11334,7 @@ html, body {
       if (placeholder) placeholder.style.display = 'none';
 
       if (metaInfo) {
-        metaInfo.textContent = `${payload.width}×${payload.height} · ${payload.sampler_name} · ${payload.steps} steps · CFG ${payload.cfg_scale} · ${elapsed}s`;
+        metaInfo.innerHTML = `<span class="stage-status-dot" style="color:#73C991;">●</span> <span>${payload.width}×${payload.height} · ${payload.sampler_name} · ${payload.steps} steps · CFG ${payload.cfg_scale} · ${elapsed}s</span>`;
       }
 
       // Save to History
@@ -11139,9 +11436,11 @@ html, body {
 
   function renderImageFilmstrip() {
     const filmstrip = document.getElementById('imageFilmstripScroll');
+    const countEl = document.getElementById('filmstripCount');
+    if (countEl) countEl.innerText = imageHistory.length;
     if (!filmstrip) return;
     if (imageHistory.length === 0) {
-      filmstrip.innerHTML = '<span class="filmstrip-empty-text">Past generated images will appear here.</span>';
+      filmstrip.innerHTML = '<span class="filmstrip-empty-text">No images generated in this session yet.</span>';
       return;
     }
 
@@ -11163,10 +11462,11 @@ html, body {
         if (stageImg) {
           stageImg.src = `data:image/png;base64,${item.image}`;
           stageImg.style.display = 'block';
+          stageImg.onclick = () => openLightbox(`data:image/png;base64,${item.image}`, item.prompt || 'Generated Image');
         }
         if (placeholder) placeholder.style.display = 'none';
         if (promptInput) promptInput.value = item.prompt || '';
-        if (metaInfo) metaInfo.textContent = `Historical generation · ${item.time}`;
+        if (metaInfo) metaInfo.innerHTML = `<span class="stage-status-dot" style="color:#73C991;">●</span> <span>Historical: ${item.time} · ${item.params ? `${item.params.width}×${item.params.height}` : ''}</span>`;
 
         filmstrip.querySelectorAll('.filmstrip-thumb').forEach(t => t.classList.remove('active'));
         thumb.classList.add('active');
