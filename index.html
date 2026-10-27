@@ -142,8 +142,9 @@ html, body {
 }
 
 .top-header {
-  height: 32px;
-  min-height: 32px;
+  height: 34px;
+  min-height: 34px;
+  max-height: 34px;
   background: var(--bg-top-bar);
   border-bottom: 1px solid var(--border-frame);
   display: flex;
@@ -151,25 +152,46 @@ html, body {
   justify-content: space-between;
   padding: 0 12px;
   font-family: var(--font-mono);
+  box-sizing: border-box;
 }
 
 .top-header-left {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
+  min-width: 0;
+  flex-shrink: 1;
 }
 
 .app-title {
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 700;
   color: var(--text-main);
   letter-spacing: 0.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
+}
+
+.desktop-title-short {
+  display: none;
+}
+
+@media (max-width: 1280px) {
+  .desktop-title-full {
+    display: none;
+  }
+  .desktop-title-short {
+    display: inline;
+  }
 }
 
 .top-header-right {
   display: flex;
   align-items: center;
   gap: 6px;
+  flex-shrink: 0;
 }
 
 .top-select-btn {
@@ -183,6 +205,19 @@ html, body {
   cursor: pointer;
   outline: none;
   height: 24px;
+  box-sizing: border-box;
+}
+
+#modelSelect.top-select-btn {
+  max-width: 170px;
+  min-width: 110px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#modelModeSelect.top-select-btn {
+  max-width: 130px;
+}
 }
 
 .top-btn {
@@ -1505,15 +1540,15 @@ html, body {
 
 /* Source Tabs */
 .hub-source-tabs {
-  display: flex;
-  border-bottom: 1px solid var(--border-frame);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-bottom: 2px solid var(--border-dark);
   background: var(--bg-parchment);
   flex-shrink: 0;
-  overflow-x: auto;
 }
 
 .hub-source-tab {
-  padding: 8px 16px;
+  padding: 8px 12px;
   font-family: var(--font-mono);
   font-size: 11.5px;
   font-weight: 600;
@@ -1523,6 +1558,10 @@ html, body {
   background: transparent;
   border-bottom: 2px solid transparent;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
   transition: color 0.1s, border-color 0.1s;
   -webkit-appearance: none;
   text-decoration: none;
@@ -2348,10 +2387,10 @@ html, body {
     justify-content: center !important;
   }
 
-  /* 2-Column Equal Segmented Source Tabs */
+  /* 3-Column Equal Segmented Source Tabs */
   .hub-source-tabs {
     display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
+    grid-template-columns: repeat(3, 1fr) !important;
     width: 100% !important;
     box-sizing: border-box !important;
     border-bottom: 2px solid var(--border-dark) !important;
@@ -2360,10 +2399,11 @@ html, body {
 
   .hub-source-tab {
     width: 100% !important;
-    height: 36px !important;
-    min-height: 36px !important;
+    height: 34px !important;
+    min-height: 34px !important;
     padding: 0 4px !important;
-    font-size: 12px !important;
+    font-size: 10.5px !important;
+    font-weight: 700 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -2787,18 +2827,20 @@ html, body {
     overflow-x: hidden !important;
   }
 
-  /* 2. Top Command Header: Strategic 2-Tier Balanced Grid */
+  /* 2. Top Command Header: Strategic 2-Tier Balanced 12-Column Grid */
   .top-header {
     height: auto !important;
     min-height: auto !important;
+    max-height: none !important;
     display: grid !important;
-    grid-template-columns: auto 1fr auto auto;
-    grid-template-rows: auto auto;
-    gap: 5px 4px;
-    padding: max(6px, env(safe-area-inset-top)) 6px 6px 6px;
+    grid-template-columns: repeat(12, 1fr) !important;
+    grid-template-rows: 28px 28px !important;
+    gap: 4px 4px !important;
+    padding: max(6px, env(safe-area-inset-top)) 6px 6px 6px !important;
     background: var(--bg-top-bar);
     border-bottom: 1px solid var(--border-dark);
     flex-shrink: 0;
+    box-sizing: border-box !important;
   }
 
   .top-header-left {
@@ -2813,21 +2855,23 @@ html, body {
     display: none !important;
   }
 
+  /* ── Row 1, Col 1-2: Session Ledger Toggle ── */
   .mobile-ledger-toggle {
     display: inline-flex !important;
     align-items: center;
     justify-content: center;
-    grid-column: 1;
-    grid-row: 1;
-    height: 28px;
-    padding: 0 8px;
-    font-size: 11px;
+    grid-column: 1 / 3 !important;
+    grid-row: 1 !important;
+    height: 28px !important;
+    padding: 0 4px !important;
+    font-size: 10.5px !important;
     font-weight: 700;
     white-space: nowrap;
     background: var(--bg-btn);
     border: 1px solid var(--border-dark);
     color: var(--text-main);
     touch-action: manipulation;
+    box-sizing: border-box !important;
   }
 
   .mobile-ledger-toggle:active {
@@ -2835,128 +2879,173 @@ html, body {
     color: #FFFFFF;
   }
 
+  /* ── Row 1, Col 3-8: Segmented Studio Navigation Switcher ── */
+  .studio-nav-segmented {
+    grid-column: 3 / 9 !important;
+    grid-row: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 28px !important;
+    margin: 0 !important;
+    padding: 1px !important;
+    border: 1px solid var(--border-dark) !important;
+    background: var(--bg-parchment) !important;
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+    gap: 1px !important;
+  }
+
+  .studio-nav-btn {
+    flex: 1 1 0 !important;
+    height: 100% !important;
+    min-width: 0 !important;
+    padding: 0 2px !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+    text-overflow: ellipsis !important;
+    overflow: hidden !important;
+    border: none !important;
+    border-radius: 0 !important;
+    cursor: pointer;
+  }
+
+  /* ── Row 1, Col 9-10: New Session Button ── */
+  #newChatBtn {
+    grid-column: 9 / 11 !important;
+    grid-row: 1 !important;
+    height: 28px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 0 4px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 10.5px !important;
+    font-weight: 700 !important;
+    background: var(--bg-btn);
+    border: 1px solid var(--border-dark);
+    color: var(--text-main);
+    box-sizing: border-box !important;
+    white-space: nowrap;
+    touch-action: manipulation;
+  }
+
+  /* ── Row 1, Col 11-12: Settings Button ── */
+  #settingsBtn {
+    grid-column: 11 / 13 !important;
+    grid-row: 1 !important;
+    height: 28px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 0 4px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 3px !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    background: var(--bg-btn);
+    border: 1px solid var(--border-dark);
+    color: var(--text-main);
+    box-sizing: border-box !important;
+    white-space: nowrap;
+    touch-action: manipulation;
+  }
+
+  #settingsBtn .settings-btn-label {
+    display: none !important;
+  }
+
+  /* ── Row 2, Col 1-5: Active Model Dropdown (Wide & Uncropped) ── */
   select#modelSelect.top-select-btn {
-    grid-column: 2;
-    grid-row: 1;
-    height: 28px;
+    grid-column: 1 / 6 !important;
+    grid-row: 2 !important;
+    height: 28px !important;
     width: 100% !important;
     max-width: none !important;
     min-width: 0 !important;
-    font-size: 11px;
+    font-size: 10.5px !important;
     font-weight: 700;
     padding: 0 4px;
     border: 1px solid var(--border-dark);
     background: #FFFFFF;
     color: var(--text-main);
     text-overflow: ellipsis;
-  }
-
-  #newChatBtn {
-    grid-column: 3;
-    grid-row: 1;
-    height: 28px !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    padding: 0 6px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
-    background: var(--bg-btn);
-    border: 1px solid var(--border-dark);
-    color: var(--text-main);
     box-sizing: border-box !important;
-    white-space: nowrap;
-    touch-action: manipulation;
   }
 
-  #settingsBtn {
-    grid-column: 4;
-    grid-row: 1;
-    height: 28px !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    padding: 0 6px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 4px !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
-    background: var(--bg-btn);
-    border: 1px solid var(--border-dark);
-    color: var(--text-main);
-    box-sizing: border-box !important;
-    white-space: nowrap;
-    touch-action: manipulation;
-  }
-
+  /* ── Row 2, Col 6-8: Model Mode Dropdown ── */
   select#modelModeSelect.top-select-btn {
-    grid-column: 1 / 3;
-    grid-row: 2;
+    grid-column: 6 / 9 !important;
+    grid-row: 2 !important;
     height: 28px !important;
     width: 100% !important;
     max-width: none !important;
     min-width: 0 !important;
-    font-size: 11px !important;
+    font-size: 10.5px !important;
     font-weight: 600 !important;
-    padding: 0 4px !important;
+    padding: 0 2px !important;
     border: 1px solid var(--border-dark);
     background: var(--bg-btn);
     color: var(--text-main);
     box-sizing: border-box !important;
+    text-overflow: ellipsis;
+  }
+
+  /* ── Row 2, Col 9-10: Model Hub Button ── */
+  #modelHubBtn {
+    grid-column: 9 / 11 !important;
+    grid-row: 2 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 28px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 0 4px !important;
+    font-size: 10.5px !important;
+    font-weight: 700 !important;
+    background: var(--bg-btn);
+    border: 1px solid var(--border-dark);
+    color: var(--text-main);
+    box-sizing: border-box !important;
+    white-space: nowrap;
+    touch-action: manipulation;
+  }
+
+  /* ── Row 2, Col 11-12: Evict VRAM Button ── */
+  #vramPurgeQuickBtn {
+    grid-column: 11 / 13 !important;
+    grid-row: 2 !important;
+    height: 28px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 0 4px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 10.5px !important;
+    font-weight: 700 !important;
+    background: var(--bg-btn);
+    border: 1px solid var(--border-dark);
+    color: var(--text-main);
+    box-sizing: border-box !important;
+    white-space: nowrap;
+    touch-action: manipulation;
   }
 
   #modelsLibraryBtn {
-    grid-column: 3;
-    grid-row: 2;
-    height: 28px !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    padding: 0 6px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
-    background: var(--bg-btn);
-    border: 1px solid var(--border-dark);
-    color: var(--text-main);
-    box-sizing: border-box !important;
-    white-space: nowrap;
-    touch-action: manipulation;
-  }
-
-  #modelHubBtn {
-    grid-column: 3;
-    grid-row: 2;
     display: none !important;
-  }
-
-  #vramPurgeQuickBtn {
-    grid-column: 4;
-    grid-row: 2;
-    height: 28px !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    padding: 0 6px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
-    background: var(--bg-btn);
-    border: 1px solid var(--border-dark);
-    color: var(--text-main);
-    box-sizing: border-box !important;
-    white-space: nowrap;
-    touch-action: manipulation;
   }
 
   #settingsBtn:active,
   #newChatBtn:active,
-  #modelsLibraryBtn:active,
+  #modelHubBtn:active,
   #vramPurgeQuickBtn:active,
   .mobile-ledger-toggle:active {
     background: #1A1816 !important;
@@ -3232,33 +3321,45 @@ html, body {
   .composer-row {
     margin-top: 4px;
     padding: 6px 6px max(6px, env(safe-area-inset-bottom)) 6px;
-    gap: 5px;
+    gap: 4px;
     flex-wrap: nowrap;
     align-items: flex-end;
   }
 
   .composer-input {
     font-size: 16px !important; /* Critical: prevents iOS Safari auto-zoom on focus */
-    height: 38px;
-    min-height: 38px;
+    height: 36px;
+    min-height: 36px;
     max-height: 120px;
-    padding: 8px 10px;
+    padding: 7px 10px;
     line-height: 20px;
+    box-sizing: border-box;
   }
 
   .composer-btn {
-    height: 38px;
-    min-height: 38px;
-    padding: 0 12px;
-    font-size: 12px;
+    height: 36px;
+    min-height: 36px;
+    padding: 0 10px;
+    font-size: 11.5px;
     font-weight: 700;
     touch-action: manipulation;
+    box-sizing: border-box;
   }
 
   .composer-btn.secondary {
-    height: 38px;
-    min-height: 38px;
-    padding: 0 9px;
+    height: 36px;
+    min-height: 36px;
+    padding: 0 8px;
+  }
+
+  .mic-dictate-btn {
+    width: 36px !important;
+    min-width: 36px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 14px !important;
   }
 
   .composer-token-counter {
@@ -3495,14 +3596,30 @@ html, body {
   }
 
   .modal-tab-bar {
-    overflow-x: auto;
-    white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    gap: 4px !important;
+    padding-bottom: 6px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   .modal-tab-bar::-webkit-scrollbar {
-    display: none;
+    display: none !important;
+  }
+
+  .modal-tab-btn {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+    font-size: 11px !important;
+    padding: 5px 9px !important;
+    height: 28px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
   }
 
   /* 8. Mobile Toast Placement (Centered below Top Bar, Safe from Dynamic Island) */
@@ -4316,13 +4433,6 @@ html, body {
   .stage-canvas-area {
     min-height: 280px;
   }
-  .studio-nav-segmented {
-    margin-left: 4px;
-  }
-  .studio-nav-btn {
-    font-size: 10px;
-    padding: 2px 6px;
-  }
 }
 
 </style>
@@ -4333,11 +4443,14 @@ html, body {
   <header class="top-header">
     <div class="top-header-left">
       <button class="top-btn mobile-ledger-toggle" id="mobileMenuToggle" title="Toggle Session Ledger">☰ Ledger</button>
-      <span class="app-title">Local Intelligence Workstation</span>
+      <span class="app-title">
+        <span class="desktop-title-full">Local Intelligence Workstation</span>
+        <span class="desktop-title-short">LI Workstation</span>
+      </span>
       <div class="studio-nav-segmented" id="studioViewSwitcher">
         <button type="button" class="studio-nav-btn active" data-view="chat" id="viewBtnChat" title="Chat & Reasoning Studio">💬 Chat</button>
-        <button type="button" class="studio-nav-btn" data-view="image" id="viewBtnImage" title="Diffusion Image Generation Studio">🎨 Image Studio</button>
-        <button type="button" class="studio-nav-btn" data-view="audio" id="viewBtnAudio" title="Speech Transcription & Voice Lab">🎙️ Audio Lab</button>
+        <button type="button" class="studio-nav-btn" data-view="image" id="viewBtnImage" title="Diffusion Image Generation Studio">🎨 Image</button>
+        <button type="button" class="studio-nav-btn" data-view="audio" id="viewBtnAudio" title="Speech Transcription & Voice Lab">🎙️ Audio</button>
       </div>
     </div>
     <div class="top-header-right">
@@ -4403,7 +4516,7 @@ html, body {
         </div>
 
         <div class="composer-row">
-          <textarea id="promptInput" class="composer-input" placeholder="Type prompt (or /imagine for diffusion images)..." rows="1"></textarea>
+          <textarea id="promptInput" class="composer-input" placeholder="Type prompt (/imagine for image)..." rows="1"></textarea>
           <span id="promptTokenCounter" class="composer-token-counter" title="Prompt token estimate">0 tok</span>
           <input type="file" id="imageInput" accept="image/*,.txt,.md,.json,.csv,.py,.js,.ts,.html,.css,.yaml,.yml,.sh,.log,.sql,.xml" style="display:none;">
           <button type="button" class="composer-btn secondary mic-dictate-btn" id="chatDictateBtn" title="Voice Dictation (Click to Speak, Click again to Transcribe)">🎙️</button>
@@ -4981,6 +5094,7 @@ html, body {
     <div class="hub-top-bar">
       <span class="hub-top-bar-title">MODEL HUB — Search & Download</span>
       <div class="hub-top-bar-actions">
+        <button type="button" class="top-btn" id="hubOpenLocalLibBtn" title="View Installed Models" style="height:26px; font-size:10.5px; padding:0 8px;">📁 Installed</button>
         <button class="hub-close-btn" id="hubCloseBtn">✕ CLOSE</button>
       </div>
     </div>
@@ -5046,14 +5160,6 @@ html, body {
       </div>
       <div class="hub-hf-toolbar-right">
         <span style="font-family:var(--font-mono); font-size:10px; color:var(--text-muted);">CivitAI Live REST API</span>
-      </div>
-    </div>
-          <option value="60">60 / page</option>
-          <option value="100">100 / page</option>
-        </select>
-        <button type="button" class="hub-hf-action-btn" id="openHfConfigBtn" title="Open Hugging Face settings drawer">
-          ⚙ HF Config
-        </button>
       </div>
     </div>
 
@@ -8862,6 +8968,10 @@ html, body {
 
       // Close Hub
       document.getElementById('hubCloseBtn')?.addEventListener('click', close);
+      document.getElementById('hubOpenLocalLibBtn')?.addEventListener('click', () => {
+        close();
+        document.getElementById('modelsLibraryBtn')?.click();
+      });
       overlay?.addEventListener('click', (e) => {
         if (e.target === overlay) close();
       });
