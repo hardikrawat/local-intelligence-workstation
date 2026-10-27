@@ -1110,6 +1110,9 @@ html, body {
 
 .composer-input::placeholder {
   color: #888888;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 
 .composer-btn {
@@ -3757,39 +3760,53 @@ html, body {
   }
 
   .composer-input {
-    font-size: 16px !important; /* Critical: prevents iOS Safari auto-zoom on focus */
-    height: 36px;
-    min-height: 36px;
+    font-size: 15px !important; /* Critical: prevents iOS Safari auto-zoom on focus */
+    height: 36px !important;
+    min-height: 36px !important;
     max-height: 120px;
     padding: 7px 10px;
     line-height: 20px;
-    box-sizing: border-box;
+    box-sizing: border-box !important;
+    border-radius: 0 !important;
   }
 
   .composer-btn {
-    height: 36px;
-    min-height: 36px;
-    padding: 0 10px;
-    font-size: 11.5px;
-    font-weight: 700;
+    height: 36px !important;
+    min-height: 36px !important;
+    padding: 0 10px !important;
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
     touch-action: manipulation;
-    box-sizing: border-box;
+    box-sizing: border-box !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0 !important;
+  }
+
+  .composer-btn[style*="display: none"],
+  .composer-btn[style*="display:none"] {
+    display: none !important;
   }
 
   .composer-btn.secondary {
-    height: 36px;
-    min-height: 36px;
-    padding: 0 8px;
+    height: 36px !important;
+    min-height: 36px !important;
+    padding: 0 8px !important;
   }
 
   .mic-dictate-btn {
     width: 36px !important;
     min-width: 36px !important;
+    height: 36px !important;
+    min-height: 36px !important;
     padding: 0 !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
     font-size: 14px !important;
+    box-sizing: border-box !important;
+    border-radius: 0 !important;
   }
 
   .composer-token-counter {
@@ -7880,11 +7897,27 @@ html, body {
   
   function setupTextarea() {
     function adjustHeight() {
-      promptInput.style.height = '32px';
-      if (promptInput.scrollHeight > 36) {
-        promptInput.style.height = `${Math.min(promptInput.scrollHeight, 120)}px`;
+      if (!promptInput.value.trim()) {
+        promptInput.style.height = '';
+        return;
+      }
+      promptInput.style.height = 'auto';
+      const isMobile = window.innerWidth <= 600;
+      const baseHeight = isMobile ? 36 : 32;
+      const newHeight = Math.max(baseHeight, Math.min(promptInput.scrollHeight, 120));
+      promptInput.style.height = `${newHeight}px`;
+    }
+
+    function updatePlaceholder() {
+      if (!promptInput) return;
+      if (window.innerWidth <= 600) {
+        promptInput.placeholder = 'Type a prompt...';
+      } else {
+        promptInput.placeholder = 'Type prompt (/imagine for image)...';
       }
     }
+    updatePlaceholder();
+    window.addEventListener('resize', updatePlaceholder);
 
     function updatePromptTokens() {
       if (!promptTokenCounter) return;
@@ -8973,7 +9006,7 @@ html, body {
     if (text.startsWith('/imagine ') || text.startsWith('/image ')) {
       const imgPrompt = text.replace(/^\/(imagine|image)\s+/i, '').trim();
       promptInput.value = '';
-      promptInput.style.height = '32px';
+      promptInput.style.height = '';
       if (promptTokenCounter) updateCountDisplay(promptTokenCounter, '0 TOKENS');
       removeAttachment();
       await executeInlineImageGen(imgPrompt);
@@ -9012,7 +9045,7 @@ html, body {
 
     appendMessageToDOM('user', text || (attachedDocPayload ? `Attached document: ${attachedDocPayload.name}` : ''), userMessage.images, session.messages.length - 1, null, userMessage.doc);
     promptInput.value = '';
-    promptInput.style.height = '32px';
+    promptInput.style.height = '';
     if (promptTokenCounter) updateCountDisplay(promptTokenCounter, '0 TOKENS');
     removeAttachment();
 
