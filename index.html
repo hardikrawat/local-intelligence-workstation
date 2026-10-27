@@ -4701,24 +4701,384 @@ html, body {
   object-fit: contain;
 }
 
-/* Mobile Responsiveness for Studios */
+/* ─── Studio Sub-Navigation Bar (Mobile only) ─── */
+.studio-sub-tabs {
+  display: none;
+}
+.studio-sub-tab-btn {
+  display: none;
+}
+
+/* Stage Canvas Overlay Progress Bar */
+.stage-canvas-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.12);
+  z-index: 20;
+  overflow: hidden;
+}
+.stage-canvas-progress-fill {
+  height: 100%;
+  background: #E5C07B;
+  transition: width 0.3s ease;
+}
+
+/* TTS Quick Phrase Preset Chips */
+.tts-presets-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  margin-top: 2px;
+}
+.tts-presets-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.tts-preset-chip {
+  height: 22px !important;
+  line-height: 20px !important;
+  font-size: 10px !important;
+  padding: 0 7px !important;
+  background: var(--bg-card) !important;
+  border: 1px dashed var(--border-rule) !important;
+  color: var(--text-main) !important;
+}
+.tts-preset-chip:hover {
+  background: var(--bg-btn-hover) !important;
+  border-style: solid !important;
+}
+
+/* ==========================================================================
+   IMAGE GENERATION STUDIO & AUDIO LAB — Mobile Workstation Architecture
+   Professional big-tech segmented views, zero dual-scroll trap, zero overflow
+   ========================================================================== */
 @media (max-width: 768px) {
-  .image-studio-grid, .audio-lab-grid {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr;
-    overflow-y: auto;
+  /* Sub-Tab Navigation Bar */
+  .studio-sub-tabs {
+    display: flex !important;
+    background: var(--bg-top-bar);
+    border-bottom: 1px solid var(--border-dark);
+    padding: 3px 6px;
+    gap: 4px;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    width: 100%;
+    z-index: 10;
   }
-  .image-studio-inspector, .audio-lab-inspector {
-    border-right: none;
-    border-bottom: 1px solid var(--border-frame);
-    max-height: 45vh;
+
+  .studio-sub-tab-btn {
+    flex: 1;
+    height: 28px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    background: var(--bg-btn);
+    border: 1px solid var(--border-dark);
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 0 6px;
+    white-space: nowrap;
+    border-radius: 0;
+    box-sizing: border-box;
+    transition: background 0.1s ease, color 0.1s ease, border-color 0.1s ease;
+    touch-action: manipulation;
   }
+
+  .studio-sub-tab-btn:hover {
+    background: var(--bg-btn-hover);
+    color: var(--text-main);
+  }
+
+  .studio-sub-tab-btn.active {
+    background: #1A1816 !important;
+    color: #FAF8F2 !important;
+    border-color: #000000 !important;
+  }
+
+  /* ─── Image Generation Studio Mobile Architecture ─── */
+  .image-studio-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Subtab: Stage Canvas & Output (Default) */
+  .image-studio-grid[data-active-subtab="stage"] .image-studio-stage {
+    display: flex !important;
+    flex: 1 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .image-studio-grid[data-active-subtab="stage"] .image-studio-inspector {
+    display: none !important;
+  }
+
+  /* Subtab: Generator Controls */
+  .image-studio-grid[data-active-subtab="inspector"] .image-studio-stage {
+    display: none !important;
+  }
+
+  .image-studio-grid[data-active-subtab="inspector"] .image-studio-inspector {
+    display: flex !important;
+    flex: 1 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow-y: auto !important;
+    border-right: none !important;
+    border-bottom: none !important;
+    padding: 12px 14px 32px 14px !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Image Studio Stage Toolbar on Mobile */
+  .image-studio-stage .stage-toolbar {
+    height: 32px !important;
+    min-height: 32px !important;
+    padding: 0 8px !important;
+    gap: 6px !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    overflow: hidden !important;
+  }
+
+  .image-studio-stage .stage-meta-info {
+    font-size: 10px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 135px !important;
+    flex-shrink: 1 !important;
+  }
+
+  .image-studio-stage .stage-actions {
+    display: flex !important;
+    gap: 4px !important;
+    flex-shrink: 0 !important;
+    align-items: center !important;
+  }
+
+  .image-studio-stage .stage-actions .top-btn {
+    height: 24px !important;
+    line-height: 22px !important;
+    padding: 0 6px !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Image Studio Canvas & Filmstrip on Mobile */
   .stage-canvas-area {
-    min-height: 280px;
+    min-height: 0 !important;
+    padding: 12px !important;
+  }
+
+  .stage-filmstrip-bar {
+    height: 64px !important;
+    min-height: 64px !important;
+    padding: 0 8px !important;
+    gap: 8px !important;
+  }
+
+  .filmstrip-header-tag {
+    font-size: 9.5px !important;
+    padding-right: 8px !important;
+    height: 32px !important;
+  }
+
+  .filmstrip-thumb {
+    height: 48px !important;
+    width: 48px !important;
+  }
+
+  /* Generator Controls Mobile Refinements */
+  .inspector-aspect-presets {
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 3px !important;
+  }
+
+  .aspect-preset-btn {
+    font-size: 9.5px !important;
+    padding: 5px 1px !important;
+  }
+
+  /* Checkpoint Row Fix: Prevent ↻ overflow */
+  #imgModelSelect {
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  #refreshImgModelsBtn {
+    flex-shrink: 0 !important;
+  }
+
+  /* ─── Audio Lab Mobile Architecture ─── */
+  .audio-lab-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Subtab: ASR Speech-to-Text Input */
+  .audio-lab-grid[data-active-subtab="asr"] .audio-lab-inspector {
+    display: flex !important;
+    flex: 1 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow-y: auto !important;
+    border-right: none !important;
+    border-bottom: none !important;
+    padding: 12px 14px 32px 14px !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .audio-lab-grid[data-active-subtab="asr"] .audio-lab-stage {
+    display: none !important;
+  }
+
+  /* Subtab: Stage Transcript Document Viewer */
+  .audio-lab-grid[data-active-subtab="stage"] .audio-lab-inspector {
+    display: none !important;
+  }
+
+  .audio-lab-grid[data-active-subtab="stage"] .audio-lab-stage {
+    display: flex !important;
+    flex: 1 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .audio-lab-grid[data-active-subtab="stage"] .audio-lab-stage .stage-toolbar,
+  .audio-lab-grid[data-active-subtab="stage"] .audio-lab-stage .audio-transcript-container {
+    display: flex !important;
+  }
+
+  .audio-lab-grid[data-active-subtab="stage"] .audio-lab-stage .tts-synthesizer-card {
+    display: none !important;
+  }
+
+  /* Subtab: TTS Voice Synthesis */
+  .audio-lab-grid[data-active-subtab="tts"] .audio-lab-inspector {
+    display: none !important;
+  }
+
+  .audio-lab-grid[data-active-subtab="tts"] .audio-lab-stage {
+    display: flex !important;
+    flex: 1 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+  }
+
+  .audio-lab-grid[data-active-subtab="tts"] .audio-lab-stage .stage-toolbar,
+  .audio-lab-grid[data-active-subtab="tts"] .audio-lab-stage .audio-player-bar,
+  .audio-lab-grid[data-active-subtab="tts"] .audio-lab-stage .audio-transcript-container {
+    display: none !important;
+  }
+
+  .audio-lab-grid[data-active-subtab="tts"] .audio-lab-stage .tts-synthesizer-card {
+    display: flex !important;
+    flex: 1 !important;
+    height: 100% !important;
+    border-top: none !important;
+    overflow-y: auto !important;
+    padding: 14px 14px 32px 14px !important;
+  }
+
+  .audio-lab-grid[data-active-subtab="tts"] .tts-input-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .audio-lab-grid[data-active-subtab="tts"] #ttsVoiceSelect {
+    width: 100% !important;
+  }
+
+  .audio-lab-grid[data-active-subtab="tts"] #ttsSpeakBtn {
+    height: 36px !important;
+    font-size: 12.5px !important;
+    font-weight: 700 !important;
+  }
+
+  /* Audio Stage Toolbar on Mobile */
+  .audio-lab-stage .stage-toolbar {
+    height: 32px !important;
+    min-height: 32px !important;
+    padding: 0 8px !important;
+    gap: 6px !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    overflow: hidden !important;
+  }
+
+  .audio-lab-stage .stage-meta-info {
+    font-size: 10px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 120px !important;
+    flex-shrink: 1 !important;
+  }
+
+  .audio-lab-stage .stage-actions {
+    display: flex !important;
+    gap: 4px !important;
+    flex-shrink: 0 !important;
+    align-items: center !important;
+  }
+
+  .audio-lab-stage .stage-actions .top-btn {
+    height: 24px !important;
+    line-height: 22px !important;
+    padding: 0 6px !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+
+  .audio-recorder-card {
+    padding: 12px 10px !important;
+    gap: 8px !important;
+  }
+
+  .recorder-timer {
+    font-size: 22px !important;
+  }
+
+  .audio-dropzone {
+    padding: 12px 8px !important;
   }
 }
 
 </style>
+</head>
 <body>
 
 <div class="window-frame">
@@ -4814,7 +5174,13 @@ html, body {
     <!-- ═══════════════════════════════════════════════════════════════════
          IMAGE GENERATION STUDIO WORKSPACE
          ═══════════════════════════════════════════════════════════════════ -->
-    <main class="studio-workspace image-studio-grid" id="imageStudioWorkspace" style="display:none;">
+    <main class="studio-workspace image-studio-grid" id="imageStudioWorkspace" data-active-subtab="stage" style="display:none;">
+      <!-- Mobile Sub-Navigation Segmented Controller -->
+      <div class="studio-sub-tabs image-studio-sub-tabs">
+        <button type="button" class="studio-sub-tab-btn active" data-subtab="stage">🎨 Canvas & Output</button>
+        <button type="button" class="studio-sub-tab-btn" data-subtab="inspector">⚙ Generator Controls</button>
+      </div>
+
       <!-- Left Control Inspector -->
       <aside class="image-studio-inspector">
         <div class="inspector-section-header">
@@ -4827,11 +5193,11 @@ html, body {
             <label for="imgModelSelect">Active Checkpoint / Model:</label>
             <span class="field-hint" id="sdBackendTypeBadge">SD / Forge / ComfyUI</span>
           </div>
-          <div style="display:flex; gap:4px;">
-            <select id="imgModelSelect" class="top-select-btn" style="flex:1; width:100%; height:25px;">
+          <div style="display:flex; gap:4px; min-width:0; width:100%;">
+            <select id="imgModelSelect" class="top-select-btn" style="flex:1; width:100%; min-width:0; height:25px;">
               <option value="">Detecting SD Checkpoints...</option>
             </select>
-            <button type="button" class="top-btn" id="refreshImgModelsBtn" title="Refresh local checkpoints" style="height:25px; padding:0 8px;">↻</button>
+            <button type="button" class="top-btn" id="refreshImgModelsBtn" title="Refresh local checkpoints" style="height:25px; padding:0 8px; flex-shrink:0;">↻</button>
           </div>
         </div>
 
@@ -4941,17 +5307,33 @@ html, body {
         <div class="stage-toolbar">
           <div class="stage-meta-info" id="stageMetaInfo">
             <span class="stage-status-dot">●</span>
-            <span>Diffusion Standby · 512×512 · Euler a</span>
+            <span class="desktop-text">Diffusion Standby · 512×512 · Euler a</span>
+            <span class="mobile-text">Standby · 512²</span>
           </div>
           <div class="stage-actions">
-            <button type="button" class="top-btn" id="stageZoomBtn" title="Lightbox Zoom Fullscreen">🔍 Lightbox</button>
-            <button type="button" class="top-btn" id="stageDownloadBtn" title="Download PNG">⬇ Download</button>
-            <button type="button" class="top-btn" id="stageCopyBtn" title="Copy Base64 / Image">📋 Copy</button>
-            <button type="button" class="top-btn" id="stageSendToChatBtn" title="Inject into Chat transcript">💬 Send to Chat</button>
+            <button type="button" class="top-btn" id="stageZoomBtn" title="Lightbox Zoom Fullscreen">
+              <span class="desktop-text">🔍 Lightbox</span>
+              <span class="mobile-text">🔍 View</span>
+            </button>
+            <button type="button" class="top-btn" id="stageDownloadBtn" title="Download PNG">
+              <span class="desktop-text">⬇ Download</span>
+              <span class="mobile-text">⬇ Save</span>
+            </button>
+            <button type="button" class="top-btn" id="stageCopyBtn" title="Copy Base64 / Image">
+              <span class="desktop-text">📋 Copy</span>
+              <span class="mobile-text">📋</span>
+            </button>
+            <button type="button" class="top-btn" id="stageSendToChatBtn" title="Inject into Chat transcript">
+              <span class="desktop-text">💬 Send to Chat</span>
+              <span class="mobile-text">💬 Chat</span>
+            </button>
           </div>
         </div>
 
         <div class="stage-canvas-area" id="stageCanvasArea">
+          <div id="stageCanvasProgressBar" class="stage-canvas-progress" style="display:none;">
+            <div class="stage-canvas-progress-fill" id="stageCanvasProgressFill" style="width:0%;"></div>
+          </div>
           <div class="stage-placeholder" id="stagePlaceholder">
             <div class="placeholder-crosshair-box">
               <span class="corner-mark top-left">┌</span>
@@ -4962,6 +5344,7 @@ html, body {
               <div class="placeholder-title">DIFFUSION CANVAS VIEWPORT</div>
               <div class="placeholder-desc">Configure synthesis prompt and parameters on the left, then click Generate Image.</div>
               <div class="placeholder-sub">Engine: Automatic1111 / SD WebUI / Forge / ComfyUI</div>
+              <button type="button" class="generate-btn mobile-text" onclick="setStudioSubTab('image', 'inspector')" style="height:28px; margin-top:8px; padding:0 12px; font-size:10.5px; width:auto;">⚙ Open Controls</button>
             </div>
           </div>
           <img id="stageImage" class="stage-active-image" style="display:none;" alt="Generated Artwork">
@@ -4981,7 +5364,14 @@ html, body {
     <!-- ═══════════════════════════════════════════════════════════════════
          AUDIO LAB WORKSPACE (SPEECH-TO-TEXT & TEXT-TO-SPEECH)
          ═══════════════════════════════════════════════════════════════════ -->
-    <main class="studio-workspace audio-lab-grid" id="audioLabWorkspace" style="display:none;">
+    <main class="studio-workspace audio-lab-grid" id="audioLabWorkspace" data-active-subtab="asr" style="display:none;">
+      <!-- Mobile Sub-Navigation Segmented Controller -->
+      <div class="studio-sub-tabs audio-lab-sub-tabs">
+        <button type="button" class="studio-sub-tab-btn active" data-subtab="asr">🎙️ Transcribe</button>
+        <button type="button" class="studio-sub-tab-btn" data-subtab="stage">📄 Transcript</button>
+        <button type="button" class="studio-sub-tab-btn" data-subtab="tts">🔊 Voice (TTS)</button>
+      </div>
+
       <!-- Left Recording & ASR Panel -->
       <aside class="audio-lab-inspector">
         <div class="inspector-section-header">
@@ -5045,12 +5435,22 @@ html, body {
         <div class="stage-toolbar">
           <div class="stage-meta-info" id="audioStageMetaInfo">
             <span class="stage-status-dot">●</span>
-            <span>Audio Document & Transcript Viewer</span>
+            <span class="desktop-text">Audio Document & Transcript Viewer</span>
+            <span class="mobile-text">📄 Transcript</span>
           </div>
           <div class="stage-actions">
-            <button type="button" class="top-btn" id="copyAudioTranscriptBtn">📋 Copy</button>
-            <button type="button" class="top-btn" id="sendAudioToChatBtn">💬 To Chat</button>
-            <button type="button" class="top-btn" id="downloadAudioTranscriptBtn">⬇ Export</button>
+            <button type="button" class="top-btn" id="copyAudioTranscriptBtn" title="Copy Transcript">
+              <span class="desktop-text">📋 Copy</span>
+              <span class="mobile-text">📋 Copy</span>
+            </button>
+            <button type="button" class="top-btn" id="sendAudioToChatBtn" title="Send Transcript to Chat Composer">
+              <span class="desktop-text">💬 To Chat</span>
+              <span class="mobile-text">💬 Chat</span>
+            </button>
+            <button type="button" class="top-btn" id="downloadAudioTranscriptBtn" title="Export as Text File">
+              <span class="desktop-text">⬇ Export</span>
+              <span class="mobile-text">⬇ Export</span>
+            </button>
           </div>
         </div>
 
@@ -5066,13 +5466,16 @@ html, body {
         <!-- Transcript Display Box -->
         <div class="audio-transcript-container">
           <div class="transcript-placeholder" id="audioTranscriptPlaceholder">
-            Transcription text will appear here once audio is recorded or uploaded.
+            <div>Transcription text will appear here once audio is recorded or uploaded.</div>
+            <div style="margin-top:12px;">
+              <button type="button" class="top-btn mobile-text" onclick="setStudioSubTab('audio', 'asr')" style="height:26px; padding:0 12px; font-weight:700;">🎙️ Record / Upload Audio</button>
+            </div>
           </div>
           <div id="audioTranscriptContent" class="transcript-content-text" style="display:none;" contenteditable="true"></div>
         </div>
 
         <!-- Bottom TTS Voice Synthesizer Section -->
-        <div class="tts-synthesizer-card">
+        <div class="tts-synthesizer-card" id="ttsSynthesizerCard">
           <div class="tts-card-header">
             <span>TEXT-TO-SPEECH (TTS) SYNTHESIZER</span>
             <span class="backend-status-indicator" id="piperBackendStatusBadge">○ STANDBY</span>
@@ -5083,6 +5486,12 @@ html, body {
               <option value="browser-default">Browser Speech (Web Speech)</option>
             </select>
             <button type="button" class="composer-btn" id="ttsSpeakBtn">🔊 Speak</button>
+          </div>
+          <div class="tts-presets-row" id="ttsPresetsRow">
+            <span class="tts-presets-label">Quick Phrases:</span>
+            <button type="button" class="top-btn tts-preset-chip" data-phrase="Hello, this is a test of local neural speech synthesis.">"Hello world"</button>
+            <button type="button" class="top-btn tts-preset-chip" data-phrase="Local Intelligence Workstation is running successfully.">"LI Workstation"</button>
+            <button type="button" class="top-btn tts-preset-chip" data-phrase="All inference models are loaded and ready.">"Systems Ready"</button>
           </div>
         </div>
       </section>
@@ -10925,6 +11334,53 @@ html, body {
   document.getElementById('viewBtnImage')?.addEventListener('click', () => switchStudioView('image'));
   document.getElementById('viewBtnAudio')?.addEventListener('click', () => switchStudioView('audio'));
 
+  // ─── Studio Sub-Tabs Navigation (Mobile Workstation) ───────────────────
+  function setStudioSubTab(studio, subtab) {
+    if (studio === 'image') {
+      const imgWs = document.getElementById('imageStudioWorkspace');
+      if (imgWs) imgWs.setAttribute('data-active-subtab', subtab);
+      document.querySelectorAll('.image-studio-sub-tabs .studio-sub-tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-subtab') === subtab);
+      });
+    } else if (studio === 'audio') {
+      const audioWs = document.getElementById('audioLabWorkspace');
+      if (audioWs) audioWs.setAttribute('data-active-subtab', subtab);
+      document.querySelectorAll('.audio-lab-sub-tabs .studio-sub-tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-subtab') === subtab);
+      });
+    }
+  }
+  window.setStudioSubTab = setStudioSubTab;
+
+  function initStudioSubTabs() {
+    document.querySelectorAll('.image-studio-sub-tabs .studio-sub-tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const subtab = btn.getAttribute('data-subtab');
+        setStudioSubTab('image', subtab);
+      });
+    });
+
+    document.querySelectorAll('.audio-lab-sub-tabs .studio-sub-tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const subtab = btn.getAttribute('data-subtab');
+        setStudioSubTab('audio', subtab);
+      });
+    });
+
+    // Preset quick phrase chips for TTS
+    document.querySelectorAll('.tts-preset-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const phrase = chip.getAttribute('data-phrase');
+        const input = document.getElementById('ttsInputText');
+        if (input && phrase) {
+          input.value = phrase;
+          input.focus();
+        }
+      });
+    });
+  }
+  initStudioSubTabs();
+
   // ─── 2. Multi-Backend Management & Telemetry ──────────────────────────
 
   async function fetchBackendsStatus() {
@@ -11274,6 +11730,13 @@ html, body {
     const progressFill = document.getElementById('imgProgressBarFill');
     const progressText = document.getElementById('imgProgressText');
     const metaInfo = document.getElementById('stageMetaInfo');
+    const stageBar = document.getElementById('stageCanvasProgressBar');
+    const stageFill = document.getElementById('stageCanvasProgressFill');
+
+    // Auto-switch to canvas viewport tab on mobile so user sees generation immediately
+    if (window.innerWidth <= 768) {
+      setStudioSubTab('image', 'stage');
+    }
 
     if (genBtn) {
       genBtn.disabled = true;
@@ -11282,6 +11745,8 @@ html, body {
     if (progressBox) progressBox.style.display = 'block';
     if (progressFill) progressFill.style.width = '15%';
     if (progressText) progressText.textContent = 'Submitting prompt to diffusion engine...';
+    if (stageBar) stageBar.style.display = 'block';
+    if (stageFill) stageFill.style.width = '15%';
 
     // Start progress polling
     const pollInterval = setInterval(async () => {
@@ -11291,6 +11756,8 @@ html, body {
           const pData = await pRes.json();
           const pct = Math.round((pData.progress || 0) * 100);
           if (progressFill && pct > 0) progressFill.style.width = `${pct}%`;
+          if (stageBar && pct > 0) stageBar.style.display = 'block';
+          if (stageFill && pct > 0) stageFill.style.width = `${pct}%`;
           if (progressText && pData.eta_relative) {
             progressText.textContent = `Sampling step... ${pct}% (ETA: ${pData.eta_relative.toFixed(1)}s)`;
           }
@@ -11361,6 +11828,8 @@ html, body {
         genBtn.textContent = '⚡ GENERATE IMAGE';
       }
       if (progressBox) progressBox.style.display = 'none';
+      const stageBar = document.getElementById('stageCanvasProgressBar');
+      if (stageBar) stageBar.style.display = 'none';
     }
   });
 
@@ -11467,6 +11936,10 @@ html, body {
         if (placeholder) placeholder.style.display = 'none';
         if (promptInput) promptInput.value = item.prompt || '';
         if (metaInfo) metaInfo.innerHTML = `<span class="stage-status-dot" style="color:#73C991;">●</span> <span>Historical: ${item.time} · ${item.params ? `${item.params.width}×${item.params.height}` : ''}</span>`;
+
+        if (window.innerWidth <= 768) {
+          setStudioSubTab('image', 'stage');
+        }
 
         filmstrip.querySelectorAll('.filmstrip-thumb').forEach(t => t.classList.remove('active'));
         thumb.classList.add('active');
@@ -11731,6 +12204,11 @@ html, body {
         content.style.display = 'block';
       }
       if (placeholder) placeholder.style.display = 'none';
+
+      // Auto-switch to transcript document viewer tab on mobile
+      if (window.innerWidth <= 768) {
+        setStudioSubTab('audio', 'stage');
+      }
 
       if (status) {
         status.className = 'inline-status-badge success';
