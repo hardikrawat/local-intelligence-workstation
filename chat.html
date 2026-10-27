@@ -3835,6 +3835,7 @@ html, body {
     border-bottom: none;
     box-sizing: border-box !important;
     overflow-x: hidden !important;
+    border-radius: 0 !important;
   }
 
   #settingsModal .drawer-card {
@@ -3842,6 +3843,56 @@ html, body {
     height: 85dvh !important;
     box-sizing: border-box !important;
     overflow-x: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .drawer-header {
+    height: 44px !important;
+    min-height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 0 0 8px 0 !important;
+    border-bottom: 1px solid var(--border-frame) !important;
+    flex-shrink: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .drawer-header span {
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.5px !important;
+    font-family: var(--font-mono) !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  #closeSettingsModalX,
+  #closeLibraryModalX {
+    height: 28px !important;
+    min-height: 28px !important;
+    line-height: 26px !important;
+    padding: 0 10px !important;
+    font-size: 11px !important;
+    font-family: var(--font-mono) !important;
+    font-weight: 700 !important;
+    box-sizing: border-box !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 0 !important;
+    border: 1px solid var(--border-dark) !important;
+    background: var(--bg-parchment) !important;
+    color: var(--text-main) !important;
+    flex-shrink: 0 !important;
+  }
+
+  #closeSettingsModalX:active,
+  #closeLibraryModalX:active {
+    background: #1A1816 !important;
+    color: #FFFFFF !important;
   }
 
   #settingsModal .modal-tab-pane,
@@ -3853,48 +3904,74 @@ html, body {
     padding-right: 0 !important;
   }
 
-  /* Segmented 3-Column Tab Bar for Settings on Mobile */
-  #settingsTabBar {
-    display: grid !important;
-    grid-template-columns: repeat(3, 1fr) !important;
-    gap: 4px !important;
+  /* Horizontal Scrollable Segmented Tab Bar for Settings on Mobile */
+  #settingsTabBar,
+  .modal-tab-bar {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    gap: 6px !important;
     width: 100% !important;
     box-sizing: border-box !important;
-    padding-bottom: 8px !important;
-    overflow-x: hidden !important;
+    padding: 4px 0 8px 0 !important;
+    border-bottom: 1px solid var(--border-frame) !important;
+    flex-shrink: 0 !important;
   }
 
-  #settingsTabBar .modal-tab-btn {
-    width: 100% !important;
-    height: 34px !important;
-    min-height: 34px !important;
-    padding: 0 2px !important;
+  #settingsTabBar::-webkit-scrollbar,
+  .modal-tab-bar::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  #settingsTabBar .modal-tab-btn,
+  .modal-tab-btn {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    padding: 0 12px !important;
     font-size: 11px !important;
-    color: var(--text-main) !important;
-    display: flex !important;
+    font-family: var(--font-mono) !important;
+    font-weight: 600 !important;
+    color: var(--text-muted) !important;
+    display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
     text-align: center !important;
     white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
     box-sizing: border-box !important;
-    border: 1px solid var(--border-dark) !important;
-    background: #FFFFFF !important;
+    border: 1px solid var(--border-frame) !important;
+    background: var(--bg-parchment) !important;
+    border-radius: 0 !important;
+    transition: background 0.1s, color 0.1s, border-color 0.1s !important;
+    -webkit-appearance: none !important;
   }
 
-  #settingsTabBar .modal-tab-btn.active {
+  #settingsTabBar .modal-tab-btn:hover,
+  .modal-tab-btn:hover {
+    color: var(--text-main) !important;
+    border-color: var(--border-dark) !important;
+  }
+
+  #settingsTabBar .modal-tab-btn.active,
+  .modal-tab-btn.active {
     background: #1A1816 !important;
     color: #FFFFFF !important;
+    font-weight: 700 !important;
+    border-color: #1A1816 !important;
   }
 
-  /* Strategic Mobile Unified Input & Action Heights (36px Everywhere) */
+  /* Strategic Mobile Unified Input & Action Heights (34px Everywhere) */
   .form-input {
-    font-size: 15px !important;
-    height: 36px !important;
-    min-height: 36px !important;
+    font-size: 13.5px !important;
+    height: 34px !important;
+    min-height: 34px !important;
     box-sizing: border-box !important;
     max-width: 100% !important;
+    border-radius: 0 !important;
   }
 
   .form-action-group {
@@ -3918,39 +3995,49 @@ html, body {
     flex: 1 1 0 !important;
     min-width: 0 !important;
     width: 100% !important;
-    height: 36px !important;
-    min-height: 36px !important;
+    height: 34px !important;
+    min-height: 34px !important;
     box-sizing: border-box !important;
+    border-radius: 0 !important;
   }
 
   .form-action-row .top-btn,
   .form-action-row #settingsHfVisBtn {
-    height: 36px !important;
-    min-height: 36px !important;
-    width: 36px !important;
-    min-width: 36px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    width: 34px !important;
+    min-width: 34px !important;
     padding: 0 !important;
     box-sizing: border-box !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
     flex-shrink: 0 !important;
+    border-radius: 0 !important;
   }
 
   .form-action-row .composer-btn,
   .form-action-row #settingsHfTestTokenBtn,
-  .form-action-row #settingsHfPingBtn {
-    height: 36px !important;
-    min-height: 36px !important;
-    padding: 0 14px !important;
-    font-size: 11.5px !important;
-    font-weight: 600 !important;
+  .form-action-row #settingsHfPingBtn,
+  .form-action-row #testConnBtn,
+  .form-action-row #pingBeOllamaBtn,
+  .form-action-row #pingBeSdBtn,
+  .form-action-row #pingBeComfyBtn,
+  .form-action-row #pingBeWhisperBtn,
+  .form-action-row #pingBePiperBtn {
+    height: 34px !important;
+    min-height: 34px !important;
+    padding: 0 12px !important;
+    font-size: 11px !important;
+    font-family: var(--font-mono) !important;
+    font-weight: 700 !important;
     box-sizing: border-box !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
     white-space: nowrap !important;
     flex-shrink: 0 !important;
+    border-radius: 0 !important;
   }
 
   .form-status-slot {
@@ -3965,6 +4052,48 @@ html, body {
     box-sizing: border-box !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
+  }
+
+  /* Backends & Inference Engines Cards on Mobile */
+  #backendsTab .form-group {
+    background: var(--bg-parchment) !important;
+    border: 1px solid var(--border-frame) !important;
+    padding: 10px !important;
+    margin-bottom: 8px !important;
+    border-radius: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  #backendsTab .backend-status-indicator {
+    height: 22px !important;
+    min-height: 22px !important;
+    line-height: 20px !important;
+    padding: 0 6px !important;
+    font-size: 10px !important;
+    font-family: var(--font-mono) !important;
+    font-weight: 700 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+    border-radius: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  #backendsTab #saveBackendsConfigBtn {
+    width: 100% !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    font-family: var(--font-mono) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 0 !important;
+    border: 1px solid var(--border-dark) !important;
+    background: var(--bg-parchment) !important;
   }
 
   /* 2-Column Balanced Grid for Endpoint Presets on Mobile */
@@ -3991,6 +4120,7 @@ html, body {
     text-overflow: ellipsis !important;
     padding: 0 4px !important;
     box-sizing: border-box !important;
+    border-radius: 0 !important;
   }
 
   /* Full Width Select & Form Elements */
@@ -3998,13 +4128,22 @@ html, body {
   #settingNumCtx,
   #settingSystemPromptPreset {
     width: 100% !important;
-    height: 36px !important;
-    min-height: 36px !important;
-    font-size: 13.5px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    font-size: 13px !important;
     box-sizing: border-box !important;
+    border-radius: 0 !important;
   }
 
-  /* Pinned Footer with Balanced Touch Targets */
+  #settingsModal #personaTab textarea {
+    min-height: 140px !important;
+    font-size: 13px !important;
+    line-height: 1.4 !important;
+    box-sizing: border-box !important;
+    border-radius: 0 !important;
+  }
+
+  /* Pinned Footer with Enterprise Visual Hierarchy */
   #settingsModal .drawer-footer {
     display: grid !important;
     grid-template-columns: 1fr 1fr !important;
@@ -4012,44 +4151,51 @@ html, body {
     width: 100% !important;
     box-sizing: border-box !important;
     padding-top: 10px !important;
+    margin-top: auto !important;
+    border-top: 1px solid var(--border-frame) !important;
+    flex-shrink: 0 !important;
   }
 
-  #settingsModal .drawer-footer .composer-btn {
+  #settingsModal .drawer-footer #closeSettingsBtn {
     width: 100% !important;
     height: 38px !important;
     min-height: 38px !important;
     font-size: 12px !important;
-    display: flex !important;
+    font-family: var(--font-mono) !important;
+    font-weight: 600 !important;
+    background: transparent !important;
+    color: var(--text-main) !important;
+    border: 1px solid var(--border-dark) !important;
+    display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
     box-sizing: border-box !important;
+    border-radius: 0 !important;
   }
 
-  .modal-tab-bar {
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-    scrollbar-width: none !important;
-    gap: 4px !important;
-    padding-bottom: 6px !important;
+  #settingsModal .drawer-footer #closeSettingsBtn:active {
+    background: rgba(0, 0, 0, 0.08) !important;
+  }
+
+  #settingsModal .drawer-footer #saveSettingsBtn {
     width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  .modal-tab-bar::-webkit-scrollbar {
-    display: none !important;
-  }
-
-  .modal-tab-btn {
-    flex-shrink: 0 !important;
-    white-space: nowrap !important;
-    font-size: 11px !important;
-    padding: 5px 9px !important;
-    height: 28px !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    font-size: 12px !important;
+    font-family: var(--font-mono) !important;
+    font-weight: 700 !important;
+    background: #1A1816 !important;
+    color: #FFFFFF !important;
+    border: 1px solid #1A1816 !important;
     display: inline-flex !important;
     align-items: center !important;
+    justify-content: center !important;
     box-sizing: border-box !important;
+    border-radius: 0 !important;
+  }
+
+  #settingsModal .drawer-footer #saveSettingsBtn:active {
+    background: #333333 !important;
   }
 
   /* 8. Mobile Toast Placement (Centered below Top Bar, Safe from Dynamic Island) */
@@ -5992,7 +6138,7 @@ html, body {
   <div class="drawer-card">
     <div class="drawer-header">
       <span>SETTINGS & CONFIGURATION</span>
-      <button class="top-btn" id="closeSettingsModalX">✕</button>
+      <button type="button" class="top-btn" id="closeSettingsModalX" title="Close Settings">✕ Close</button>
     </div>
     <div class="modal-tab-bar" id="settingsTabBar">
       <button class="modal-tab-btn active" data-tab="backendsTab">Backends & Engines</button>
@@ -6084,14 +6230,12 @@ html, body {
     <div class="modal-tab-pane" id="serverTab">
       <div class="form-group">
         <label for="settingOllamaHost">Ollama Host URL:</label>
-        <input type="text" id="settingOllamaHost" class="form-input" value="http://127.0.0.1:11434">
-        <div class="form-action-group" style="margin-top:6px;">
-          <div class="form-action-row">
-            <button class="composer-btn" id="testConnBtn">Test Connection</button>
-          </div>
-          <div class="form-status-slot">
-            <span id="hostTestResult" class="inline-status-badge"></span>
-          </div>
+        <div class="form-action-row">
+          <input type="text" id="settingOllamaHost" class="form-input" value="http://127.0.0.1:11434">
+          <button type="button" class="composer-btn" id="testConnBtn">Test Connection</button>
+        </div>
+        <div class="form-status-slot" style="margin-top:4px;">
+          <span id="hostTestResult" class="inline-status-badge"></span>
         </div>
       </div>
       <div class="form-group" style="margin-top:8px;">
@@ -6222,7 +6366,7 @@ html, body {
   <div class="drawer-card" style="width:720px;">
     <div class="drawer-header">
       <span>INSTALLED MODELS LIBRARY</span>
-      <button class="top-btn" id="closeLibraryModalX">✕</button>
+      <button type="button" class="top-btn" id="closeLibraryModalX" title="Close Library">✕ Close</button>
     </div>
     <div style="overflow-x:auto; max-height:360px;">
       <table class="model-table">
