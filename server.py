@@ -1179,11 +1179,19 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
         self.send_response(200)
         self.end_headers()
 
+    def do_HEAD(self):
+        if self.path == "/setup" or self.path == "/setup/":
+            self.path = "/setup.html"
+        super().do_HEAD()
+
     def do_GET(self):
         if self.path == "/favicon.ico":
             self.send_response(204)
             self.end_headers()
             return
+        elif self.path == "/setup" or self.path == "/setup/":
+            self.path = "/setup.html"
+            return super().do_GET()
         elif self.path.startswith("/api/backends"):
             self.handle_backends_request()
         elif self.path.startswith("/api/image/"):
@@ -1245,7 +1253,13 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
             elif path == "/api/backends/probe":
                 bid = payload.get("id")
                 url = payload.get("url")
-                probe_res = probe_single_backend({"id": bid, "url": url, "health_path": payload.get("health_path", "/")})
+                # Look up the correct health_path from config/defaults
+                cfg = load_backends_config()
+                default_health = DEFAULT_BACKENDS.get(bid, {}).get("health_path", "/")
+                health_path = cfg.get(bid, {}).get("health_path", default_health)
+                if payload.get("health_path"):
+                    health_path = payload["health_path"]
+                probe_res = probe_single_backend({"id": bid, "url": url, "health_path": health_path})
                 self.send_json_response(probe_res)
                 return
 

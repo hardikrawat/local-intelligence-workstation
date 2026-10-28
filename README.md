@@ -66,7 +66,11 @@ python3 server.py 3300
 
 Open your browser to `http://localhost:3300`.
 
-### 2. Optional: Turnkey Docker Deployment
+### 2. Preflight Check & Setup Guide
+
+Open `http://localhost:3300/setup` (or click **SETUP ↗** in the bottom telemetry bar) to run automated connectivity checks and access step-by-step installation instructions for every backend across macOS, Linux, Windows, and Docker.
+
+### 3. Optional: Turnkey Docker Deployment
 
 To run all inference backends containerized:
 

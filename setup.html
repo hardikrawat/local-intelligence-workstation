@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Setup &amp; Preflight Check · Local Intelligence Workstation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-page: #F8F6ED;
+  --bg-card: #FAF8F1;
+  --bg-btn: #EDEBE4;
+  --bg-code: #2d2d2d;
+  --border-frame: #C2B9A5;
+  --border-rule: #777777;
+  --border-dark: #333333;
+  --text-main: #1A1816;
+  --text-muted: #555555;
+  --font-mono: 'IBM Plex Mono', Menlo, Consolas, 'Courier New', Courier, monospace;
+  --status-pass: #16a34a;
+  --status-fail: #dc2626;
+  --status-warn: #ca8a04;
+  --status-skip: #6b7280;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--bg-page); color: var(--text-main); font-family: var(--font-mono); font-size: 13px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+
+.setup-container {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 24px 16px 60px 16px;
+}
+
+/* Header */
+.setup-header {
+  border-bottom: 2px solid var(--border-dark);
+  padding-bottom: 16px;
+  margin-bottom: 24px;
+}
+.setup-header h1 {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.setup-header p {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+.setup-header .nav-link {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-main);
+  text-decoration: none;
+  border: 1px solid var(--border-dark);
+  padding: 4px 12px;
+  background: var(--bg-btn);
+}
+.setup-header .nav-link:hover { background: var(--border-dark); color: #fff; }
+
+/* Preflight Summary */
+.preflight-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+  gap: 8px;
+  margin-bottom: 24px;
+  border: 1px solid var(--border-frame);
+  padding: 12px;
+  background: var(--bg-card);
+}
+.preflight-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.preflight-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--status-skip);
+  transition: background 0.3s;
+}
+.preflight-dot.pass { background: var(--status-pass); }
+.preflight-dot.fail { background: var(--status-fail); }
+.preflight-dot.warn { background: var(--status-warn); }
+.preflight-label { flex: 1; }
+.preflight-ms { font-weight: 400; color: var(--text-muted); font-size: 10px; }
+
+.preflight-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.btn-preflight {
+  height: 32px;
+  padding: 0 16px;
+  border: 1px solid var(--border-dark);
+  background: var(--bg-btn);
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.btn-preflight:hover { background: var(--border-dark); color: #fff; }
+.btn-preflight:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-preflight.primary { background: var(--text-main); color: var(--bg-page); }
+.btn-preflight.primary:hover { background: #000; }
+
+/* Section */
+.setup-section {
+  margin-bottom: 24px;
+  border: 1px solid var(--border-frame);
+  background: var(--bg-card);
+}
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-frame);
+  cursor: pointer;
+  user-select: none;
+}
+.section-header:hover { background: var(--bg-btn); }
+.section-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-status {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid;
+}
+.section-status.online { color: var(--status-pass); border-color: var(--status-pass); background: rgba(22,163,106,0.08); }
+.section-status.offline { color: var(--status-fail); border-color: var(--status-fail); background: rgba(220,38,38,0.08); }
+.section-status.optional { color: var(--status-warn); border-color: var(--status-warn); background: rgba(202,138,4,0.08); }
+.section-status.skip { color: var(--status-skip); border-color: var(--status-skip); }
+
+.section-body {
+  padding: 14px;
+  display: none;
+}
+.section-body.open { display: block; }
+
+.section-meta {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+.section-meta strong { color: var(--text-main); }
+
+/* Connection test row */
+.conn-test-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.conn-test-row input {
+  flex: 1;
+  height: 30px;
+  padding: 0 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  border: 1px solid var(--border-frame);
+  background: #fff;
+  color: var(--text-main);
+}
+.conn-test-result {
+  font-size: 10.5px;
+  font-weight: 600;
+  min-height: 20px;
+  padding: 2px 0;
+}
+.conn-test-result.pass { color: var(--status-pass); }
+.conn-test-result.fail { color: var(--status-fail); }
+
+/* Install guide tabs */
+.install-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border-frame);
+  margin-bottom: 10px;
+}
+.install-tab {
+  padding: 4px 12px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  border: 1px solid var(--border-frame);
+  border-bottom: none;
+  background: var(--bg-btn);
+  color: var(--text-muted);
+  cursor: pointer;
+  margin-bottom: -1px;
+}
+.install-tab.active {
+  background: var(--bg-card);
+  color: var(--text-main);
+  border-bottom: 1px solid var(--bg-card);
+}
+.install-pane { display: none; }
+.install-pane.active { display: block; }
+
+/* Code blocks */
+pre.cmd-block {
+  background: var(--bg-code);
+  color: #e0e0e0;
+  padding: 10px 12px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  line-height: 1.5;
+  overflow-x: auto;
+  margin: 8px 0;
+  position: relative;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+pre.cmd-block .cmd-comment { color: #6a9955; }
+pre.cmd-block .cmd-highlight { color: #dcdcaa; }
+
+.copy-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  padding: 2px 6px;
+  font-size: 9px;
+  font-family: var(--font-mono);
+  background: rgba(255,255,255,0.1);
+  color: #ccc;
+  border: 1px solid rgba(255,255,255,0.2);
+  cursor: pointer;
+}
+.copy-btn:hover { background: rgba(255,255,255,0.2); }
+
+/* Steps */
+.step-list {
+  counter-reset: step;
+  list-style: none;
+  padding: 0;
+}
+.step-list li {
+  counter-increment: step;
+  padding: 6px 0 6px 28px;
+  position: relative;
+  font-size: 11.5px;
+  line-height: 1.5;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+.step-list li:last-child { border-bottom: none; }
+.step-list li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 6px;
+  width: 20px;
+  height: 20px;
+  background: var(--bg-btn);
+  border: 1px solid var(--border-frame);
+  text-align: center;
+  line-height: 18px;
+  font-size: 10px;
+  font-weight: 700;
+}
+.step-list code {
+  background: var(--bg-btn);
+  padding: 1px 5px;
+  font-size: 10.5px;
+  border: 1px solid var(--border-frame);
+}
+
+/* Notes */
+.setup-note {
+  padding: 8px 12px;
+  font-size: 10.5px;
+  line-height: 1.5;
+  border-left: 3px solid;
+  margin: 8px 0;
+}
+.setup-note.info { border-color: #2563eb; background: rgba(37,99,235,0.06); }
+.setup-note.warn { border-color: var(--status-warn); background: rgba(202,138,4,0.06); }
+.setup-note.tip { border-color: var(--status-pass); background: rgba(22,163,106,0.06); }
+
+/* Docker compose */
+.docker-section {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-frame);
+}
+
+/* Requirements table */
+.req-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  margin: 8px 0;
+}
+.req-table th, .req-table td {
+  padding: 5px 8px;
+  border: 1px solid var(--border-frame);
+  text-align: left;
+}
+.req-table th {
+  background: var(--bg-btn);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: 0.3px;
+}
+
+/* Footer */
+.setup-footer {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 2px solid var(--border-dark);
+  font-size: 10.5px;
+  color: var(--text-muted);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .setup-container { padding: 16px 12px 40px 12px; }
+  .preflight-summary { grid-template-columns: 1fr 1fr; }
+  .conn-test-row { flex-wrap: wrap; }
+  .conn-test-row input { min-width: 0; }
+  .preflight-actions { flex-wrap: wrap; }
+}
+</style>
+</head>
+<body>
+
+<div class="setup-container">
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       HEADER
+       ═══════════════════════════════════════════════════════════════════ -->
+  <header class="setup-header">
+    <h1>⚙ Preflight Check &amp; Setup Guide</h1>
+    <p>
+      Local Intelligence Workstation coordinates five independent inference engines.
+      This page validates each backend's connectivity, provides installation instructions for every platform,
+      and verifies your environment is ready for text generation, image synthesis, speech transcription, and voice playback.
+    </p>
+    <a href="/" class="nav-link">← Back to Workstation</a>
+  </header>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       PREFLIGHT SUMMARY STRIP
+       ═══════════════════════════════════════════════════════════════════ -->
+  <div class="preflight-summary" id="preflightSummary">
+    <div class="preflight-item" data-backend="ollama">
+      <span class="preflight-dot" id="dotOllama"></span>
+      <span class="preflight-label">💬 Ollama</span>
+      <span class="preflight-ms" id="msOllama">—</span>
+    </div>
+    <div class="preflight-item" data-backend="sd_webui">
+      <span class="preflight-dot" id="dotSd"></span>
+      <span class="preflight-label">🎨 SD WebUI</span>
+      <span class="preflight-ms" id="msSd">—</span>
+    </div>
+    <div class="preflight-item" data-backend="comfyui">
+      <span class="preflight-dot" id="dotComfy"></span>
+      <span class="preflight-label">🔮 ComfyUI</span>
+      <span class="preflight-ms" id="msComfy">—</span>
+    </div>
+    <div class="preflight-item" data-backend="whisper">
+      <span class="preflight-dot" id="dotWhisper"></span>
+      <span class="preflight-label">🎙️ Whisper</span>
+      <span class="preflight-ms" id="msWhisper">—</span>
+    </div>
+    <div class="preflight-item" data-backend="piper">
+      <span class="preflight-dot" id="dotPiper"></span>
+      <span class="preflight-label">🔊 Piper TTS</span>
+      <span class="preflight-ms" id="msPiper">—</span>
+    </div>
+  </div>
+
+  <div class="preflight-actions">
+    <button class="btn-preflight primary" id="runAllChecks" onclick="runPreflightChecks()">▶ Run All Preflight Checks</button>
+    <button class="btn-preflight" id="saveAllBtn" onclick="saveAllConfigurations()">💾 Save All URLs</button>
+    <button class="btn-preflight" onclick="expandAll()">Expand All</button>
+    <button class="btn-preflight" onclick="collapseAll()">Collapse All</button>
+    <span id="saveStatusMsg" style="font-size:11px; font-weight:700; color:var(--status-pass); align-self:center; margin-left:6px;"></span>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       1. OLLAMA (Required)
+       ═══════════════════════════════════════════════════════════════════ -->
+  <div class="setup-section" id="sectionOllama">
+    <div class="section-header" onclick="toggleSection('sectionOllama')">
+      <span class="section-title">💬 Ollama — Autoregressive LLMs &amp; Vision Models</span>
+      <span class="section-status" id="statusOllama">CHECKING</span>
+    </div>
+    <div class="section-body" id="bodyOllama">
+      <div class="section-meta">
+        <strong>Required.</strong> Ollama is the core inference engine that runs autoregressive language models
+        (LLaMA 3.x, Qwen 3, Mistral, DeepSeek R1, Gemma 3) and vision-language models (LLaVA, Qwen-VL, MiniCPM-V)
+        using <code>llama.cpp</code> under the hood. It serves the chat, reasoning, and <code>/imagine</code> prompt workflows.
+      </div>
+
+      <table class="req-table">
+        <tr><th>Requirement</th><th>Details</th></tr>
+        <tr><td>Default Port</td><td><code>11434</code></td></tr>
+        <tr><td>Health Endpoint</td><td><code>GET /api/tags</code></td></tr>
+        <tr><td>Min Disk</td><td>~5 GB (base) + model sizes (2–70 GB each)</td></tr>
+        <tr><td>GPU Recommended</td><td>Apple Silicon (Metal), NVIDIA CUDA, AMD ROCm</td></tr>
+      </table>
+
+      <div class="conn-test-row">
+        <input type="text" id="urlOllama" value="http://127.0.0.1:11434" placeholder="Ollama URL">
+        <button class="btn-preflight" onclick="testBackend('ollama','urlOllama')">Test</button>
+      </div>
+      <div class="conn-test-result" id="resultOllama"></div>
+
+      <div class="install-tabs">
+        <button class="install-tab active" onclick="showInstallTab(this,'ollama-mac')">macOS</button>
+        <button class="install-tab" onclick="showInstallTab(this,'ollama-linux')">Linux</button>
+        <button class="install-tab" onclick="showInstallTab(this,'ollama-win')">Windows</button>
+        <button class="install-tab" onclick="showInstallTab(this,'ollama-docker')">Docker</button>
+      </div>
+
+      <div class="install-pane active" id="ollama-mac">
+        <ol class="step-list">
+          <li>Install via Homebrew (recommended):
+            <pre class="cmd-block">brew install ollama<button class="copy-btn" onclick="copyCmd(this)">Copy</button></pre>
+          </li>
+          <li>Or download the macOS installer from <a href="https://ollama.com/download/mac" target="_blank" style="color:var(--text-main); font-weight:700;">ollama.com/download</a></li>
+          <li>Start the daemon:
+            <pre class="cmd-block">ollama serve<button class="copy-btn" onclick="copyCmd(this)">Copy</button></pre>
+          </li>
+          <li>Pull a model to test:
+            <pre class="cmd-block"><span class="cmd-comment"># Recommended starter models</span>
+ollama pull llama3.2:3b       <span class="cmd-comment"># Fast 3B text model</span>
+ollama pull qwen3:8b          <span class="cmd-comment"># Strong 8B reasoning model</span>
+ollama pull llava:7b          <span class="cmd-comment"># Vision-language model</span><button class="copy-btn" onclick="copyCmd(this)">Copy</button></pre>
+          </li>
+        </ol>
+      </div>
+      <div class="install-pane" id="ollama-linux">
+        <ol class="step-list">
+          <li>One-line install (official script):
+            <pre class="cmd-block">curl -fsSL https://ollama.com/install.sh | sh<button class="copy-btn" onclick="copyCmd(this)">Copy</button></pre>
+          </li>
+          <li>The installer sets up <code>ollama</code> as a systemd service. Start it:
+            <pre class="cmd-block">sudo systemctl start ollama
+sudo systemctl enable ollama  <span class="cmd-comment"># Auto-start on boot</span><button class="copy-btn" onclick="copyCmd(this)">Copy</button></pre>
+          </li>
+          <li>Pull a model: <code>ollama pull llama3.2:3b</code></li>
+        </ol>
+        <div class="setup-note info">For NVIDIA GPU acceleration, ensure CUDA drivers and <code>nvidia-container-toolkit</code> are installed.</div>
+      </div>
+      <div class="install-pane" id="ollama-win">
+        <ol class="step-list">
+          <li>Download the Windows installer from <a href="https://ollama.com/download/windows" target="_blank" style="color:var(--text-main); font-weight:700;">ollama.com/download</a></li>
+          <li>Run the <code>.exe</code> installer and follow the wizard</li>
+          <li>Ollama runs as a system tray application. It starts the daemon automatically on launch.</li>
+          <li>Open a terminal and pull a model: <code>ollama pull llama3.2:3b</code></li>
+        </ol>
+      </div>
+      <div class="install-pane" id="ollama-docker">
+        <pre class="cmd-block">docker run -d --name ollama -p 11434:11434 \
+  -v ollama_models:/root/.ollama \
+  ollama/ollama:latest<button class="copy-btn" onclick="copyCmd(this)">Copy</button></pre>
+        <div class="setup-note info">For NVIDIA GPU passthrough, add <code>--gpus all</code> to the command.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       2. STABLE DIFFUSION WEBUI (Optional)
+       ═══════════════════════════════════════════════════════════════════ -->
+  <div class="setup-section" id="sectionSd">
+    <div class="section-header" onclick="toggleSection('sectionSd')">
+      <span class="section-title">🎨 Stable Diffusion WebUI — Image Generation</span>
+      <span class="section-status" id="statusSd">CHECKING</span>
+    </div>
+    <div class="section-body" id="bodySd">
+      <div class="section-meta">
+        <strong>Optional.</strong> Enables the Image Studio workspace for text-to-image and image-to-image generation
+        via AUTOMATIC1111 or Forge WebUI. Also powers the <code>/imagine</code> inline command in chat.
+        Download checkpoints from CivitAI via the Model Hub.
+      </div>
+
+      <table class="req-table">
+        <tr><th>Requirement</th><th>Details</th></tr>
+        <tr><td>Default Port</td><td><code>7860</code></td></tr>
+        <tr><td>Health Endpoint</td><td><code>GET /sdapi/v1/sd-models</code></td></tr>
+        <tr><td>Critical Flag</td><td><code>--api</code> (must be passed at launch)</td></tr>
+        <tr><td>Min VRAM</td><td>4 GB (SD 1.5), 6 GB (SDXL), 8–12 GB (FLUX)</td></tr>
+        <tr><td>Checkpoint Path</td><td><code>models/Stable-diffusion/</code></td></tr>
+      </table>
+
+      <div class="conn-test-row">
+        <input type="text" id="urlSd" value="http://127.0.0.1:7860" placeholder="SD WebUI URL">
+        <button class="btn-preflight" onclick="testBackend('sd_webui','urlSd')">Test</button>
+      </div>
+      <div class="conn-test-result" id="resultSd"></div>
+
+      <div class="install-tabs">
+        <button class="install-tab active" onclick="showInstallTab(this,'sd-auto')">AUTOMATIC1111</button>
+        <button class="install-tab" onclick="showInstallTab(this,'sd-forge')">Forge</button>
+        <button class="install-tab" onclick="showInstallTab(this,'sd-docker')">Docker</button>
+      </div>
+
+      <div class="install-pane active" id="sd-auto">
+        <ol class="step-list">
+          <li>Clone the repository:
+            <pre class="cmd-block">git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git
+cd stable-diffusion-webui<button class="copy-btn" onclick="copyCmd(this)">Copy</button></pre>
+          </li>
+          <li>Download a checkpoint (e.g., from <a href="https://civitai.com" target="_blank" style="color:var(--text-main); font-weight:700;">CivitAI</a>) and place it in <code>models/Stable-diffusion/</code></li>
+          <li>Launch with API mode enabled:
+            <pre class="cmd-block"><span class="cmd-comment"># macOS / Linux</span>
+./webui.sh --api
+
+<span class="cmd-comment"># Windows</span>
+webui-user.bat  <span class="cmd-comment"># Edit COMMANDLINE_ARGS to include --api</span><button class="copy-btn" onclick="copyCmd(this)">Copy</button></pre>
+          </li>
+        </ol>
+        <div class="setup-note warn">The <code>--api</code> flag is <strong>mandatory</strong>. Without it, the REST API endpoints (<code>/sdapi/v1/txt2img</code>) are disabled and the Image Studio will not function.</div>
+      </div>
+      <div class="install-pane" id="sd-forge">
+        <ol class="step-list">
+          <li>Clone Forge (optimized fork with better memory management):
+            <pre class="cmd-block">git clone https://github.com/lllyasviel/stable-diffusion-webui-forge.git
+cd stable-diffusion-webui-forge<button class="copy-btn" onclick="copyCmd(this)">Copy</button></pre>
+          </li>
+          <li>Place checkpoints in <code>models/Stable-diffusion/</code></li>
+          <li>Launch: <code>./webui.sh --api</code></li>
+        </ol>
+        <div class="setup-note tip">Forge typically uses 30-40% less VRAM than AUTOMATIC1111 for the same models.</div>
+      </div>
+      <div class="install-pane" id="sd-docker">
+        <pre class="cmd-block"><span class="cmd-comment"># AUTOMATIC1111 via Docker (NVIDIA GPU required)</span>
+docker run -d --name sd-webui --gpus all \
+  -p 7860:7860 \
+  -v sd-models:/app/models \
+  ghcr.io/neggles/sd-webui-docker:latest \
+  --api --listen<button class="copy-btn" onclick="copyCmd(this)">Copy</button></pre>
+      </div>
+
+      <div class="setup-note info"><strong>GGUF Diffusion Models (FLUX, SDXL):</strong> Use the HuggingFace tab in the Model Hub to download <code>.gguf</code> quantized diffusion weights. Place them in <code>models/Stable-diffusion/</code> for SD WebUI or <code>models/diffusion_models/</code> for ComfyUI.</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       3. COMFYUI (Optional)
+       ═══════════════════════════════════════════════════════════════════ -->
+  <div class="setup-section" id="sectionComfy">
+    <div class="section-header" onclick="toggleSection('sectionComfy')">
+      <span class="section-title">🔮 ComfyUI — Node-Based Diffusion Workflows</span>
+      <span class="section-status" id="statusComfy">CHECKING</span>
+    </div>
+    <div class="section-body" id="bodyComfy">
+      <div class="section-meta">
+        <strong>Optional.</strong> ComfyUI is a node-based visual workflow editor for diffusion models (FLUX, SDXL, SD 3, ControlNet, IP-Adapter).
+        Health monitoring is integrated; use ComfyUI's own browser UI at <code>:8188</code> for workflow editing.
+        Download GGUF-quantized diffusion weights from the HuggingFace Hub tab.
+      </div>
+
+      <table class="req-table">
+        <tr><th>Requirement</th><th>Details</th></tr>
+        <tr><td>Default Port</td><td><code>8188</code></td></tr>
+        <tr><td>Health Endpoint</td><td><code>GET /system_stats</code></td></tr>
+        <tr><td>GGUF Model Path</td><td><code>models/diffusion_models/</code> or <code>models/unet/</code></td></tr>
+        <tr><td>Min VRAM</td><td>4 GB (Q4), 6 GB (Q8), 12+ GB (FP16)</td></tr>
+      </table>
+
+      <div class="conn-test-row">
+        <input type="text" id="urlComfy" value="http://127.0.0.1:8188" placeholder="ComfyUI URL">
+        <button class="btn-preflight" onclick="testBackend('comfyui','urlComfy')">Test</button>
+      </div>
+      <div class="conn-test-result" id="resultComfy"></div>
+
+      <div class="install-tabs">
+        <button class="install-tab active" onclick="showInstallTab(this,'comfy-native')">Native</button>
+        <button class="install-tab" onclick="showInstallTab(this,'comfy-gguf')">GGUF Setup</button>
+        <button class="install-tab" onclick="showInstallTab(this,'comfy-docker')">Docker</button>
+      </div>
+
+      <div class="install-pane active" id="comfy-native">
+        <ol class="step-list">
+          <li>Clone the repository:
+            <pre class="cmd-block">git clone https://github.com/comfyanonymous/ComfyUI.git
+cd ComfyUI
+pip install -r requirements.txt<button class="copy-btn" onclick="copyCmd(this)">Copy</button></pre>
+          </li>
+          <li>Launch ComfyUI:
+            <pre class="cmd-block">python main.py --listen 0.0.0.0 --port 8188<button class="copy-btn" onclick="copyCmd(this)">Copy</button></pre>
+          </li>
+          <li>Open <code>http://localhost:8188</code> in your browser to access the node editor</li>
+        </ol>
+      </div>
+      <div class="install-pane" id="comfy-gguf">
+        <ol class="step-list">
+          <li>Install the ComfyUI-GGUF extension:
+            <pre class="cmd-block">cd ComfyUI/custom_nodes
+git clone https://github.com/city96/ComfyUI-GGUF.git
+pip install -r ComfyUI-GGUF/requirements.txt<button class="copy-btn" onclick="copyCmd(this)">Copy</button></pre>
+          </li>
+          <li>Download GGUF weights from HuggingFace (use the Model Hub → 🎨 Text-to-Image tab):
+            <pre class="cmd-block"><span class="cmd-comment"># Example: FLUX.1-schnell Q4_0 (~5 GB, runs on 6 GB VRAM)</span>
+wget -c "https://huggingface.co/city96/FLUX.1-schnell-gguf/resolve/main/flux1-schnell-Q4_0.gguf" \
+  -O ComfyUI/models/diffusion_models/flux1-schnell-Q4_0.gguf<button class="copy-btn" onclick="copyCmd(this)">Copy</button></pre>
+          </li>
+          <li>Restart ComfyUI. The GGUF loader node will appear in the node editor.</li>
+        </ol>
+        <div class="setup-note tip">GGUF quantizations (Q4, Q5, Q8) reduce FLUX.1 from ~24 GB FP16 to 5–12 GB, fitting on consumer GPUs.</div>
+      </div>
+      <div class="install-pane" id="comfy-docker">
+        <pre class="cmd-block">docker run -d --name comfyui --gpus all \
+  -p 8188:8188 \
+  -v comfy-models:/app/models \
+  ghcr.io/ai-dock/comfyui:latest<button class="copy-btn" onclick="copyCmd(this)">Copy</button></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       4. WHISPER ASR (Optional)
+       ═══════════════════════════════════════════════════════════════════ -->
+  <div class="setup-section" id="sectionWhisper">
+    <div class="section-header" onclick="toggleSection('sectionWhisper')">
+      <span class="section-title">🎙️ Whisper ASR — Speech-to-Text Transcription</span>
+      <span class="section-status" id="statusWhisper">CHECKING</span>
+    </div>
+    <div class="section-body" id="bodyWhisper">
+      <div class="section-meta">
+        <strong>Optional.</strong> Enables the Audio Lab transcription workspace and the microphone dictation button
+        in the chat composer. Supports <code>whisper.cpp</code> (C++, fastest) and <code>faster-whisper</code> (Python, CTranslate2).
+        The workstation auto-detects which API format your server uses.
+      </div>
+
+      <table class="req-table">
+        <tr><th>Requirement</th><th>Details</th></tr>
+        <tr><td>Default Port</td><td><code>8178</code></td></tr>
+        <tr><td>Health Endpoint</td><td><code>GET /health</code></td></tr>
+        <tr><td>API Formats</td><td><code>POST /inference</code> (whisper.cpp) or <code>POST /v1/audio/transcriptions</code> (OpenAI-compatible)</td></tr>
+        <tr><td>Model Sizes</td><td>tiny (75 MB), base (142 MB), small (466 MB), medium (1.5 GB), large-v3 (3 GB)</td></tr>
+      </table>
+
+      <div class="conn-test-row">
+        <input type="text" id="urlWhisper" value="http://127.0.0.1:8178" placeholder="Whisper URL">
+        <button class="btn-preflight" onclick="testBackend('whisper','urlWhisper')">Test</button>
+      </div>
+      <div class="conn-test-result" id="resultWhisper"></div>
+
+      <div class="install-tabs">
+        <button class="install-tab active" onclick="showInstallTab(this,'whisper-cpp')">whisper.cpp</button>
+        <button class="install-tab" onclick="showInstallTab(this,'whisper-faster')">faster-whisper</button>
+        <button class="install-tab" onclick="showInstallTab(this,'whisper-docker')">Docker</button>
+      </div>
+
+      <div class="install-pane active" id="whisper-cpp">
+        <ol class="step-list">
+          <li>Clone and build whisper.cpp:
+            <pre class="cmd-block">git clone https://github.com/ggerganov/whisper.cpp.git
+cd whisper.cpp
+make -j<button class="copy-btn" onclick="copyCmd(this)">Copy</button></pre>
+          </li>
+          <li>Download a model:
+            <pre class="cmd-block">bash models/download-ggml-model.sh base<button class="copy-btn" onclick="copyCmd(this)">Copy</button></pre>
+          </li>
+          <li>Start the HTTP server:
+            <pre class="cmd-block">./server -m models/ggml-base.bin --port 8178<button class="copy-btn" onclick="copyCmd(this)">Copy</button></pre>
+          </li>
+        </ol>
+        <div class="setup-note tip">On Apple Silicon, whisper.cpp uses Core ML / Metal acceleration automatically.</div>
+      </div>
+      <div class="install-pane" id="whisper-faster">
+        <ol class="step-list">
+          <li>Install faster-whisper:
+            <pre class="cmd-block">pip install faster-whisper
+<span class="cmd-comment"># Or with GPU support:</span>
+pip install faster-whisper[gpu]<button class="copy-btn" onclick="copyCmd(this)">Copy</button></pre>
+          </li>
+          <li>Run as an OpenAI-compatible server:
+            <pre class="cmd-block">pip install whisper-asr-webservice
+uvicorn app.webservice:app --host 0.0.0.0 --port 8178<button class="copy-btn" onclick="copyCmd(this)">Copy</button></pre>
+          </li>
+        </ol>
+      </div>
+      <div class="install-pane" id="whisper-docker">
+        <pre class="cmd-block">docker run -d --name whisper -p 8178:9000 \
+  -e ASR_MODEL=base \
+  -e ASR_ENGINE=faster_whisper \
+  onerahmet/openai-whisper-asr-webservice:latest<button class="copy-btn" onclick="copyCmd(this)">Copy</button></pre>
+        <div class="setup-note info">Change <code>ASR_MODEL</code> to <code>small</code>, <code>medium</code>, or <code>large-v3</code> for higher accuracy (requires more RAM/VRAM).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       5. PIPER TTS (Optional)
+       ═══════════════════════════════════════════════════════════════════ -->
+  <div class="setup-section" id="sectionPiper">
+    <div class="section-header" onclick="toggleSection('sectionPiper')">
+      <span class="section-title">🔊 Piper TTS — Neural Text-to-Speech</span>
+      <span class="section-status" id="statusPiper">CHECKING</span>
+    </div>
+    <div class="section-body" id="bodyPiper">
+      <div class="section-meta">
+        <strong>Optional.</strong> Enables local neural text-to-speech for the Audio Lab synthesizer card and the
+        "Read Aloud" button on assistant messages. If Piper is offline, the workstation automatically falls back to
+        the browser's built-in Web Speech API (no installation required for basic TTS).
+      </div>
+
+      <table class="req-table">
+        <tr><th>Requirement</th><th>Details</th></tr>
+        <tr><td>Default Port</td><td><code>5000</code></td></tr>
+        <tr><td>Health Endpoint</td><td><code>GET /api/voices</code></td></tr>
+        <tr><td>Fallback</td><td>Browser Web Speech API (always available, lower quality)</td></tr>
+        <tr><td>Voice Models</td><td>~15–100 MB each, 25+ languages available</td></tr>
+      </table>
+
+      <div class="conn-test-row">
+        <input type="text" id="urlPiper" value="http://127.0.0.1:5000" placeholder="Piper TTS URL">
+        <button class="btn-preflight" onclick="testBackend('piper','urlPiper')">Test</button>
+      </div>
+      <div class="conn-test-result" id="resultPiper"></div>
+
+      <div class="install-tabs">
+        <button class="install-tab active" onclick="showInstallTab(this,'piper-pip')">pip</button>
+        <button class="install-tab" onclick="showInstallTab(this,'piper-docker')">Docker</button>
+      </div>
+
+      <div class="install-pane active" id="piper-pip">
+        <ol class="step-list">
+          <li>Install Piper TTS:
+            <pre class="cmd-block">pip install piper-tts piper-http-server<button class="copy-btn" onclick="copyCmd(this)">Copy</button></pre>
+          </li>
+          <li>Download a voice model:
+            <pre class="cmd-block"><span class="cmd-comment"># Browse voices: https://rhasspy.github.io/piper-samples/</span>
+piper --download-voice en_US-lessac-medium<button class="copy-btn" onclick="copyCmd(this)">Copy</button></pre>
+          </li>
+          <li>Start the HTTP server:
+            <pre class="cmd-block">piper-http-server --port 5000<button class="copy-btn" onclick="copyCmd(this)">Copy</button></pre>
+          </li>
+        </ol>
+      </div>
+      <div class="install-pane" id="piper-docker">
+        <pre class="cmd-block">docker run -d --name piper -p 5000:10200 \
+  rhasspy/wyoming-piper:latest \
+  --voice en_US-lessac-medium<button class="copy-btn" onclick="copyCmd(this)">Copy</button></pre>
+        <div class="setup-note info">Change <code>--voice</code> to any Piper voice ID. Browse all voices at <a href="https://rhasspy.github.io/piper-samples/" target="_blank" style="color:var(--text-main); font-weight:600;">piper-samples</a>.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       DOCKER COMPOSE (All-in-One)
+       ═══════════════════════════════════════════════════════════════════ -->
+  <div class="setup-section" id="sectionDocker">
+    <div class="section-header" onclick="toggleSection('sectionDocker')">
+      <span class="section-title">🐳 Docker Compose — Turnkey Deployment</span>
+      <span class="section-status skip">ALL-IN-ONE</span>
+    </div>
+    <div class="section-body" id="bodyDocker">
+      <div class="section-meta">
+        Deploy the gateway, Ollama, Whisper, and Piper in a single command.
+        SD WebUI and ComfyUI require separate GPU-enabled containers or native installation.
+      </div>
+      <pre class="cmd-block">docker compose up -d<button class="copy-btn" onclick="copyCmd(this)">Copy</button></pre>
+      <div class="setup-note info">The <code>docker-compose.yml</code> in the repository root defines: <code>liw-gateway</code> (:3300), <code>liw-ollama</code> (:11434), <code>liw-whisper</code> (:8178), <code>liw-piper</code> (:5000). For GPU passthrough on NVIDIA, uncomment the <code>deploy.resources</code> section in the compose file.</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       FOOTER
+       ═══════════════════════════════════════════════════════════════════ -->
+  <footer class="setup-footer">
+    <span>Local Intelligence Workstation · Preflight Check</span>
+    <a href="/" class="nav-link" style="margin:0;">← Open Workstation</a>
+  </footer>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// Preflight Check Engine
+// ═══════════════════════════════════════════════════════════════════
+
+const BACKEND_MAP = {
+  ollama:  { dot: 'dotOllama',  ms: 'msOllama',  status: 'statusOllama',  result: 'resultOllama'  },
+  sd_webui:{ dot: 'dotSd',     ms: 'msSd',      status: 'statusSd',      result: 'resultSd'      },
+  comfyui: { dot: 'dotComfy',  ms: 'msComfy',   status: 'statusComfy',   result: 'resultComfy'   },
+  whisper: { dot: 'dotWhisper', ms: 'msWhisper', status: 'statusWhisper', result: 'resultWhisper' },
+  piper:   { dot: 'dotPiper',  ms: 'msPiper',   status: 'statusPiper',   result: 'resultPiper'   }
+};
+
+const REQUIRED = new Set(['ollama']);
+
+async function runPreflightChecks() {
+  const btn = document.getElementById('runAllChecks');
+  btn.disabled = true;
+  btn.textContent = '⏳ Probing backends...';
+
+  try {
+    const res = await fetch('/api/backends');
+    if (!res.ok) throw new Error('Gateway unreachable');
+    const raw = await res.json();
+    const data = raw.backends || raw;
+
+    const inputMap = {
+      ollama: 'urlOllama',
+      sd_webui: 'urlSd',
+      comfyui: 'urlComfy',
+      whisper: 'urlWhisper',
+      piper: 'urlPiper'
+    };
+
+    for (const [id, info] of Object.entries(BACKEND_MAP)) {
+      const backend = data[id];
+      if (!backend) continue;
+
+      const inputId = inputMap[id];
+      const inputEl = document.getElementById(inputId);
+      if (inputEl && backend.url && !inputEl.dataset.dirty) {
+        inputEl.value = backend.url;
+      }
+
+      const dot = document.getElementById(info.dot);
+      const ms = document.getElementById(info.ms);
+      const statusBadge = document.getElementById(info.status);
+      const isRequired = REQUIRED.has(id);
+
+      if (backend.online) {
+        dot.className = 'preflight-dot pass';
+        ms.textContent = backend.latency_ms ? backend.latency_ms + 'ms' : '✓';
+        statusBadge.className = 'section-status online';
+        statusBadge.textContent = 'ONLINE';
+      } else {
+        dot.className = isRequired ? 'preflight-dot fail' : 'preflight-dot warn';
+        ms.textContent = '✗';
+        statusBadge.className = isRequired ? 'section-status offline' : 'section-status optional';
+        statusBadge.textContent = isRequired ? 'OFFLINE' : 'NOT RUNNING';
+      }
+    }
+  } catch (e) {
+    for (const info of Object.values(BACKEND_MAP)) {
+      document.getElementById(info.dot).className = 'preflight-dot fail';
+      document.getElementById(info.ms).textContent = '✗';
+      document.getElementById(info.status).className = 'section-status offline';
+      document.getElementById(info.status).textContent = 'ERROR';
+    }
+    console.error('Preflight failed:', e);
+  }
+
+  btn.disabled = false;
+  btn.textContent = '▶ Run All Preflight Checks';
+}
+
+async function testBackend(backendId, inputId) {
+  const url = document.getElementById(inputId).value.trim();
+  const info = BACKEND_MAP[backendId];
+  const resultEl = document.getElementById(info.result);
+  resultEl.className = 'conn-test-result';
+  resultEl.textContent = 'Testing...';
+
+  try {
+    const res = await fetch('/api/backends/probe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: backendId, url: url })
+    });
+    const data = await res.json();
+
+    if (data.online) {
+      resultEl.className = 'conn-test-result pass';
+      resultEl.textContent = `✓ Connected — ${data.latency_ms || 0}ms latency (HTTP ${data.http_status || 200})`;
+      document.getElementById(info.dot).className = 'preflight-dot pass';
+      document.getElementById(info.ms).textContent = (data.latency_ms || 0) + 'ms';
+      document.getElementById(info.status).className = 'section-status online';
+      document.getElementById(info.status).textContent = 'ONLINE';
+    } else {
+      resultEl.className = 'conn-test-result fail';
+      resultEl.textContent = `✗ Unreachable — ${data.error || 'Connection refused'}`;
+      const isReq = REQUIRED.has(backendId);
+      document.getElementById(info.dot).className = isReq ? 'preflight-dot fail' : 'preflight-dot warn';
+      document.getElementById(info.ms).textContent = '✗';
+      document.getElementById(info.status).className = isReq ? 'section-status offline' : 'section-status optional';
+      document.getElementById(info.status).textContent = isReq ? 'OFFLINE' : 'NOT RUNNING';
+    }
+  } catch (e) {
+    resultEl.className = 'conn-test-result fail';
+    resultEl.textContent = `✗ Gateway error: ${e.message}`;
+  }
+}
+
+async function saveAllConfigurations() {
+  const saveBtn = document.getElementById('saveAllBtn');
+  const msgEl = document.getElementById('saveStatusMsg');
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Saving...';
+  msgEl.style.color = 'var(--status-pass)';
+  msgEl.textContent = '';
+
+  const payload = {
+    ollama: { url: document.getElementById('urlOllama').value.trim() },
+    sd_webui: { url: document.getElementById('urlSd').value.trim() },
+    comfyui: { url: document.getElementById('urlComfy').value.trim() },
+    whisper: { url: document.getElementById('urlWhisper').value.trim() },
+    piper: { url: document.getElementById('urlPiper').value.trim() }
+  };
+
+  try {
+    const res = await fetch('/api/backends/config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (data.saved) {
+      msgEl.textContent = '✓ Saved to backends.json';
+      document.querySelectorAll('.conn-test-row input').forEach(input => { delete input.dataset.dirty; });
+      setTimeout(() => { msgEl.textContent = ''; }, 3000);
+      runPreflightChecks();
+    }
+  } catch (e) {
+    msgEl.style.color = 'var(--status-fail)';
+    msgEl.textContent = '✗ Error saving: ' + e.message;
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.textContent = '💾 Save All URLs';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// UI Helpers
+// ═══════════════════════════════════════════════════════════════════
+
+function toggleSection(sectionId) {
+  const body = document.getElementById(sectionId).querySelector('.section-body');
+  body.classList.toggle('open');
+}
+
+function expandAll() {
+  document.querySelectorAll('.section-body').forEach(b => b.classList.add('open'));
+}
+
+function collapseAll() {
+  document.querySelectorAll('.section-body').forEach(b => b.classList.remove('open'));
+}
+
+function showInstallTab(btn, paneId) {
+  const container = btn.closest('.section-body');
+  container.querySelectorAll('.install-tab').forEach(t => t.classList.remove('active'));
+  container.querySelectorAll('.install-pane').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(paneId).classList.add('active');
+}
+
+function copyCmd(btn) {
+  const pre = btn.closest('pre');
+  const text = pre.textContent.replace('Copy', '').trim();
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓';
+    setTimeout(() => btn.textContent = 'Copy', 1500);
+  });
+}
+
+// Run preflight automatically on page load
+window.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.conn-test-row input').forEach(input => {
+    input.addEventListener('input', () => { input.dataset.dirty = 'true'; });
+  });
+  setTimeout(runPreflightChecks, 300);
+});
+</script>
+</body>
+</html>

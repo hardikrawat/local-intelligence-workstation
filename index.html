@@ -6120,6 +6120,7 @@ html, body {
       <span class="backend-indicator" id="beSdInd" title="Stable Diffusion WebUI">SD <b id="beSdDot">○</b></span>
       <span class="backend-indicator" id="beAsrInd" title="Whisper Speech-to-Text">ASR <b id="beAsrDot">○</b></span>
       <span class="backend-indicator" id="beTtsInd" title="Piper Neural Text-to-Speech">TTS <b id="beTtsDot">○</b></span>
+      <a href="/setup" target="_blank" style="margin-left:6px; color:var(--text-main); font-size:9.5px; font-weight:700; text-decoration:none; border:1px solid var(--border-frame); padding:1px 5px; background:var(--bg-btn); cursor:pointer;" title="Launch Setup Guide & Preflight Check">SETUP ↗</a>
     </span>
     <span>|</span>
     <span>HOST: <span id="serverStatusText">127.0.0.1:11434</span></span>
@@ -6170,8 +6171,9 @@ html, body {
          BACKENDS & INFERENCE ENGINES CONFIGURATION
          ═══════════════════════════════════════════════════════════════════ -->
     <div class="modal-tab-pane active" id="backendsTab">
-      <div style="font-size:11px; color:var(--text-muted); margin-bottom:10px;">
-        Local Intelligence Workstation coordinates multiple local engines. Configure daemon URLs and ping latency:
+      <div style="font-size:11px; color:var(--text-muted); margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+        <span>Local Intelligence Workstation coordinates multiple local engines. Configure daemon URLs and ping latency:</span>
+        <a href="/setup" target="_blank" style="font-family:var(--font-mono); font-size:10px; font-weight:700; color:var(--text-main); text-decoration:none; border:1px solid var(--border-dark); padding:2px 8px; background:var(--bg-btn); white-space:nowrap;">⚙ Setup Guide</a>
       </div>
 
       <!-- Ollama Backend -->
