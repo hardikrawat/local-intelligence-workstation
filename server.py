@@ -365,9 +365,14 @@ class BackendProcessManager:
                 py = venv_py if os.path.exists(venv_py) else "python3"
                 cmd = [py, "launch.py", "--api", "--skip-torch-cuda-test", "--no-half"]
         elif name == "comfyui":
-            venv_py = os.path.join(path, "venv", "bin", "python")
-            py = venv_py if os.path.exists(venv_py) else "python3"
-            cmd = [py, "main.py", "--listen", "127.0.0.1", "--port", "8188"]
+            home = os.path.expanduser("~")
+            candidates = [
+                os.path.join(path, "venv", "bin", "python"),
+                os.path.join(home, "Documents", "stable-diffusion-webui", "venv", "bin", "python"),
+                shutil.which("python3") or "python3"
+            ]
+            py = next((p for p in candidates if p and os.path.isfile(p)), "python3")
+            cmd = [py, "main.py", "--listen", "127.0.0.1", "--port", "8188", "--disable-auto-launch"]
         elif name == "ollama":
             cmd = ["ollama", "serve"]
             cwd = None
@@ -437,13 +442,26 @@ class BackendProcessManager:
             self._append_log(name, f"=== Auto-Installing {name} to {target_dir} ===")
             try:
                 if not os.path.exists(target_dir):
-                    self._append_log(name, f"> git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git {target_dir}")
-                    subprocess.run(["git", "clone", "https://github.com/AUTOMATIC1111/stable-diffusion-webui.git", target_dir], check=True, timeout=180)
-                # Apply mirror and Apple Silicon flags in webui-user.sh
-                webui_user = os.path.join(target_dir, "webui-user.sh")
-                if os.path.exists(webui_user):
-                    with open(webui_user, "a") as f:
-                        f.write('\nexport STABLE_DIFFUSION_REPO="https://github.com/w-e-w/stablediffusion.git"\nexport COMMANDLINE_ARGS="--api --skip-torch-cuda-test --no-half"\n')
+                    if name == "comfyui":
+                        repo_url = "https://github.com/comfyanonymous/ComfyUI.git"
+                    else:
+                        repo_url = "https://github.com/AUTOMATIC1111/stable-diffusion-webui.git"
+                    self._append_log(name, f"> git clone {repo_url} {target_dir}")
+                    subprocess.run(["git", "clone", repo_url, target_dir], check=True, timeout=180)
+
+                if name == "comfyui":
+                    extra_paths_file = os.path.join(target_dir, "extra_model_paths.yaml")
+                    sd_dir = os.path.join(home, "Documents", "stable-diffusion-webui")
+                    if not os.path.exists(extra_paths_file) and os.path.exists(sd_dir):
+                        with open(extra_paths_file, "w") as f:
+                            f.write(f"a1111:\n    base_path: {sd_dir}\n    checkpoints: models/Stable-diffusion\n    vae: models/VAE\n    loras: models/Lora\n")
+                        self._append_log(name, f"Linked shared models from {sd_dir}")
+                elif name == "sd_webui":
+                    # Apply mirror and Apple Silicon flags in webui-user.sh
+                    webui_user = os.path.join(target_dir, "webui-user.sh")
+                    if os.path.exists(webui_user):
+                        with open(webui_user, "a") as f:
+                            f.write('\nexport STABLE_DIFFUSION_REPO="https://github.com/w-e-w/stablediffusion.git"\nexport COMMANDLINE_ARGS="--api --skip-torch-cuda-test --no-half"\n')
                 self._append_log(name, "=== Installation setup complete. Launching service... ===")
                 self.start_service(name)
             except Exception as e:
@@ -1588,7 +1606,12 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
                     res = process_manager.stop_service(name)
                 elif action == "restart":
                     process_manager.stop_service(name)
-                    time.sleep(1)
+                    port = process_manager.PORT_MAP.get(name)
+                    if port:
+                        for _ in range(10):
+                            if not process_manager._is_port_open(port):
+                                break
+                            time.sleep(0.4)
                     res = process_manager.start_service(name)
                 elif action == "install":
                     res = process_manager.install_service(name)

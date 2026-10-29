@@ -1758,6 +1758,7 @@ async function pollLogs(name) {
         }
       }
       state.since = data.next_since;
+      updateServiceStatus(name);
       
       const drawer = document.getElementById(`consoleDrawer_${name}`);
       const isDrawerOpen = drawer && drawer.style.display !== 'none';
