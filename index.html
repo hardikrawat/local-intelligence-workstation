@@ -4190,12 +4190,15 @@ select option:checked {
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
-    padding: max(4px, env(safe-area-inset-top)) 8px 4px 8px !important;
+    padding: max(4px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) 4px max(8px, env(safe-area-inset-left)) !important;
     background: var(--bg-top-bar) !important;
     border-bottom: 1px solid var(--border-dark) !important;
     flex-shrink: 0 !important;
     gap: 6px !important;
     box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
   }
 
   .studio-breadcrumb {
@@ -6809,13 +6812,22 @@ select option:checked {
   .stage-top-meta-bar {
     height: 32px !important;
     min-height: 32px !important;
-    padding: 0 8px !important;
+    padding: 0 max(8px, env(safe-area-inset-right)) 0 max(8px, env(safe-area-inset-left)) !important;
     display: flex !important;
     flex-wrap: nowrap !important;
     justify-content: space-between !important;
     align-items: center !important;
     overflow: hidden !important;
     flex-shrink: 0 !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .video-stage-progress-box {
+    padding: 6px max(8px, env(safe-area-inset-right)) 6px max(8px, env(safe-area-inset-left)) !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   .stage-meta-left {
@@ -6826,23 +6838,26 @@ select option:checked {
     flex: 1 1 auto !important;
     min-width: 0 !important;
     max-width: none !important;
+    margin-right: 6px !important;
   }
 
   .stage-actions-group {
     display: flex !important;
-    gap: 4px !important;
+    gap: 3px !important;
     flex-shrink: 0 !important;
     align-items: center !important;
+    box-sizing: border-box !important;
   }
 
   .stage-actions-group .top-btn {
     height: 24px !important;
     line-height: 22px !important;
-    padding: 0 6px !important;
+    padding: 0 5px !important;
     font-size: 10px !important;
     font-weight: 700 !important;
     white-space: nowrap !important;
     flex-shrink: 0 !important;
+    box-sizing: border-box !important;
   }
 
   .btn-lbl-full {
@@ -14652,6 +14667,9 @@ select option:checked {
     } else if (view === 'video') {
       loadVideoModels();
       renderVideoFilmstrip();
+      if (typeof window.checkAndResumeVideoProgress === 'function') {
+        window.checkAndResumeVideoProgress();
+      }
     } else if (view === 'audio') {
       populateTtsVoiceDropdowns();
     }
@@ -15113,33 +15131,14 @@ select option:checked {
       }
     });
 
-    // Generate Video Button
-    const genBtn = document.getElementById('generateVideoBtn');
-    genBtn?.addEventListener('click', async () => {
-      const prompt = document.getElementById('videoPromptInput')?.value.trim();
-      if (!prompt) {
-        showToast('Please enter a motion prompt.', 'warning');
-        document.getElementById('videoPromptInput')?.focus();
-        return;
-      }
+    // ─── Video Progress Polling & Background Resumption ───
+    let _videoPollActive = false;
+    let _videoPollTimer = null;
 
-      // Auto-switch to canvas & player tab on mobile so user sees progress and output
-      if (window.innerWidth <= 900) {
-        setStudioSubTab('video', 'stage');
-      }
+    function startVideoProgressPolling() {
+      if (_videoPollActive) return;
+      _videoPollActive = true;
 
-      const activeBtnF = document.querySelector('#videoFramePresets .aspect-preset-btn.active');
-      const frames = parseInt(activeBtnF?.getAttribute('data-frames') || '16', 10);
-      const activeBtnFps = document.querySelector('#videoFpsPresets .aspect-preset-btn.active');
-      const fps = parseInt(activeBtnFps?.getAttribute('data-fps') || '12', 10);
-      const activeBtnAsp = document.querySelector('#videoAspectPresets .aspect-preset-btn.active');
-      const width = parseInt(activeBtnAsp?.getAttribute('data-vw') || '512', 10);
-      const height = parseInt(activeBtnAsp?.getAttribute('data-vh') || '512', 10);
-      const motionBucket = parseInt(document.getElementById('videoMotionBucketInput')?.value || '127', 10);
-      const seed = parseInt(document.getElementById('videoSeedInput')?.value || '-1', 10);
-      const model = document.getElementById('videoModelSelect')?.value || 'svd-xt';
-
-      // Elements for Canvas & Player Progress Banner
       const stageProgressBar = document.getElementById('videoStageProgressBarBox');
       const stageProgressFill = document.getElementById('videoStageProgressFill');
       const stageProgressText = document.getElementById('videoStageProgressText');
@@ -15147,7 +15146,6 @@ select option:checked {
       const stageTelemetrySub = document.getElementById('videoStageTelemetrySub');
       const stageStepCounter = document.getElementById('videoStageStepCounter');
 
-      // Elements for Motion Controls Inspector Progress Bar
       const inspectorProgressBar = document.getElementById('videoGenProgressBar');
       const inspectorProgressFill = document.getElementById('videoGenProgressFill');
       const inspectorProgressText = document.getElementById('videoGenProgressText');
@@ -15155,39 +15153,17 @@ select option:checked {
 
       const stageDot = document.getElementById('videoStageDot');
       const stageMeta = document.getElementById('videoStageMetaText');
-
       const placeholderTitle = document.getElementById('videoStageTitle');
       const placeholderDesc = document.getElementById('videoStageDesc');
       const placeholderSub = document.getElementById('videoStageSub');
+      const genBtn = document.getElementById('generateVideoBtn');
 
       if (genBtn) genBtn.disabled = true;
       if (stageProgressBar) stageProgressBar.style.display = 'flex';
       if (inspectorProgressBar) inspectorProgressBar.style.display = 'flex';
 
-      if (stageProgressFill) stageProgressFill.style.width = '2%';
-      if (inspectorProgressFill) inspectorProgressFill.style.width = '2%';
-      if (stageProgressText) stageProgressText.textContent = `Connecting to diffusion pipeline (${model})...`;
-      if (inspectorProgressText) inspectorProgressText.textContent = `Connecting to diffusion pipeline (${model})...`;
-      if (stageProgressEta) stageProgressEta.textContent = '0.0%';
-      if (inspectorProgressEta) inspectorProgressEta.textContent = '0.0%';
-      if (stageTelemetrySub) stageTelemetrySub.textContent = `Allocating ${frames} frames · Engine: SD WebUI :7860 · ${fps} fps`;
-      if (stageStepCounter) stageStepCounter.textContent = `Step 0/${frames * 15}`;
-
-      if (stageDot) stageDot.className = 'stage-live-indicator';
-      if (stageMeta) stageMeta.textContent = `Rendering ${frames} frames · ${fps} fps · ${model}...`;
-
-      if (placeholderTitle) placeholderTitle.textContent = 'SYNTHESIZING VIDEO FRAMES';
-      if (placeholderDesc) placeholderDesc.textContent = `Connecting to diffusion pipeline (${model})...`;
-      if (placeholderSub) placeholderSub.textContent = `Allocating latent canvas (${width}x${height}) · ${frames} frames`;
-      const livePrevInit = document.getElementById('videoStageLivePreview');
-      const glyphInit = document.getElementById('videoStageGlyph');
-      if (livePrevInit) livePrevInit.style.display = 'none';
-      if (glyphInit) glyphInit.style.display = 'block';
-
-      // Real-time backend progress polling (NO mock / NO simulated increments!)
-      let pollActive = true;
-      const pollProgress = async () => {
-        if (!pollActive) return;
+      const poll = async () => {
+        if (!_videoPollActive) return;
         try {
           const pRes = await fetch('/api/video/progress');
           if (pRes.ok) {
@@ -15226,16 +15202,198 @@ select option:checked {
                   placeholderTitle.textContent = `DIFFUSING FRAME ${pData.frame_current}/${pData.frame_total}`;
                 }
               }
+            } else if (pData.stage === 'complete' && pData.result_item) {
+              _videoPollActive = false;
+              if (stageProgressFill) stageProgressFill.style.width = '100%';
+              if (inspectorProgressFill) inspectorProgressFill.style.width = '100%';
+              if (stageProgressText) stageProgressText.textContent = '✓ Video synthesis complete!';
+              if (inspectorProgressText) inspectorProgressText.textContent = '✓ Complete!';
+              if (stageProgressEta) stageProgressEta.textContent = '100%';
+              if (inspectorProgressEta) inspectorProgressEta.textContent = '100%';
+              if (stageTelemetrySub) stageTelemetrySub.textContent = `Rendered ${pData.result_item.frames} frames @ ${pData.result_item.fps} fps · Duration ${pData.result_item.duration}s`;
+              if (stageDot) stageDot.className = 'stage-live-indicator standby';
+              if (stageMeta) stageMeta.textContent = `Video Ready · ${pData.result_item.frames} frames · ${pData.result_item.fps} fps · ${pData.result_item.duration}s`;
+
+              const item = {
+                id: pData.result_item.job_id || ('vid_' + Date.now()),
+                prompt: pData.result_item.prompt,
+                video_url: pData.result_item.video_url,
+                thumb: (pData.result_item.frames_data && pData.result_item.frames_data[0]) || pData.result_item.video_url,
+                frames: pData.result_item.frames,
+                fps: pData.result_item.fps,
+                duration: pData.result_item.duration,
+                frames_data: pData.result_item.frames_data,
+                timestamp: pData.result_item.timestamp || Date.now()
+              };
+
+              const exists = videoHistory.some(v => (v.id && v.id === item.id) || (v.video_url === item.video_url));
+              if (!exists) {
+                videoHistory.unshift(item);
+                if (videoHistory.length > 20) videoHistory.pop();
+                localStorage.setItem('liw_video_history', JSON.stringify(videoHistory));
+                renderVideoFilmstrip();
+              }
+
+              loadVideoIntoPlayer(item);
+              showToast('✓ Video generated successfully!', 'success');
+              localStorage.removeItem('liw_active_video_job');
+
+              if (genBtn) genBtn.disabled = false;
+              setTimeout(() => {
+                if (stageProgressBar) stageProgressBar.style.display = 'none';
+                if (inspectorProgressBar) inspectorProgressBar.style.display = 'none';
+              }, 1500);
+              return;
+            } else if (pData.stage === 'error') {
+              _videoPollActive = false;
+              if (stageDot) stageDot.className = 'stage-live-indicator standby';
+              if (stageMeta) stageMeta.textContent = 'Video Synthesis Failed';
+              if (stageProgressText) stageProgressText.textContent = `Error: ${pData.error || 'Synthesis error'}`;
+              if (stageTelemetrySub) stageTelemetrySub.textContent = 'Synthesis process aborted';
+              if (placeholderTitle) placeholderTitle.textContent = 'VIDEO SYNTHESIS FAILED';
+              if (placeholderDesc) placeholderDesc.textContent = pData.error || 'Synthesis error';
+              const livePrevErr = document.getElementById('videoStageLivePreview');
+              const glyphErr = document.getElementById('videoStageGlyph');
+              if (livePrevErr) livePrevErr.style.display = 'none';
+              if (glyphErr) glyphErr.style.display = 'block';
+              showToast(`Video synthesis error: ${pData.error || 'Synthesis error'}`, 'error');
+              localStorage.removeItem('liw_active_video_job');
+              if (genBtn) genBtn.disabled = false;
+              setTimeout(() => {
+                if (stageProgressBar) stageProgressBar.style.display = 'none';
+                if (inspectorProgressBar) inspectorProgressBar.style.display = 'none';
+              }, 2000);
+              return;
             }
           }
         } catch (err) {
           console.warn('Video progress poll error:', err);
         }
-        if (pollActive) {
-          setTimeout(pollProgress, 250);
+
+        if (_videoPollActive) {
+          _videoPollTimer = setTimeout(poll, 300);
         }
       };
-      setTimeout(pollProgress, 120);
+
+      poll();
+    }
+
+    window.checkAndResumeVideoProgress = async function() {
+      try {
+        const pRes = await fetch('/api/video/progress');
+        if (!pRes.ok) return;
+        const pData = await pRes.json();
+
+        if (pData.active) {
+          if (window.innerWidth <= 900 && typeof setStudioSubTab === 'function') {
+            setStudioSubTab('video', 'stage');
+          }
+          startVideoProgressPolling();
+        } else if (pData.stage === 'complete' && pData.result_item) {
+          const item = {
+            id: pData.result_item.job_id || ('vid_' + Date.now()),
+            prompt: pData.result_item.prompt,
+            video_url: pData.result_item.video_url,
+            thumb: (pData.result_item.frames_data && pData.result_item.frames_data[0]) || pData.result_item.video_url,
+            frames: pData.result_item.frames,
+            fps: pData.result_item.fps,
+            duration: pData.result_item.duration,
+            frames_data: pData.result_item.frames_data,
+            timestamp: pData.result_item.timestamp || Date.now()
+          };
+
+          const exists = videoHistory.some(v => (v.id && v.id === item.id) || (v.video_url === item.video_url));
+          if (!exists) {
+            videoHistory.unshift(item);
+            if (videoHistory.length > 20) videoHistory.pop();
+            localStorage.setItem('liw_video_history', JSON.stringify(videoHistory));
+            renderVideoFilmstrip();
+          }
+          loadVideoIntoPlayer(item);
+        }
+      } catch (err) {
+        console.warn('Video progress resume check error:', err);
+      }
+    };
+
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && (currentStudioView === 'video' || window.currentStudioView === 'video')) {
+        window.checkAndResumeVideoProgress();
+      }
+    });
+
+    window.addEventListener('focus', () => {
+      if (currentStudioView === 'video' || window.currentStudioView === 'video') {
+        window.checkAndResumeVideoProgress();
+      }
+    });
+
+    // Generate Video Button
+    const genBtn = document.getElementById('generateVideoBtn');
+    genBtn?.addEventListener('click', async () => {
+      const prompt = document.getElementById('videoPromptInput')?.value.trim();
+      if (!prompt) {
+        showToast('Please enter a motion prompt.', 'warning');
+        document.getElementById('videoPromptInput')?.focus();
+        return;
+      }
+
+      // Auto-switch to canvas & player tab on mobile so user sees progress and output
+      if (window.innerWidth <= 900 && typeof setStudioSubTab === 'function') {
+        setStudioSubTab('video', 'stage');
+      }
+
+      const activeBtnF = document.querySelector('#videoFramePresets .aspect-preset-btn.active');
+      const frames = parseInt(activeBtnF?.getAttribute('data-frames') || '16', 10);
+      const activeBtnFps = document.querySelector('#videoFpsPresets .aspect-preset-btn.active');
+      const fps = parseInt(activeBtnFps?.getAttribute('data-fps') || '12', 10);
+      const activeBtnAsp = document.querySelector('#videoAspectPresets .aspect-preset-btn.active');
+      const width = parseInt(activeBtnAsp?.getAttribute('data-vw') || '512', 10);
+      const height = parseInt(activeBtnAsp?.getAttribute('data-vh') || '512', 10);
+      const motionBucket = parseInt(document.getElementById('videoMotionBucketInput')?.value || '127', 10);
+      const seed = parseInt(document.getElementById('videoSeedInput')?.value || '-1', 10);
+      const model = document.getElementById('videoModelSelect')?.value || 'svd-xt';
+
+      const stageDot = document.getElementById('videoStageDot');
+      const stageMeta = document.getElementById('videoStageMetaText');
+      const placeholderTitle = document.getElementById('videoStageTitle');
+      const placeholderDesc = document.getElementById('videoStageDesc');
+      const placeholderSub = document.getElementById('videoStageSub');
+      const stageProgressBar = document.getElementById('videoStageProgressBarBox');
+      const stageProgressFill = document.getElementById('videoStageProgressFill');
+      const stageProgressText = document.getElementById('videoStageProgressText');
+      const stageProgressEta = document.getElementById('videoStageProgressEta');
+      const stageTelemetrySub = document.getElementById('videoStageTelemetrySub');
+      const stageStepCounter = document.getElementById('videoStageStepCounter');
+
+      const inspectorProgressBar = document.getElementById('videoGenProgressBar');
+      const inspectorProgressFill = document.getElementById('videoGenProgressFill');
+      const inspectorProgressText = document.getElementById('videoGenProgressText');
+      const inspectorProgressEta = document.getElementById('videoGenProgressEta');
+
+      if (genBtn) genBtn.disabled = true;
+      if (stageProgressBar) stageProgressBar.style.display = 'flex';
+      if (inspectorProgressBar) inspectorProgressBar.style.display = 'flex';
+
+      if (stageProgressFill) stageProgressFill.style.width = '2%';
+      if (inspectorProgressFill) inspectorProgressFill.style.width = '2%';
+      if (stageProgressText) stageProgressText.textContent = `Connecting to diffusion pipeline (${model})...`;
+      if (inspectorProgressText) inspectorProgressText.textContent = `Connecting to diffusion pipeline (${model})...`;
+      if (stageProgressEta) stageProgressEta.textContent = '0.0%';
+      if (inspectorProgressEta) inspectorProgressEta.textContent = '0.0%';
+      if (stageTelemetrySub) stageTelemetrySub.textContent = `Starting ${frames} frames · Engine: SD WebUI :7860 · ${fps} fps`;
+      if (stageStepCounter) stageStepCounter.textContent = `Step 0/${frames * 15}`;
+
+      if (stageDot) stageDot.className = 'stage-live-indicator';
+      if (stageMeta) stageMeta.textContent = `Rendering ${frames} frames · ${fps} fps · ${model}...`;
+
+      if (placeholderTitle) placeholderTitle.textContent = 'SYNTHESIZING VIDEO FRAMES';
+      if (placeholderDesc) placeholderDesc.textContent = `Connecting to diffusion pipeline (${model})...`;
+      if (placeholderSub) placeholderSub.textContent = `Allocating latent canvas (${width}x${height}) · ${frames} frames`;
+      const livePrevInit = document.getElementById('videoStageLivePreview');
+      const glyphInit = document.getElementById('videoStageGlyph');
+      if (livePrevInit) livePrevInit.style.display = 'none';
+      if (glyphInit) glyphInit.style.display = 'block';
 
       try {
         const res = await fetch('/api/video/generate', {
@@ -15255,44 +15413,17 @@ select option:checked {
           })
         });
 
-        pollActive = false;
         const data = await res.json();
-
-        if (data.status === 'success' && data.video_url) {
-          if (stageProgressFill) stageProgressFill.style.width = '100%';
-          if (inspectorProgressFill) inspectorProgressFill.style.width = '100%';
-          if (stageProgressText) stageProgressText.textContent = '✓ Video synthesis complete!';
-          if (inspectorProgressText) inspectorProgressText.textContent = '✓ Complete!';
-          if (stageProgressEta) stageProgressEta.textContent = '100%';
-          if (inspectorProgressEta) inspectorProgressEta.textContent = '100%';
-          if (stageTelemetrySub) stageTelemetrySub.textContent = `Rendered ${data.frames} frames @ ${data.fps} fps · Duration ${data.duration}s`;
-          if (stageDot) stageDot.className = 'stage-live-indicator standby';
-          if (stageMeta) stageMeta.textContent = `Video Ready · ${data.frames} frames · ${data.fps} fps · ${data.duration}s`;
-
-          const item = {
-            id: 'vid_' + Date.now(),
-            prompt,
-            video_url: data.video_url,
-            thumb: (data.frames_data && data.frames_data[0]) || data.video_url,
-            frames: data.frames,
-            fps: data.fps,
-            duration: data.duration,
-            frames_data: data.frames_data,
-            timestamp: Date.now()
-          };
-
-          videoHistory.unshift(item);
-          if (videoHistory.length > 20) videoHistory.pop();
-          localStorage.setItem('liw_video_history', JSON.stringify(videoHistory));
-
-          loadVideoIntoPlayer(item);
-          renderVideoFilmstrip();
-          showToast('✓ Video generated successfully!', 'success');
+        if (data.status === 'started' || data.status === 'already_active') {
+          if (data.job_id) {
+            localStorage.setItem('liw_active_video_job', data.job_id);
+          }
+          startVideoProgressPolling();
         } else {
-          throw new Error(data.error || 'Video generation returned no output');
+          throw new Error(data.error || 'Failed to start video synthesis in background');
         }
       } catch (err) {
-        pollActive = false;
+        if (genBtn) genBtn.disabled = false;
         const livePrevErr = document.getElementById('videoStageLivePreview');
         const glyphErr = document.getElementById('videoStageGlyph');
         if (livePrevErr) livePrevErr.style.display = 'none';
@@ -15304,13 +15435,10 @@ select option:checked {
         if (placeholderTitle) placeholderTitle.textContent = 'VIDEO SYNTHESIS FAILED';
         if (placeholderDesc) placeholderDesc.textContent = err.message;
         showToast(`Video synthesis error: ${err.message}`, 'error');
-      } finally {
-        pollActive = false;
-        if (genBtn) genBtn.disabled = false;
         setTimeout(() => {
           if (stageProgressBar) stageProgressBar.style.display = 'none';
           if (inspectorProgressBar) inspectorProgressBar.style.display = 'none';
-        }, 1500);
+        }, 2000);
       }
     });
 
@@ -15370,6 +15498,11 @@ select option:checked {
     });
   }
   initVideoStudio();
+  setTimeout(() => {
+    if (typeof window.checkAndResumeVideoProgress === 'function') {
+      window.checkAndResumeVideoProgress();
+    }
+  }, 400);
 
   // ─── 2. Multi-Backend Management & Telemetry ──────────────────────────
 

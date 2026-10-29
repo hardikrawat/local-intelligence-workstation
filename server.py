@@ -527,6 +527,7 @@ CACHE_TTL = 300  # 5 minutes
 _video_gen_lock = threading.Lock()
 _video_gen_state = {
     "active": False,
+    "job_id": None,
     "stage": "idle",
     "frame_current": 0,
     "frame_total": 0,
@@ -536,8 +537,100 @@ _video_gen_state = {
     "prompt": "",
     "started_at": 0,
     "completed_at": 0,
+    "result_item": None,
     "last_error": None
 }
+
+
+def _run_video_generation_worker(job_id, prompt, neg_prompt, num_gen_frames, steps, cfg, width, height, seed, fps, video_model, sd_url):
+    try:
+        frames_b64 = []
+        for i in range(num_gen_frames):
+            with _video_gen_lock:
+                if _video_gen_state.get("job_id") != job_id:
+                    return
+                _video_gen_state["frame_current"] = i + 1
+                _video_gen_state["stage"] = "generating_frames"
+
+            frame_seed = seed + i
+            frame_req = {
+                "prompt": prompt,
+                "negative_prompt": neg_prompt,
+                "steps": steps,
+                "cfg_scale": cfg,
+                "width": width,
+                "height": height,
+                "seed": frame_seed,
+                "sampler_name": "Euler a"
+            }
+            req = urllib.request.Request(
+                f"{sd_url}/sdapi/v1/txt2img",
+                data=json.dumps(frame_req).encode("utf-8"),
+                headers={"Content-Type": "application/json", "User-Agent": "LIW-Gateway/1.0"},
+                method="POST"
+            )
+            # 300s timeout to allow heavy checkpoint loading / MPS allocation without timing out
+            with urllib.request.urlopen(req, timeout=300) as resp:
+                res_data = json.loads(resp.read().decode("utf-8"))
+                if res_data.get("images") and len(res_data["images"]) > 0:
+                    frames_b64.append(res_data["images"][0])
+
+        if frames_b64:
+            with _video_gen_lock:
+                if _video_gen_state.get("job_id") != job_id:
+                    return
+                _video_gen_state["stage"] = "assembling_webp"
+
+            pil_images = []
+            for fb64 in frames_b64:
+                img_bytes = base64.b64decode(fb64.split(",")[-1])
+                pil_images.append(Image.open(io.BytesIO(img_bytes)).convert("RGB"))
+
+            webp_buf = io.BytesIO()
+            frame_duration_ms = int(1000 / fps)
+            pil_images[0].save(
+                webp_buf,
+                format="WEBP",
+                save_all=True,
+                append_images=pil_images[1:],
+                duration=frame_duration_ms,
+                loop=0,
+                quality=88,
+                method=4
+            )
+            webp_b64 = base64.b64encode(webp_buf.getvalue()).decode("utf-8")
+            video_uri = f"data:image/webp;base64,{webp_b64}"
+
+            result_item = {
+                "job_id": job_id,
+                "video_url": video_uri,
+                "format": "webp",
+                "frames": len(frames_b64),
+                "fps": fps,
+                "duration": round(len(frames_b64) / fps, 2),
+                "prompt": prompt,
+                "model": video_model,
+                "width": width,
+                "height": height,
+                "seed": seed,
+                "timestamp": time.time(),
+                "frames_data": [f"data:image/png;base64,{f}" if not f.startswith("data:") else f for f in frames_b64]
+            }
+
+            with _video_gen_lock:
+                if _video_gen_state.get("job_id") == job_id:
+                    _video_gen_state["active"] = False
+                    _video_gen_state["stage"] = "complete"
+                    _video_gen_state["completed_at"] = time.time()
+                    _video_gen_state["result_item"] = result_item
+        else:
+            raise RuntimeError("No frames generated from SD WebUI sampler")
+    except Exception as e:
+        with _video_gen_lock:
+            if _video_gen_state.get("job_id") == job_id:
+                _video_gen_state["active"] = False
+                _video_gen_state["stage"] = "error"
+                _video_gen_state["last_error"] = str(e)
 
 
 def cache_get(key):
@@ -1796,6 +1889,7 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
             elif path == "/api/video/progress":
                 with _video_gen_lock:
                     is_active = _video_gen_state["active"]
+                    job_id = _video_gen_state.get("job_id")
                     stage = _video_gen_state["stage"]
                     frame_curr = _video_gen_state["frame_current"]
                     frame_tot = _video_gen_state["frame_total"]
@@ -1803,21 +1897,24 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
                     fps = _video_gen_state["fps"]
                     model = _video_gen_state["model"]
                     last_err = _video_gen_state["last_error"]
+                    result_item = _video_gen_state.get("result_item")
 
                 if not is_active:
                     self.send_json_response({
                         "active": False,
+                        "job_id": job_id,
                         "stage": stage,
                         "progress": 100.0 if stage == "complete" else 0.0,
-                        "detail": "Standby · Ready to generate video" if stage != "error" else f"Generation error: {last_err}",
-                        "eta_str": "Standby" if stage != "error" else "Error",
-                        "telemetry": f"Engine: SD WebUI :7860 ({model})" if stage != "error" else f"Failed: {last_err}",
+                        "detail": "✓ Video synthesis complete!" if stage == "complete" else ("Standby · Ready to generate video" if stage != "error" else f"Generation error: {last_err}"),
+                        "eta_str": "Complete" if stage == "complete" else ("Standby" if stage != "error" else "Error"),
+                        "telemetry": f"Rendered {frame_tot} frames @ {fps} fps" if stage == "complete" else (f"Engine: SD WebUI :7860 ({model})" if stage != "error" else f"Failed: {last_err}"),
                         "frame_current": frame_curr,
                         "frame_total": frame_tot,
-                        "sampling_step": 0,
+                        "sampling_step": steps_per_frame if stage == "complete" else 0,
                         "sampling_steps": steps_per_frame,
-                        "global_step": 0,
-                        "total_global_steps": 0,
+                        "global_step": frame_tot * steps_per_frame if stage == "complete" else 0,
+                        "total_global_steps": frame_tot * steps_per_frame,
+                        "result_item": result_item if stage == "complete" else None,
                         "error": last_err
                     })
                     return
@@ -1877,6 +1974,7 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
 
                 self.send_json_response({
                     "active": True,
+                    "job_id": job_id,
                     "stage": stage,
                     "progress": overall_pct,
                     "frame_progress": round(sd_progress * 100, 1),
@@ -1915,7 +2013,17 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
                 num_gen_frames = min(max(frames_count, 2), 24)
 
                 with _video_gen_lock:
+                    if _video_gen_state["active"]:
+                        self.send_json_response({
+                            "status": "already_active",
+                            "job_id": _video_gen_state.get("job_id"),
+                            "message": "Video generation is already running in background"
+                        })
+                        return
+
+                    job_id = f"vjob_{int(time.time() * 1000)}_{random.randint(100, 999)}"
                     _video_gen_state["active"] = True
+                    _video_gen_state["job_id"] = job_id
                     _video_gen_state["stage"] = "generating_frames"
                     _video_gen_state["frame_current"] = 1
                     _video_gen_state["frame_total"] = num_gen_frames
@@ -1924,87 +2032,27 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
                     _video_gen_state["model"] = video_model
                     _video_gen_state["prompt"] = prompt
                     _video_gen_state["started_at"] = time.time()
+                    _video_gen_state["completed_at"] = 0
+                    _video_gen_state["result_item"] = None
                     _video_gen_state["last_error"] = None
 
-                try:
-                    frames_b64 = []
-                    for i in range(num_gen_frames):
-                        with _video_gen_lock:
-                            _video_gen_state["frame_current"] = i + 1
-                            _video_gen_state["stage"] = "generating_frames"
+                # Spawn background synthesis worker thread - immediately returns to avoid ngrok/mobile timeout!
+                worker = threading.Thread(
+                    target=_run_video_generation_worker,
+                    args=(job_id, prompt, neg_prompt, num_gen_frames, steps, cfg, width, height, seed, fps, video_model, sd_url),
+                    daemon=True
+                )
+                worker.start()
 
-                        frame_seed = seed + i
-                        frame_req = {
-                            "prompt": prompt,
-                            "negative_prompt": neg_prompt,
-                            "steps": steps,
-                            "cfg_scale": cfg,
-                            "width": width,
-                            "height": height,
-                            "seed": frame_seed,
-                            "sampler_name": "Euler a"
-                        }
-                        req = urllib.request.Request(
-                            f"{sd_url}/sdapi/v1/txt2img",
-                            data=json.dumps(frame_req).encode("utf-8"),
-                            headers={"Content-Type": "application/json", "User-Agent": "LIW-Gateway/1.0"},
-                            method="POST"
-                        )
-                        with urllib.request.urlopen(req, timeout=120) as resp:
-                            res_data = json.loads(resp.read().decode("utf-8"))
-                            if res_data.get("images") and len(res_data["images"]) > 0:
-                                frames_b64.append(res_data["images"][0])
-
-                    if frames_b64:
-                        with _video_gen_lock:
-                            _video_gen_state["stage"] = "assembling_webp"
-
-                        pil_images = []
-                        for fb64 in frames_b64:
-                            img_bytes = base64.b64decode(fb64.split(",")[-1])
-                            pil_images.append(Image.open(io.BytesIO(img_bytes)).convert("RGB"))
-
-                        webp_buf = io.BytesIO()
-                        frame_duration_ms = int(1000 / fps)
-                        pil_images[0].save(
-                            webp_buf,
-                            format="WEBP",
-                            save_all=True,
-                            append_images=pil_images[1:],
-                            duration=frame_duration_ms,
-                            loop=0
-                        )
-                        webp_b64 = base64.b64encode(webp_buf.getvalue()).decode("utf-8")
-                        video_uri = f"data:image/webp;base64,{webp_b64}"
-
-                        with _video_gen_lock:
-                            _video_gen_state["active"] = False
-                            _video_gen_state["stage"] = "complete"
-                            _video_gen_state["completed_at"] = time.time()
-
-                        self.send_json_response({
-                            "status": "success",
-                            "video_url": video_uri,
-                            "format": "webp",
-                            "frames": len(frames_b64),
-                            "fps": fps,
-                            "duration": round(len(frames_b64) / fps, 2),
-                            "seed": seed,
-                            "frames_data": [f"data:image/png;base64,{f}" if not f.startswith("data:") else f for f in frames_b64]
-                        })
-                        return
-                    else:
-                        raise RuntimeError("No frames generated from SD WebUI")
-                except Exception as e:
-                    with _video_gen_lock:
-                        _video_gen_state["active"] = False
-                        _video_gen_state["stage"] = "error"
-                        _video_gen_state["last_error"] = str(e)
-                    self.send_json_response({
-                        "error": f"Video generation failed: {str(e)}. Ensure SD WebUI is running on {sd_url}.",
-                        "status": "error"
-                    }, status=500)
-                    return
+                self.send_json_response({
+                    "status": "started",
+                    "job_id": job_id,
+                    "frames": num_gen_frames,
+                    "fps": fps,
+                    "model": video_model,
+                    "message": "Video synthesis started in background"
+                })
+                return
         self.send_error(404, f"Video endpoint not found: {path}")
 
     def handle_system_request(self):
