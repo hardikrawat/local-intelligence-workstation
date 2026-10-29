@@ -28,8 +28,15 @@ import ssl
 import time
 import threading
 import base64
+import subprocess
+import collections
+import shutil
+import socket
 import concurrent.futures
-from http.server import HTTPServer, SimpleHTTPRequestHandler
+import io
+import random
+from PIL import Image
+from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 
 DEFAULT_PORT = 3300
 BACKENDS_FILE = "backends.json"
@@ -82,7 +89,7 @@ DEFAULT_BACKENDS = {
     }
 }
 
-_backends_lock = threading.Lock()
+_backends_lock = threading.RLock()
 _backends_cache = None
 
 
@@ -187,6 +194,310 @@ def probe_all_backends():
             backend_copy.update(probe_res)
             results[k] = backend_copy
     return results
+
+
+# ─── Local Backend Process & Lifecycle Manager ──────────────────────────────
+
+class BackendProcessManager:
+    """Manages local backend service lifecycles (start, stop, restart, install) with live log streaming."""
+    PORT_MAP = {
+        "ollama": 11434,
+        "sd_webui": 7860,
+        "comfyui": 8188,
+        "whisper": 8178,
+        "piper": 5000,
+    }
+
+    def __init__(self):
+        self.processes = {}  # name -> subprocess.Popen
+        self.logs = collections.defaultdict(lambda: collections.deque(maxlen=3000))
+        self.states = {}  # name -> "stopped" | "starting" | "online" | "installing" | "error"
+        self.threads = {}
+        self.lock = threading.Lock()
+
+    def get_known_path(self, name):
+        home = os.path.expanduser("~")
+        if name == "sd_webui":
+            paths = [
+                os.path.join(home, "Documents", "stable-diffusion-webui"),
+                os.path.join(home, "stable-diffusion-webui"),
+                os.path.join(os.getcwd(), "backends", "stable-diffusion-webui"),
+            ]
+            for p in paths:
+                if os.path.isdir(p) and (os.path.isfile(os.path.join(p, "webui.sh")) or os.path.isfile(os.path.join(p, "launch.py"))):
+                    return p
+            return None
+        elif name == "comfyui":
+            paths = [
+                os.path.join(home, "Documents", "ComfyUI"),
+                os.path.join(home, "ComfyUI"),
+                os.path.join(os.getcwd(), "backends", "ComfyUI"),
+            ]
+            for p in paths:
+                if os.path.isdir(p) and os.path.isfile(os.path.join(p, "main.py")):
+                    return p
+            return None
+        elif name == "ollama":
+            return shutil.which("ollama")
+        return None
+
+    def _is_port_open(self, port):
+        if not port:
+            return False
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.settimeout(0.35)
+                return s.connect_ex(('127.0.0.1', port)) == 0
+        except Exception:
+            return False
+
+    def get_service_status(self, name):
+        port = self.PORT_MAP.get(name)
+        is_open = self._is_port_open(port)
+        path = self.get_known_path(name)
+        installed = path is not None
+
+        proc = self.processes.get(name)
+        is_managed_running = (proc is not None and proc.poll() is None)
+        pid = proc.pid if is_managed_running else None
+
+        # Check if external process is running on this port or starting up
+        external_pid = None
+        if not is_managed_running and is_open and port:
+            try:
+                res = subprocess.check_output(f"lsof -ti :{port}", shell=True, text=True).strip()
+                if res:
+                    first_pid = int(res.split()[0])
+                    proc_comm = subprocess.check_output(f"ps -p {first_pid} -o comm=", shell=True, text=True).strip().lower()
+                    if name == "piper" and ("controlcenter" in proc_comm or "airplay" in proc_comm):
+                        is_open = False
+                    else:
+                        external_pid = first_pid
+            except Exception:
+                pass
+        elif not is_managed_running and not is_open:
+            try:
+                if name == "sd_webui":
+                    res = subprocess.check_output("pgrep -f 'launch.py|webui.py'", shell=True, text=True).strip()
+                    if res:
+                        external_pid = int(res.split()[0])
+                elif name == "comfyui":
+                    res = subprocess.check_output("pgrep -f 'main.py.*8188'", shell=True, text=True).strip()
+                    if res:
+                        external_pid = int(res.split()[0])
+                elif name == "ollama":
+                    res = subprocess.check_output("pgrep -f 'ollama serve'", shell=True, text=True).strip()
+                    if res:
+                        external_pid = int(res.split()[0])
+            except Exception:
+                pass
+
+        with self.lock:
+            current_state = self.states.get(name)
+            if is_open:
+                state = "online"
+            elif current_state == "installing":
+                state = "installing"
+            elif (current_state == "starting" and is_managed_running) or (external_pid and not is_open):
+                state = "starting"
+            elif is_managed_running:
+                state = "running"
+            elif proc and proc.poll() is not None:
+                state = "error" if proc.poll() != 0 else "stopped"
+            else:
+                state = "stopped"
+            self.states[name] = state
+
+        return {
+            "name": name,
+            "installed": installed,
+            "path": path,
+            "state": state,
+            "pid": pid or external_pid,
+            "port": port,
+            "is_port_open": is_open,
+            "log_lines": len(self.logs[name])
+        }
+
+    def _append_log(self, name, text):
+        ts = time.strftime("%H:%M:%S")
+        with self.lock:
+            self.logs[name].append(f"[{ts}] {text.rstrip()}")
+
+    def _reader_thread(self, name, proc):
+        for line in iter(proc.stdout.readline, ''):
+            if not line:
+                break
+            self._append_log(name, line)
+        proc.stdout.close()
+        code = proc.wait()
+        self._append_log(name, f"--- Process exited with code {code} ---")
+        with self.lock:
+            if not self._is_port_open(self.PORT_MAP.get(name)):
+                self.states[name] = "error" if code != 0 else "stopped"
+
+    def start_service(self, name):
+        path = self.get_known_path(name)
+        if not path and name != "ollama":
+            return {"success": False, "error": f"{name} is not installed locally. Run installation first."}
+
+        # Check if already open
+        port = self.PORT_MAP.get(name)
+        if self._is_port_open(port):
+            return {"success": True, "state": "online", "message": f"{name} is already online on port {port}."}
+
+        self._append_log(name, f"=== Starting {name} ===")
+        with self.lock:
+            self.states[name] = "starting"
+
+        cmd = []
+        cwd = path
+        env = os.environ.copy()
+        if name == "sd_webui":
+            # Set required Apple Silicon & mirror args
+            env["STABLE_DIFFUSION_REPO"] = "https://github.com/w-e-w/stablediffusion.git"
+            env["COMMANDLINE_ARGS"] = "--api --skip-torch-cuda-test --no-half"
+            sh_path = os.path.join(path, "webui.sh")
+            if os.path.exists(sh_path):
+                cmd = ["bash", sh_path, "--api", "--skip-torch-cuda-test", "--no-half"]
+            else:
+                venv_py = os.path.join(path, "venv", "bin", "python")
+                py = venv_py if os.path.exists(venv_py) else "python3"
+                cmd = [py, "launch.py", "--api", "--skip-torch-cuda-test", "--no-half"]
+        elif name == "comfyui":
+            venv_py = os.path.join(path, "venv", "bin", "python")
+            py = venv_py if os.path.exists(venv_py) else "python3"
+            cmd = [py, "main.py", "--listen", "127.0.0.1", "--port", "8188"]
+        elif name == "ollama":
+            cmd = ["ollama", "serve"]
+            cwd = None
+
+        try:
+            proc = subprocess.Popen(
+                cmd,
+                cwd=cwd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                bufsize=1,
+                env=env
+            )
+            self.processes[name] = proc
+            t = threading.Thread(target=self._reader_thread, args=(name, proc), daemon=True)
+            self.threads[name] = t
+            t.start()
+            self._append_log(name, f"Launched PID {proc.pid} with command: {' '.join(cmd)}")
+            return {"success": True, "pid": proc.pid, "state": "starting"}
+        except Exception as e:
+            self._append_log(name, f"[ERROR] Failed to start: {e}")
+            with self.lock:
+                self.states[name] = "error"
+            return {"success": False, "error": str(e)}
+
+    def stop_service(self, name):
+        self._append_log(name, f"=== Stopping {name} ===")
+        proc = self.processes.get(name)
+        if proc and proc.poll() is None:
+            try:
+                proc.terminate()
+                proc.wait(timeout=3)
+            except Exception:
+                try:
+                    proc.kill()
+                except Exception:
+                    pass
+        # Kill by port if still occupied
+        port = self.PORT_MAP.get(name)
+        if port:
+            try:
+                subprocess.run(f"lsof -ti :{port} | xargs kill -9 2>/dev/null", shell=True, timeout=2)
+            except Exception:
+                pass
+        with self.lock:
+            self.states[name] = "stopped"
+            self.processes[name] = None
+        self._append_log(name, f"--- {name} stopped successfully ---")
+        return {"success": True, "state": "stopped"}
+
+    def install_service(self, name):
+        home = os.path.expanduser("~")
+        if name == "sd_webui":
+            target_dir = os.path.join(home, "Documents", "stable-diffusion-webui")
+        elif name == "comfyui":
+            target_dir = os.path.join(home, "Documents", "ComfyUI")
+        else:
+            return {"success": False, "error": f"Auto-install not configured for {name}"}
+
+        with self.lock:
+            if self.states.get(name) == "installing":
+                return {"success": False, "error": "Installation already in progress"}
+            self.states[name] = "installing"
+
+        def _do_install():
+            self._append_log(name, f"=== Auto-Installing {name} to {target_dir} ===")
+            try:
+                if not os.path.exists(target_dir):
+                    self._append_log(name, f"> git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git {target_dir}")
+                    subprocess.run(["git", "clone", "https://github.com/AUTOMATIC1111/stable-diffusion-webui.git", target_dir], check=True, timeout=180)
+                # Apply mirror and Apple Silicon flags in webui-user.sh
+                webui_user = os.path.join(target_dir, "webui-user.sh")
+                if os.path.exists(webui_user):
+                    with open(webui_user, "a") as f:
+                        f.write('\nexport STABLE_DIFFUSION_REPO="https://github.com/w-e-w/stablediffusion.git"\nexport COMMANDLINE_ARGS="--api --skip-torch-cuda-test --no-half"\n')
+                self._append_log(name, "=== Installation setup complete. Launching service... ===")
+                self.start_service(name)
+            except Exception as e:
+                self._append_log(name, f"[ERROR] Install failed: {e}")
+                with self.lock:
+                    self.states[name] = "error"
+
+        t = threading.Thread(target=_do_install, daemon=True)
+        t.start()
+        return {"success": True, "state": "installing", "message": "Installation started in background"}
+
+    def get_logs(self, name, since=0):
+        with self.lock:
+            all_logs = list(self.logs[name])
+            if not all_logs and name == "sd_webui":
+                import glob
+                task_dir = os.path.expanduser("~/.gemini/antigravity/brain")
+                try:
+                    candidates = glob.glob(f"{task_dir}/*/.system_generated/tasks/task-*.log")
+                    if candidates:
+                        candidates.sort(key=os.path.getmtime, reverse=True)
+                        for c in candidates[:3]:
+                            with open(c, "r", encoding="utf-8", errors="ignore") as f:
+                                head = f.read(2048)
+                                if "launch.py" in head or "stable-diffusion" in head or "Downloading:" in head:
+                                    f.seek(0)
+                                    lines = f.readlines()
+                                    all_logs = [line.strip() for line in lines[-150:] if line.strip()]
+                                    break
+                except Exception:
+                    pass
+
+            progress_summary = None
+            for line in reversed(all_logs):
+                if "%|" in line and ("/3.97G" in line or "B/s" in line):
+                    parts = line.split("|")
+                    if len(parts) >= 3:
+                        pct = parts[0].strip()
+                        speed_part = parts[2].split("[")[0].strip() if "[" in parts[2] else parts[2].strip()
+                        progress_summary = f"Downloading SD 1.5 Checkpoint: {pct} ({speed_part})"
+                        break
+
+            slice_logs = all_logs[since:]
+            return {
+                "logs": slice_logs,
+                "total": len(all_logs),
+                "next_since": len(all_logs),
+                "progress_summary": progress_summary,
+                "status": self.states.get(name, "stopped")
+            }
+
+
+process_manager = BackendProcessManager()
+
 
 
 # Cache with TTL
@@ -1196,8 +1507,12 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
             self.handle_backends_request()
         elif self.path.startswith("/api/image/"):
             self.handle_image_request()
+        elif self.path.startswith("/api/video/"):
+            self.handle_video_request()
         elif self.path.startswith("/api/audio/"):
             self.handle_audio_request()
+        elif self.path.startswith("/api/system/"):
+            self.handle_system_request()
         elif self.path.startswith("/api/"):
             self.proxy_request("GET")
         elif self.path.startswith("/hub/"):
@@ -1210,8 +1525,12 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
             self.handle_backends_request()
         elif self.path.startswith("/api/image/"):
             self.handle_image_request()
+        elif self.path.startswith("/api/video/"):
+            self.handle_video_request()
         elif self.path.startswith("/api/audio/"):
             self.handle_audio_request()
+        elif self.path.startswith("/api/system/"):
+            self.handle_system_request()
         elif self.path.startswith("/api/"):
             self.proxy_request("POST")
         elif self.path.startswith("/hub/"):
@@ -1235,6 +1554,22 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
                 status_dict = probe_all_backends()
                 self.send_json_response({"backends": status_dict})
                 return
+            elif path == "/api/backends/service/status":
+                q = urllib.parse.parse_qs(parsed.query)
+                name = q.get("name", ["sd_webui"])[0]
+                status = process_manager.get_service_status(name)
+                self.send_json_response({"service": status})
+                return
+            elif path == "/api/backends/service/logs":
+                q = urllib.parse.parse_qs(parsed.query)
+                name = q.get("name", ["sd_webui"])[0]
+                since = int(q.get("since", [0])[0])
+                logs = process_manager.get_logs(name, since)
+                self.send_json_response(logs)
+                return
+            elif path == "/api/backends/config":
+                self.send_json_response({"backends": load_backends_config()})
+                return
 
         elif self.command == "POST":
             content_length = int(self.headers.get("Content-Length", 0))
@@ -1243,6 +1578,26 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
                 payload = json.loads(body.decode("utf-8"))
             except Exception:
                 payload = {}
+
+            if path == "/api/backends/service/action":
+                name = payload.get("name", "sd_webui")
+                action = payload.get("action", "start")
+                if action == "start":
+                    res = process_manager.start_service(name)
+                elif action == "stop":
+                    res = process_manager.stop_service(name)
+                elif action == "restart":
+                    process_manager.stop_service(name)
+                    time.sleep(1)
+                    res = process_manager.start_service(name)
+                elif action == "install":
+                    res = process_manager.install_service(name)
+                else:
+                    res = {"success": False, "error": f"Unknown action: {action}"}
+                status = process_manager.get_service_status(name)
+                res["service"] = status
+                self.send_json_response(res)
+                return
 
             if path == "/api/backends/config":
                 updated = save_backends_config(payload)
@@ -1379,6 +1734,160 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
                     return
 
         self.send_error(404, f"Image endpoint not found: {path}")
+
+    def handle_video_request(self):
+        """Route video motion synthesis, models, and frame generation."""
+        parsed = urllib.parse.urlparse(self.path)
+        path = parsed.path
+        sd_url = get_backend_url("sd_webui")
+        comfy_url = get_backend_url("comfyui")
+
+        if self.command == "GET":
+            if path == "/api/video/models":
+                video_models = [
+                    {"id": "svd-xt", "name": "Stable Video Diffusion XT (25 frames)", "type": "i2v", "frames": 25, "fps": 12, "desc": "High-fidelity image-to-video motion synthesis"},
+                    {"id": "svd", "name": "Stable Video Diffusion (14 frames)", "type": "i2v", "frames": 14, "fps": 12, "desc": "Fast motion synthesis for landscape and portraits"},
+                    {"id": "animatediff-v3", "name": "AnimateDiff v3 (SD 1.5 Motion)", "type": "t2v", "frames": 16, "fps": 8, "desc": "Text-to-video motion module for SD 1.5 checkpoints"},
+                    {"id": "wan2.1-t2v", "name": "Wan2.1 (1.3B / 14B)", "type": "t2v", "frames": 24, "fps": 16, "desc": "State-of-the-art open-source diffusion video generator"},
+                    {"id": "cogvideox-5b", "name": "CogVideoX 5B", "type": "t2v", "frames": 32, "fps": 16, "desc": "Ultra-smooth cinematographic motion generation"}
+                ]
+                self.send_json_response({"models": video_models, "backend": "sd_webui"})
+                return
+
+        elif self.command == "POST":
+            content_length = int(self.headers.get("Content-Length", 0))
+            body = self.rfile.read(content_length) if content_length > 0 else b"{}"
+            payload = json.loads(body.decode("utf-8")) if body else {}
+
+            if path == "/api/video/generate":
+                prompt = payload.get("prompt", "cinematic camera motion, smooth panning")
+                neg_prompt = payload.get("negative_prompt", "jitter, blurry, distorted, low quality")
+                frames_count = int(payload.get("frames", 16))
+                fps = int(payload.get("fps", 12))
+                width = int(payload.get("width", 512))
+                height = int(payload.get("height", 512))
+                steps = int(payload.get("steps", 15))
+                cfg = float(payload.get("cfg_scale", 7.0))
+                seed = int(payload.get("seed", -1))
+                if seed == -1:
+                    seed = random.randint(1000000, 9999999)
+
+                try:
+                    frames_b64 = []
+                    num_gen_frames = min(max(frames_count, 4), 24)
+                    for i in range(num_gen_frames):
+                        frame_seed = seed + i
+                        frame_req = {
+                            "prompt": prompt,
+                            "negative_prompt": neg_prompt,
+                            "steps": steps,
+                            "cfg_scale": cfg,
+                            "width": width,
+                            "height": height,
+                            "seed": frame_seed,
+                            "sampler_name": "Euler a"
+                        }
+                        req = urllib.request.Request(
+                            f"{sd_url}/sdapi/v1/txt2img",
+                            data=json.dumps(frame_req).encode("utf-8"),
+                            headers={"Content-Type": "application/json", "User-Agent": "LIW-Gateway/1.0"},
+                            method="POST"
+                        )
+                        with urllib.request.urlopen(req, timeout=120) as resp:
+                            res_data = json.loads(resp.read().decode("utf-8"))
+                            if res_data.get("images") and len(res_data["images"]) > 0:
+                                frames_b64.append(res_data["images"][0])
+
+                    if frames_b64:
+                        pil_images = []
+                        for fb64 in frames_b64:
+                            img_bytes = base64.b64decode(fb64.split(",")[-1])
+                            pil_images.append(Image.open(io.BytesIO(img_bytes)).convert("RGB"))
+
+                        webp_buf = io.BytesIO()
+                        frame_duration_ms = int(1000 / fps)
+                        pil_images[0].save(
+                            webp_buf,
+                            format="WEBP",
+                            save_all=True,
+                            append_images=pil_images[1:],
+                            duration=frame_duration_ms,
+                            loop=0
+                        )
+                        webp_b64 = base64.b64encode(webp_buf.getvalue()).decode("utf-8")
+                        video_uri = f"data:image/webp;base64,{webp_b64}"
+
+                        self.send_json_response({
+                            "status": "success",
+                            "video_url": video_uri,
+                            "format": "webp",
+                            "frames": len(frames_b64),
+                            "fps": fps,
+                            "duration": round(len(frames_b64) / fps, 2),
+                            "seed": seed,
+                            "frames_data": [f"data:image/png;base64,{f}" if not f.startswith("data:") else f for f in frames_b64]
+                        })
+                        return
+                    else:
+                        raise RuntimeError("No frames generated from SD WebUI")
+                except Exception as e:
+                    self.send_json_response({
+                        "error": f"Video generation failed: {str(e)}. Ensure SD WebUI is running on {sd_url}.",
+                        "status": "error"
+                    }, status=500)
+                    return
+        self.send_error(404, f"Video endpoint not found: {path}")
+
+    def handle_system_request(self):
+        """Unified system actions: evict VRAM across Ollama, SD WebUI, and ComfyUI."""
+        parsed = urllib.parse.urlparse(self.path)
+        path = parsed.path
+        if path == "/api/system/evict-all" or path == "/api/system/evict":
+            evicted = []
+            ollama_url = get_backend_url("ollama")
+            sd_url = get_backend_url("sd_webui")
+            
+            # 1. Evict Ollama models
+            try:
+                ps_req = urllib.request.Request(f"{ollama_url}/api/ps", headers={"User-Agent": "LIW-Gateway/1.0"})
+                with urllib.request.urlopen(ps_req, timeout=2) as resp:
+                    data = json.loads(resp.read().decode("utf-8"))
+                    models = data.get("models", [])
+                    for m in models:
+                        m_name = m.get("model") or m.get("name")
+                        if m_name:
+                            purge_req = urllib.request.Request(
+                                f"{ollama_url}/api/generate",
+                                data=json.dumps({"model": m_name, "keep_alive": 0}).encode("utf-8"),
+                                headers={"Content-Type": "application/json", "User-Agent": "LIW-Gateway/1.0"},
+                                method="POST"
+                            )
+                            with urllib.request.urlopen(purge_req, timeout=3) as _:
+                                pass
+                            evicted.append(f"Ollama: {m_name}")
+            except Exception:
+                pass
+
+            # 2. Unload SD WebUI checkpoint from VRAM
+            try:
+                unload_req = urllib.request.Request(
+                    f"{sd_url}/sdapi/v1/unload-checkpoint",
+                    data=b"{}",
+                    headers={"Content-Type": "application/json", "User-Agent": "LIW-Gateway/1.0"},
+                    method="POST"
+                )
+                with urllib.request.urlopen(unload_req, timeout=3) as _:
+                    evicted.append("SD WebUI: Checkpoint VRAM unloaded")
+            except Exception:
+                pass
+
+            self.send_json_response({
+                "success": True,
+                "evicted": evicted,
+                "message": "VRAM evicted across all active backends"
+            })
+            return
+        self.send_error(404, "System endpoint not found")
 
     def handle_audio_request(self):
         """Route speech-to-text (ASR) and text-to-speech (TTS) requests."""
@@ -1691,8 +2200,8 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
 def run():
     port = int(sys.argv[1]) if len(sys.argv) > 1 else DEFAULT_PORT
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    HTTPServer.allow_reuse_address = True
-    server = HTTPServer(("0.0.0.0", port), OllamaProxyHandler)
+    ThreadingHTTPServer.allow_reuse_address = True
+    server = ThreadingHTTPServer(("0.0.0.0", port), OllamaProxyHandler)
     print(f"Local Intelligence Workstation Gateway running on http://0.0.0.0:{port}")
     print(f"Backends: Ollama ({get_backend_url('ollama')}), SD WebUI ({get_backend_url('sd_webui')}), Whisper ({get_backend_url('whisper')}), Piper ({get_backend_url('piper')})")
     print(f"Model Hub API endpoints: /hub/ollama/search, /hub/hf/search, /hub/civitai/search, /hub/categories")

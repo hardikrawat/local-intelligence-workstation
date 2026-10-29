@@ -131,20 +131,181 @@ html, body {
 
 .window-frame {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   width: 100%;
   max-width: 100%;
   min-width: 0;
   height: 100vh;
+  height: 100dvh;
   border: 1px solid var(--border-frame);
   background: var(--bg-parchment);
+  overflow: hidden;
   overflow-x: hidden !important;
+  box-sizing: border-box;
 }
 
+/* ═══════════════════════════════════════════════════════════════════════
+   WORKSTATION LEFT ACTIVITY RAIL (LEVEL 1 GLOBAL APPLICATION SCOPE)
+   ═══════════════════════════════════════════════════════════════════════ */
+.workstation-rail {
+  width: 52px;
+  min-width: 52px;
+  max-width: 52px;
+  height: 100vh;
+  height: 100dvh;
+  background: var(--bg-top-bar);
+  border-right: 1px solid var(--border-frame);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+  z-index: 50;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.rail-top-group {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.rail-brand-wrap {
+  width: 100%;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid var(--border-frame);
+  background: var(--bg-top-bar);
+  cursor: default;
+}
+
+.rail-brand-glyph {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1;
+}
+
+.rail-nav-group {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 0;
+  gap: 3px;
+  box-sizing: border-box;
+}
+
+.rail-nav-btn {
+  width: 44px;
+  height: 44px;
+  margin: 0 auto;
+  border: 1px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.1s ease;
+  position: relative;
+  outline: none;
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
+.rail-nav-btn:hover {
+  background: #E4E0D5;
+  color: var(--text-main);
+  border-color: var(--border-frame);
+}
+
+.rail-nav-btn.active {
+  background: var(--text-main) !important;
+  color: #FAF8F2 !important;
+  border-color: #000000 !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+}
+
+.rail-nav-btn.active::before {
+  content: "";
+  position: absolute;
+  left: -4px;
+  top: 7px;
+  bottom: 7px;
+  width: 3px;
+  background: #8C5A1E;
+}
+
+.rail-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.rail-label {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  line-height: 1;
+  color: inherit;
+}
+
+.rail-divider {
+  width: 34px;
+  height: 1px;
+  background: var(--border-frame);
+  margin: 6px auto;
+}
+
+.rail-bottom-group {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 8px;
+  gap: 3px;
+  box-sizing: border-box;
+}
+
+.rail-status-pip {
+  position: absolute;
+  top: 4px;
+  right: 5px;
+  font-size: 7px;
+  color: var(--status-pass);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   WORKSTATION MAIN VIEWPORT & STAGE CONTAINER
+   ═══════════════════════════════════════════════════════════════════════ */
+.workstation-main-container {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CONTEXTUAL TOP COMMAND BAR (LEVEL 2 STUDIO SCOPE)
+   ═══════════════════════════════════════════════════════════════════════ */
 .top-header {
-  height: 34px;
-  min-height: 34px;
-  max-height: 34px;
+  height: 38px;
+  min-height: 38px;
+  max-height: 38px;
   background: var(--bg-top-bar);
   border-bottom: 1px solid var(--border-frame);
   display: flex;
@@ -153,53 +314,209 @@ html, body {
   padding: 0 12px;
   font-family: var(--font-mono);
   box-sizing: border-box;
+  gap: 12px;
+  flex-shrink: 0;
 }
 
 .top-header-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   min-width: 0;
-  flex-shrink: 1;
-}
-
-.app-title {
-  font-size: 12.5px;
-  font-weight: 700;
-  color: var(--text-main);
-  letter-spacing: 0.2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   flex-shrink: 0;
 }
 
-.desktop-title-short {
-  display: none;
+#sidebarToggleBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 9px;
+  height: 26px;
+  font-weight: 700;
 }
 
-@media (max-width: 1280px) {
-  .desktop-title-full {
-    display: none;
-  }
-  .desktop-title-short {
-    display: inline;
-  }
+#sidebarToggleBtn .toggle-icon {
+  font-size: 11px;
+  line-height: 1;
 }
 
-.top-header-right {
+.studio-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.breadcrumb-icon {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.breadcrumb-name {
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: 0.04em;
+}
+
+.breadcrumb-sep {
+  color: var(--border-dark);
+  font-weight: 400;
+  opacity: 0.6;
+}
+
+.breadcrumb-tag {
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
+
+.top-header-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.studio-context-control-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 600px;
+  justify-content: center;
+  min-width: 0;
+}
+
+.top-model-selector-wrap {
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  min-width: 140px;
+  max-width: 380px;
+  position: relative;
+}
+
+.top-model-label-pill {
+  height: 26px;
+  padding: 0 7px;
+  background: var(--border-frame);
+  color: var(--text-main);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border-dark);
+  border-right: none;
+  flex-shrink: 0;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+select#topStudioModelSelector.top-select-btn {
+  width: 100%;
+  height: 26px;
+  font-size: 11px;
+  font-weight: 700;
+  background-color: #FFFFFF;
+  border: 1px solid var(--border-dark);
+  text-overflow: ellipsis;
+  padding-left: 8px;
+  padding-right: 22px;
+  cursor: pointer;
+  box-sizing: border-box;
+  background-repeat: no-repeat !important;
+  background-position: right 7px center !important;
+  background-size: 8px 5px !important;
+}
+
+select#topStudioModelSelector.top-select-btn:hover {
+  background-color: #F4F2EB;
+  border-color: #000000;
+  background-repeat: no-repeat !important;
+  background-position: right 7px center !important;
+  background-size: 8px 5px !important;
+}
+
+.top-context-param-wrap {
   display: flex;
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
 }
 
-/* ─── Top Command Bar Controls: Unified High-Precision Engineering Aesthetics ─── */
-.top-btn,
-.top-select-btn {
-  height: 25px;
-  min-height: 25px;
-  max-height: 25px;
+.top-context-pill {
+  height: 26px;
+  padding: 0 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-main);
+  background: var(--bg-card);
+  border: 1px solid var(--border-frame);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+  box-sizing: border-box;
+}
+
+.top-context-pill .pill-dot {
+  font-size: 8px;
+  color: var(--status-pass);
+}
+
+.top-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Secondary Panels Collapsed State (Maximizing Stage Space) */
+.session-ledger-pane.collapsed,
+.image-studio-inspector.collapsed,
+.video-studio-inspector.collapsed,
+.audio-source-card.collapsed {
+  display: none !important;
+}
+
+.top-btn.primary-action-btn {
+  background: var(--text-main);
+  color: #FFFFFF;
+  border-color: #000000;
+  font-weight: 700;
+}
+
+.top-btn.primary-action-btn:hover {
+  background: #333333;
+  color: #FFFFFF;
+}
+
+.top-btn.fleet-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10.5px;
+  text-decoration: none;
+}
+
+.top-btn.fleet-status-pill .fleet-dot {
+  font-size: 8px;
+  color: var(--status-pass);
+}
+
+/* ─── Top Command Bar Buttons: High-Precision Engineering Aesthetics ─── */
+.top-btn {
+  height: 26px;
+  min-height: 26px;
+  max-height: 26px;
   border: 1px solid var(--border-dark);
   border-radius: 0;
   background: var(--bg-btn);
@@ -224,32 +541,132 @@ html, body {
   transition: background 0.1s ease, color 0.1s ease, border-color 0.1s ease;
 }
 
-.top-btn:hover,
-.top-select-btn:hover {
-  background: #1A1816;
-  color: #FFFFFF;
-  border-color: #1A1816;
+.top-btn:hover {
+  background: #1A1816 !important;
+  color: #FFFFFF !important;
+  border-color: #1A1816 !important;
 }
 
-.top-btn:active,
-.top-select-btn:active {
-  background: #000000;
-  color: #FFFFFF;
-  border-color: #000000;
+.top-btn:active {
+  background: #000000 !important;
+  color: #FFFFFF !important;
+  border-color: #000000 !important;
 }
 
-/* Custom crisp dropdown arrow for selects */
-.top-select-btn {
-  padding-right: 20px;
-  padding-left: 8px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%231A1816' d='M0 0l5 5 5-5z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 7px center;
-  background-size: 8px 5px;
+/* ─── Universal High-Precision Engineering Workstation Select & Dropdown System ─── */
+#modelSelect,
+select[style*="display:none"],
+select[style*="display: none"],
+select.hidden,
+.hidden {
+  display: none !important;
 }
 
-.top-select-btn:hover {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23FFFFFF' d='M0 0l5 5 5-5z'/%3E%3C/svg%3E");
+select,
+.top-select-btn,
+select.form-input,
+.hub-sort-select,
+.hub-hf-ctrl-select {
+  height: 26px;
+  min-height: 24px;
+  border: 1px solid var(--border-dark) !important;
+  border-radius: 0 !important;
+  background-color: #FFFFFF !important;
+  color: var(--text-main) !important;
+  font-family: var(--font-mono) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  padding-left: 8px !important;
+  padding-right: 22px !important;
+  cursor: pointer !important;
+  outline: none !important;
+  box-sizing: border-box !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+  vertical-align: middle !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%231A1816' d='M0 0l5 5 5-5z'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 8px center !important;
+  background-size: 8px 5px !important;
+  transition: background-color 0.1s ease, border-color 0.1s ease, box-shadow 0.1s ease !important;
+}
+
+/* Dropdown Hover: Clean workstation tactile highlight, completely readable soot black text */
+select:hover,
+.top-select-btn:hover,
+select.form-input:hover,
+.hub-sort-select:hover,
+.hub-hf-ctrl-select:hover {
+  background-color: #FAF8F1 !important;
+  color: var(--text-main) !important;
+  border-color: #000000 !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23000000' d='M0 0l5 5 5-5z'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 8px center !important;
+  background-size: 8px 5px !important;
+}
+
+/* Dropdown Focus: High-contrast double hairline workstation outline */
+select:focus,
+select:focus-visible,
+.top-select-btn:focus,
+select.form-input:focus,
+.hub-sort-select:focus,
+.hub-hf-ctrl-select:focus {
+  outline: none !important;
+  background-color: #FFFFFF !important;
+  color: var(--text-main) !important;
+  border-color: #000000 !important;
+  box-shadow: 0 0 0 1px #000000 !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23000000' d='M0 0l5 5 5-5z'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 8px center !important;
+  background-size: 8px 5px !important;
+}
+
+/* Dropdown Active / Clicked */
+select:active,
+.top-select-btn:active,
+select.form-input:active,
+.hub-sort-select:active,
+.hub-hf-ctrl-select:active {
+  background-color: #EDEBE4 !important;
+  color: var(--text-main) !important;
+  border-color: #000000 !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23000000' d='M0 0l5 5 5-5z'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 8px center !important;
+  background-size: 8px 5px !important;
+}
+
+select:disabled,
+.top-select-btn:disabled,
+select.form-input:disabled {
+  opacity: 0.55 !important;
+  cursor: not-allowed !important;
+  background-color: #EDEBE4 !important;
+}
+
+/* Crisp Workstation Native Option Popup Items */
+select option {
+  background-color: #FFFFFF !important;
+  color: #1A1816 !important;
+  font-family: var(--font-mono) !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  padding: 4px 8px !important;
+}
+
+select option:checked {
+  background-color: #ECEBE5 !important;
+  color: #000000 !important;
+  font-weight: 700 !important;
 }
 
 #modelSelect.top-select-btn {
@@ -1172,8 +1589,8 @@ html, body {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
-  z-index: 1000;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 3200 !important;
   align-items: center;
   justify-content: center;
 }
@@ -1185,15 +1602,397 @@ html, body {
 .drawer-card {
   background: var(--bg-transcript);
   border: 2px solid var(--border-dark);
-  width: 680px;
-  max-width: 92vw;
-  max-height: 85vh;
+  width: 760px;
+  max-width: 95vw;
+  max-height: 88vh;
   display: flex;
   flex-direction: column;
   padding: 16px;
   gap: 12px;
   overflow-y: auto;
   font-family: var(--font-mono);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   WORKSTATION DIALOGS & OVERLAYS (SHORTCUTS, PALETTE, EXPORT, TELEMETRY)
+   ═══════════════════════════════════════════════════════════════════ */
+.shortcut-list-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+  font-size: 11px;
+  border-bottom: 1px dotted var(--border-frame);
+}
+
+.shortcut-list-row kbd {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  background: var(--bg-top-bar);
+  border: 1px solid var(--border-dark);
+  color: var(--text-primary);
+}
+
+#commandPaletteModal.drawer-overlay {
+  align-items: flex-start;
+  padding-top: 12vh;
+}
+
+#commandPaletteModal .command-palette-card {
+  width: 580px;
+  max-width: 92vw;
+  background: var(--bg-transcript);
+  border: 2px solid var(--border-dark);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: var(--font-mono);
+}
+
+.command-palette-input-wrapper {
+  display: flex;
+  align-items: center;
+  border-bottom: 2px solid var(--border-dark);
+  background: var(--bg-top-bar);
+  padding: 8px 12px;
+  gap: 8px;
+}
+
+.command-palette-prompt-symbol {
+  font-weight: 700;
+  color: var(--accent);
+  font-size: 14px;
+}
+
+#commandPaletteInput {
+  flex: 1 1 auto;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+#commandPaletteList {
+  max-height: 380px;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+
+.command-palette-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: background 0.1s, border-left-color 0.1s;
+}
+
+.command-palette-item:hover,
+.command-palette-item.active {
+  background: var(--bg-top-bar);
+  border-left-color: var(--accent);
+}
+
+.command-palette-key {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 6px;
+  background: var(--bg-transcript);
+  border: 1px solid var(--border-dark);
+  color: var(--text-secondary);
+}
+
+#exportModal .top-btn {
+  height: auto !important;
+  min-height: 44px;
+  padding: 8px 10px !important;
+  gap: 8px;
+  box-sizing: border-box;
+}
+
+#exportModal .top-btn > div {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: left;
+}
+
+#exportModal .top-btn > span {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  #exportModal .top-btn {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    padding: 8px 10px !important;
+    height: auto !important;
+    gap: 6px !important;
+  }
+  #exportModal .top-btn > span {
+    align-self: flex-end;
+    font-size: 10px;
+    font-weight: 700;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   COMPACT FLEET & SETUP CONTROLLER STYLES (SETTINGS MODAL)
+   ═══════════════════════════════════════════════════════════════════ */
+.fleet-compact-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  background: var(--bg-top-bar);
+  border: 1px solid var(--border-dark);
+  margin-bottom: 10px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.fleet-compact-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.fleet-compact-title {
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--text-main);
+}
+
+.fleet-compact-sub {
+  font-size: 9.5px;
+  color: var(--text-muted);
+}
+
+.fleet-compact-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.fleet-setup-link-btn {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: #FFFFFF !important;
+  background: #1A1816 !important;
+  text-decoration: none;
+  padding: 3px 8px;
+  border: 1px solid #1A1816;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.compact-hud-strip {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.compact-hud-tile {
+  background: var(--bg-parchment);
+  border: 1px solid var(--border-frame);
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.compact-hud-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.compact-hud-port {
+  color: var(--text-muted);
+  font-size: 9px;
+}
+
+.compact-hud-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.compact-hud-badge {
+  font-size: 9px;
+  font-weight: 700;
+  color: #6b7280;
+}
+
+.compact-hud-badge.online {
+  color: #16a34a;
+}
+
+.compact-hud-ms {
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+.compact-engine-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 380px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.compact-engine-card {
+  border: 1px solid var(--border-frame);
+  background: var(--bg-card);
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.compact-engine-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.compact-engine-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.compact-engine-tag {
+  font-weight: 700;
+  font-size: 11.5px;
+}
+
+.compact-engine-role-pill {
+  font-size: 9px;
+  background: var(--bg-btn);
+  border: 1px solid var(--border-frame);
+  padding: 1px 5px;
+  color: var(--text-muted);
+}
+
+.compact-engine-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.svc-ctrl-btn {
+  height: 20px !important;
+  font-size: 9.5px !important;
+  padding: 0 6px !important;
+}
+
+.compact-engine-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.compact-engine-row .form-action-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.compact-engine-row .form-input {
+  flex: 1 1 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+}
+
+.compact-engine-row .composer-btn,
+.compact-engine-row .top-btn {
+  flex-shrink: 0 !important;
+  white-space: nowrap !important;
+}
+
+.compact-engine-label {
+  font-size: 10.5px;
+  color: var(--text-muted);
+  width: 120px;
+  flex-shrink: 0;
+}
+
+.compact-engine-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 9.5px;
+  color: var(--text-muted);
+  border-top: 1px dashed var(--border-frame);
+  padding-top: 4px;
+  flex-wrap: wrap;
+}
+
+.compact-preflight-box {
+  margin-top: 10px;
+  border: 1px solid var(--border-frame);
+  background: var(--bg-card);
+  padding: 8px 10px;
+}
+
+.preflight-box-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.preflight-box-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+
+.pf-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-size: 9.5px;
+}
+
+.pf-key {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.pf-val {
+  font-weight: 700;
+  text-align: right;
+}
+
+.backend-telemetry-cluster {
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.backend-telemetry-cluster:hover {
+  opacity: 0.8;
 }
 
 .drawer-header {
@@ -1727,10 +2526,11 @@ html, body {
 
 .hub-sort-select {
   border: 1px solid var(--border-rule);
-  background: #FFFFFF;
+  background-color: #FFFFFF;
   font-family: var(--font-mono);
   font-size: 11px;
-  padding: 2px 8px;
+  padding-left: 8px;
+  padding-right: 22px;
   color: var(--text-main);
   cursor: pointer;
   height: 30px;
@@ -2265,10 +3065,11 @@ html, body {
 
 .hub-hf-ctrl-select {
   border: 1px solid var(--border-rule);
-  background: #FFFFFF;
+  background-color: #FFFFFF;
   font-family: var(--font-mono);
   font-size: 10.5px;
-  padding: 2px 6px;
+  padding-left: 6px;
+  padding-right: 20px;
   color: var(--text-main);
   cursor: pointer;
   height: 24px;
@@ -2454,20 +3255,26 @@ html, body {
    ========================================================================== */
 @media (max-width: 768px) {
   .hub-overlay {
-    align-items: flex-end !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 48px !important;
+    height: calc(100vh - 48px) !important;
+    height: calc(100dvh - 48px) !important;
+    align-items: stretch !important;
     padding: 0 !important;
     overflow-x: hidden !important;
+    z-index: 1500 !important;
   }
 
   .hub-panel {
     width: 100% !important;
     max-width: 100% !important;
-    height: 92vh !important;
-    height: 92dvh !important;
-    max-height: 92dvh !important;
-    min-height: 92dvh !important;
-    border: 2px solid var(--border-dark) !important;
-    border-bottom: none !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    min-height: 100% !important;
+    border: none !important;
+    border-radius: 0 !important;
     box-sizing: border-box !important;
     overflow-x: hidden !important;
     display: flex !important;
@@ -2619,8 +3426,9 @@ html, body {
     min-height: 30px !important;
     font-size: 11px !important;
     box-sizing: border-box !important;
-    padding: 0 8px !important;
-    background: var(--bg-parchment) !important;
+    padding-left: 8px !important;
+    padding-right: 22px !important;
+    background-color: var(--bg-parchment) !important;
     border-radius: 0 !important;
   }
 
@@ -2644,6 +3452,8 @@ html, body {
 
   /* Category Filter Bar (Smooth Touch Scroll, Uniform Height) */
   .hub-category-bar {
+    display: flex !important;
+    flex-wrap: nowrap !important;
     padding: 6px 12px !important;
     gap: 5px !important;
     width: 100% !important;
@@ -2963,10 +3773,11 @@ html, body {
     min-height: 32px !important;
     font-size: 11px !important;
     font-family: var(--font-mono) !important;
-    padding: 0 8px !important;
+    padding-left: 8px !important;
+    padding-right: 22px !important;
     box-sizing: border-box !important;
     border: 1px solid var(--border-frame) !important;
-    background: var(--bg-parchment) !important;
+    background-color: var(--bg-parchment) !important;
     border-radius: 0 !important;
   }
 
@@ -3002,7 +3813,6 @@ html, body {
   }
 
   .hub-hf-auth-badge,
-  .hub-hf-ctrl-select,
   .hub-hf-action-btn {
     width: 100% !important;
     height: 32px !important;
@@ -3020,6 +3830,20 @@ html, body {
     text-overflow: ellipsis !important;
     border: 1px solid var(--border-frame) !important;
     background: var(--bg-parchment) !important;
+    border-radius: 0 !important;
+  }
+
+  select.hub-hf-ctrl-select {
+    width: 100% !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    font-size: 11px !important;
+    font-family: var(--font-mono) !important;
+    box-sizing: border-box !important;
+    padding-left: 8px !important;
+    padding-right: 22px !important;
+    border: 1px solid var(--border-frame) !important;
+    background-color: var(--bg-parchment) !important;
     border-radius: 0 !important;
   }
 
@@ -3247,229 +4071,235 @@ html, body {
   }
 
   .window-frame {
-    height: 100vh;
-    height: 100dvh;
+    flex-direction: column !important;
+    height: 100vh !important;
+    height: 100dvh !important;
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
     border: none;
     position: relative;
+    overflow: hidden !important;
     overflow-x: hidden !important;
   }
 
-  /* 2. Top Command Header: Strategic 2-Tier Balanced 12-Column Grid */
+  /* ═══════════════════════════════════════════════════════════════════
+     MOBILE WORKSTATION BOTTOM DOCK (PRIMARY MODALITY NAVIGATION)
+     ═══════════════════════════════════════════════════════════════════ */
+  .workstation-rail {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    flex-direction: row !important;
+    justify-content: space-around !important;
+    align-items: center !important;
+    border-right: none !important;
+    border-top: 1px solid var(--border-dark) !important;
+    background: var(--bg-top-bar) !important;
+    z-index: 2500 !important;
+    padding: 0 !important;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .rail-brand-wrap,
+  .rail-divider,
+  .rail-bottom-group {
+    display: none !important;
+  }
+
+  .rail-nav-group {
+    flex-direction: row !important;
+    width: 100% !important;
+    height: 100% !important;
+    padding: 0 !important;
+    gap: 0 !important;
+    justify-content: space-around !important;
+  }
+
+  .rail-nav-btn {
+    flex: 1 1 0 !important;
+    height: 100% !important;
+    width: auto !important;
+    margin: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    padding: 2px 0 !important;
+  }
+
+  .rail-nav-btn.active::before {
+    display: none !important;
+  }
+
+  .rail-nav-btn.active {
+    background: #1A1816 !important;
+    color: #FAF8F2 !important;
+    border-top: 2px solid #8C5A1E !important;
+  }
+
+  .rail-nav-btn.active .rail-label {
+    color: #FAF8F2 !important;
+  }
+
+  .rail-icon {
+    font-size: 15px !important;
+  }
+
+  .rail-label {
+    font-size: 8px !important;
+  }
+
+  /* Main viewport height accounts for 48px bottom dock */
+  .workstation-main-container {
+    height: calc(100vh - 48px) !important;
+    height: calc(100dvh - 48px) !important;
+    max-height: calc(100vh - 48px) !important;
+    max-height: calc(100dvh - 48px) !important;
+    flex: 0 0 calc(100dvh - 48px) !important;
+    flex-grow: 0 !important;
+    flex-shrink: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    position: relative !important;
+  }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     MOBILE TOP CONTEXT COMMAND BAR (SLEEK SINGLE-TIER LAYOUT)
+     ═══════════════════════════════════════════════════════════════════ */
+  body[data-studio-view="hub"] .top-header {
+    display: none !important;
+  }
+
+  body:not([data-studio-view="chat"]) #sidebarToggleBtn {
+    display: none !important;
+  }
+
   .top-header {
-    height: auto !important;
-    min-height: auto !important;
-    max-height: none !important;
-    display: grid !important;
-    grid-template-columns: repeat(12, 1fr) !important;
-    grid-template-rows: 28px 28px !important;
-    gap: 4px 4px !important;
-    padding: max(6px, env(safe-area-inset-top)) 6px 6px 6px !important;
-    background: var(--bg-top-bar);
-    border-bottom: 1px solid var(--border-dark);
-    flex-shrink: 0;
+    height: 40px !important;
+    min-height: 40px !important;
+    max-height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: max(4px, env(safe-area-inset-top)) 8px 4px 8px !important;
+    background: var(--bg-top-bar) !important;
+    border-bottom: 1px solid var(--border-dark) !important;
+    flex-shrink: 0 !important;
+    gap: 6px !important;
     box-sizing: border-box !important;
+  }
+
+  .studio-breadcrumb {
+    display: none !important;
+  }
+
+  .top-model-label-pill {
+    display: none !important;
   }
 
   .top-header-left {
-    display: contents !important;
+    flex-shrink: 0 !important;
+    gap: 4px !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  #sidebarToggleBtn {
+    height: 28px !important;
+    padding: 0 6px !important;
+    font-size: 10.5px !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+  }
+
+  .top-header-center {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    display: flex !important;
+    justify-content: flex-start !important;
+  }
+
+  .studio-context-control-group {
+    width: 100% !important;
+    max-width: none !important;
+    gap: 4px !important;
+    justify-content: flex-start !important;
+    display: flex !important;
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+  }
+
+  .top-model-selector-wrap {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  select#topStudioModelSelector.top-select-btn {
+    height: 28px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    padding-left: 6px !important;
+    padding-right: 20px !important;
+    border: 1px solid var(--border-dark) !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .top-context-param-wrap,
+  #topContextParamWrap,
+  select#modelModeSelect,
+  .top-context-pill,
+  .top-header-divider,
+  #vramPurgeQuickBtn,
+  #topFleetPill,
+  #modelsLibraryBtn {
+    display: none !important;
   }
 
   .top-header-right {
-    display: contents !important;
-  }
-
-  .app-title {
-    display: none !important;
-  }
-
-  /* ── Row 1, Col 1-2: Session Ledger Toggle ── */
-  .mobile-ledger-toggle {
-    display: inline-flex !important;
-    align-items: center;
-    justify-content: center;
-    grid-column: 1 / 3 !important;
-    grid-row: 1 !important;
-    height: 28px !important;
-    padding: 0 4px !important;
-    font-size: 10.5px !important;
-    font-weight: 700;
-    white-space: nowrap;
-    background: var(--bg-btn);
-    border: 1px solid var(--border-dark);
-    color: var(--text-main);
-    touch-action: manipulation;
-    box-sizing: border-box !important;
-  }
-
-  .mobile-ledger-toggle:active {
-    background: #1A1816;
-    color: #FFFFFF;
-  }
-
-  /* ── Row 1, Col 3-8: Segmented Studio Navigation Switcher ── */
-  .studio-nav-segmented {
-    grid-column: 3 / 9 !important;
-    grid-row: 1 !important;
+    flex-shrink: 0 !important;
+    gap: 4px !important;
     display: flex !important;
     align-items: center !important;
-    justify-content: center !important;
-    height: 28px !important;
-    margin: 0 !important;
-    padding: 1px !important;
-    border: 1px solid var(--border-dark) !important;
-    background: var(--bg-parchment) !important;
-    box-sizing: border-box !important;
-    min-width: 0 !important;
-    gap: 1px !important;
   }
 
-  .studio-nav-btn {
-    flex: 1 1 0 !important;
-    height: 100% !important;
-    min-width: 0 !important;
-    padding: 0 2px !important;
-    font-size: 10px !important;
-    font-weight: 700 !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    white-space: nowrap !important;
-    text-overflow: ellipsis !important;
-    overflow: hidden !important;
-    border: none !important;
-    border-radius: 0 !important;
-    cursor: pointer;
-  }
-
-  /* ── Row 1, Col 9-10: New Session Button ── */
-  #newChatBtn {
-    grid-column: 9 / 11 !important;
-    grid-row: 1 !important;
+  #topPrimaryActionBtn {
     height: 28px !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    padding: 0 4px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    font-size: 10.5px !important;
-    font-weight: 700 !important;
-    background: var(--bg-btn);
-    border: 1px solid var(--border-dark);
-    color: var(--text-main);
-    box-sizing: border-box !important;
-    white-space: nowrap;
-    touch-action: manipulation;
-  }
-
-  /* ── Row 1, Col 11-12: Settings Button ── */
-  #settingsBtn {
-    grid-column: 11 / 13 !important;
-    grid-row: 1 !important;
-    height: 28px !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    padding: 0 4px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 3px !important;
+    padding: 0 8px !important;
     font-size: 11px !important;
     font-weight: 700 !important;
-    background: var(--bg-btn);
-    border: 1px solid var(--border-dark);
-    color: var(--text-main);
-    box-sizing: border-box !important;
-    white-space: nowrap;
-    touch-action: manipulation;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
   }
 
-  #settingsBtn .settings-btn-label {
-    display: none !important;
-  }
-
-  /* ── Row 2, Col 1-5: Active Model Dropdown (Wide & Uncropped) ── */
-  select#modelSelect.top-select-btn {
-    grid-column: 1 / 6 !important;
-    grid-row: 2 !important;
+  #settingsBtn {
     height: 28px !important;
-    width: 100% !important;
-    max-width: none !important;
-    min-width: 0 !important;
-    font-size: 10.5px !important;
-    font-weight: 700;
-    padding: 0 4px;
-    border: 1px solid var(--border-dark);
-    background: #FFFFFF;
-    color: var(--text-main);
-    text-overflow: ellipsis;
-    box-sizing: border-box !important;
-  }
-
-  /* ── Row 2, Col 6-8: Model Mode Dropdown ── */
-  select#modelModeSelect.top-select-btn {
-    grid-column: 6 / 9 !important;
-    grid-row: 2 !important;
-    height: 28px !important;
-    width: 100% !important;
-    max-width: none !important;
-    min-width: 0 !important;
-    font-size: 10.5px !important;
-    font-weight: 600 !important;
-    padding: 0 2px !important;
-    border: 1px solid var(--border-dark);
-    background: var(--bg-btn);
-    color: var(--text-main);
-    box-sizing: border-box !important;
-    text-overflow: ellipsis;
-  }
-
-  /* ── Row 2, Col 9-10: Model Hub Button ── */
-  #modelHubBtn {
-    grid-column: 9 / 11 !important;
-    grid-row: 2 !important;
+    width: 28px !important;
+    min-width: 28px !important;
+    padding: 0 !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    height: 28px !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    padding: 0 4px !important;
-    font-size: 10.5px !important;
-    font-weight: 700 !important;
-    background: var(--bg-btn);
-    border: 1px solid var(--border-dark);
-    color: var(--text-main);
-    box-sizing: border-box !important;
-    white-space: nowrap;
-    touch-action: manipulation;
+    font-size: 13px !important;
+    flex-shrink: 0 !important;
   }
 
-  /* ── Row 2, Col 11-12: Evict VRAM Button ── */
-  #vramPurgeQuickBtn {
-    grid-column: 11 / 13 !important;
-    grid-row: 2 !important;
-    height: 28px !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    padding: 0 4px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    font-size: 10.5px !important;
-    font-weight: 700 !important;
-    background: var(--bg-btn);
-    border: 1px solid var(--border-dark);
-    color: var(--text-main);
-    box-sizing: border-box !important;
-    white-space: nowrap;
-    touch-action: manipulation;
-  }
-
-  #modelsLibraryBtn {
+  #settingsBtn .settings-btn-label,
+  #settingsBtn .kbd-shortcut-pill {
     display: none !important;
   }
 
@@ -3480,6 +4310,11 @@ html, body {
   .mobile-ledger-toggle:active {
     background: #1A1816 !important;
     color: #FFFFFF !important;
+  }
+
+  /* Pinned footer hidden on mobile to give full screen to canvas/composer */
+  .status-bar {
+    display: none !important;
   }
 
   /* 3. Session Ledger Off-Canvas Drawer */
@@ -3557,40 +4392,58 @@ html, body {
 
   /* 4. Transcript & Messages Full-Width Canvas */
   .work-area {
-    flex: 1 1 auto !important;
-    display: flex !important;
-    flex-direction: column !important;
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
-    height: 100% !important;
-    min-height: 0 !important;
-    position: relative;
+    position: relative !important;
     overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
   }
 
   .transcript-wrapper {
-    flex: 1;
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    height: 100% !important;
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
-    padding: 6px 8px 4px 8px;
+    padding: 4px 6px 4px 6px !important;
     overflow: hidden !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
   }
 
   .transcript-area {
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    height: 100% !important;
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
     overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-sizing: border-box !important;
   }
 
   .transcript-scroll {
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: none !important;
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
+    overflow-y: auto !important;
     overflow-x: hidden !important;
-    padding-right: 2px;
+    padding-right: 2px !important;
+    box-sizing: border-box !important;
+    -webkit-overflow-scrolling: touch;
   }
 
   .chat-container {
@@ -3753,36 +4606,52 @@ html, body {
 
   /* 5. Composer Command Row */
   .composer-row {
-    margin-top: 4px;
-    padding: 6px 6px max(6px, env(safe-area-inset-bottom)) 6px;
-    gap: 4px;
-    flex-wrap: nowrap;
-    align-items: flex-end;
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+    width: 100% !important;
+    min-height: 44px !important;
+    margin-top: auto !important;
+    margin-bottom: 0 !important;
+    padding: 5px 6px 5px 6px !important;
+    gap: 4px !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: flex-end !important;
+    box-sizing: border-box !important;
+    background: var(--bg-parchment) !important;
+    border-top: 1px solid var(--border-frame) !important;
+    position: relative !important;
+    z-index: 10 !important;
   }
 
   .composer-input {
-    font-size: 15px !important; /* Critical: prevents iOS Safari auto-zoom on focus */
+    font-size: 16px !important; /* Critical: prevents iOS Safari auto-zoom on focus */
     height: 36px !important;
     min-height: 36px !important;
-    max-height: 120px;
-    padding: 7px 10px;
-    line-height: 20px;
+    max-height: 120px !important;
+    padding: 7px 8px !important;
+    line-height: 20px !important;
     box-sizing: border-box !important;
     border-radius: 0 !important;
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    width: 100% !important;
   }
 
   .composer-btn {
     height: 36px !important;
     min-height: 36px !important;
-    padding: 0 10px !important;
-    font-size: 11.5px !important;
+    padding: 0 8px !important;
+    font-size: 11px !important;
     font-weight: 700 !important;
     touch-action: manipulation;
     box-sizing: border-box !important;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     border-radius: 0 !important;
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
   }
 
   .composer-btn[style*="display: none"],
@@ -3793,12 +4662,14 @@ html, body {
   .composer-btn.secondary {
     height: 36px !important;
     min-height: 36px !important;
-    padding: 0 8px !important;
+    padding: 0 6px !important;
+    flex-shrink: 0 !important;
   }
 
   .mic-dictate-btn {
     width: 36px !important;
     min-width: 36px !important;
+    max-width: 36px !important;
     height: 36px !important;
     min-height: 36px !important;
     padding: 0 !important;
@@ -3808,6 +4679,7 @@ html, body {
     font-size: 14px !important;
     box-sizing: border-box !important;
     border-radius: 0 !important;
+    flex-shrink: 0 !important;
   }
 
   .composer-token-counter {
@@ -4328,6 +5200,148 @@ html, body {
   width: 100%;
 }
 
+/* ─── Video Generation Studio ────────────────────────────────────────── */
+.video-studio-grid {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.video-studio-inspector {
+  border-right: 1px solid var(--border-frame);
+  background: var(--bg-parchment);
+  display: flex;
+  flex-direction: column;
+  padding: 12px 14px;
+  overflow-y: auto;
+  gap: 12px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.video-stage-area {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: #121110;
+  position: relative;
+  overflow: hidden;
+}
+
+.stage-top-meta-bar {
+  background: var(--bg-top-bar);
+  border-bottom: 1px solid var(--border-dark);
+  padding: 0 12px;
+  height: 34px;
+  min-height: 34px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-main);
+}
+
+.stage-meta-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-main);
+  white-space: nowrap;
+}
+
+.stage-live-indicator {
+  font-size: 10px;
+  color: #73C991;
+}
+
+.stage-live-indicator.standby {
+  color: #8C877B;
+}
+
+.stage-actions-group {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.stage-viewport-box {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: auto;
+  padding: 24px;
+  background-color: #121110;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 24px 24px;
+  box-sizing: border-box;
+}
+
+.video-player-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 12px;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.video-scrubber-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 600px;
+  background: rgba(26, 24, 22, 0.95);
+  border: 1px solid var(--border-dark);
+  padding: 6px 10px;
+  margin-top: 8px;
+  box-sizing: border-box;
+  color: #FFFFFF;
+  font-size: 10.5px;
+  font-family: var(--font-mono);
+}
+
+.video-timeline-range {
+  flex: 1;
+  accent-color: #FFFFFF;
+  cursor: pointer;
+}
+
+.video-frame-counter {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Preset Grids: Full width distribution without empty trailing gaps */
+#videoFramePresets {
+  grid-template-columns: repeat(3, 1fr) !important;
+}
+#videoFpsPresets {
+  grid-template-columns: repeat(4, 1fr) !important;
+}
+#videoAspectPresets {
+  grid-template-columns: repeat(3, 1fr) !important;
+}
+#videoModePresets {
+  grid-template-columns: repeat(2, 1fr) !important;
+}
+
 .image-studio-inspector {
   background: var(--bg-parchment);
   border-right: 1px solid var(--border-frame);
@@ -4593,6 +5607,9 @@ html, body {
   display: flex;
   gap: 6px;
   margin-top: 4px;
+  align-items: stretch;
+  height: 32px;
+  min-height: 32px;
 }
 
 .generate-btn {
@@ -4607,11 +5624,14 @@ html, body {
   flex: 1;
   height: 32px !important;
   min-height: 32px !important;
+  max-height: 32px !important;
+  line-height: 30px !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
   cursor: pointer;
   box-sizing: border-box !important;
+  vertical-align: middle;
   transition: background 0.1s ease;
 }
 
@@ -4621,6 +5641,50 @@ html, body {
 
 .generate-btn:active {
   background: #000000 !important;
+}
+
+/* Secondary Action Button in Inspectors (e.g. 🎲 Random, Reset) */
+.inspector-sub-btn,
+.inspector-actions .top-btn,
+.recorder-controls .top-btn {
+  height: 32px !important;
+  min-height: 32px !important;
+  max-height: 32px !important;
+  line-height: 30px !important;
+  padding: 0 12px !important;
+  border: 1px solid var(--border-dark) !important;
+  border-radius: 0 !important;
+  background: var(--bg-btn) !important;
+  color: var(--text-main) !important;
+  font-family: var(--font-mono) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer;
+  box-sizing: border-box !important;
+  white-space: nowrap !important;
+  flex-shrink: 0;
+  vertical-align: middle;
+  outline: none;
+  transition: background 0.1s ease, color 0.1s ease, border-color 0.1s ease;
+}
+
+.inspector-sub-btn:hover,
+.inspector-actions .top-btn:hover,
+.recorder-controls .top-btn:hover {
+  background: #1A1816 !important;
+  color: #FFFFFF !important;
+  border-color: #1A1816 !important;
+}
+
+.inspector-sub-btn:active,
+.inspector-actions .top-btn:active,
+.recorder-controls .top-btn:active {
+  background: #000000 !important;
+  color: #FFFFFF !important;
+  border-color: #000000 !important;
 }
 
 .generation-progress-box {
@@ -5376,6 +6440,7 @@ html, body {
 
   /* ─── Studio Workspaces Strict View Isolation (Mobile & Desktop) ─── */
   body[data-studio-view="chat"] #imageStudioWorkspace,
+  body[data-studio-view="chat"] #videoStudioWorkspace,
   body[data-studio-view="chat"] #audioLabWorkspace {
     display: none !important;
   }
@@ -5383,11 +6448,13 @@ html, body {
     display: flex !important;
     flex-direction: column !important;
     width: 100% !important;
+    flex: 1 1 0 !important;
     height: 100% !important;
     min-height: 0 !important;
   }
 
   body[data-studio-view="image"] #chatWorkspace,
+  body[data-studio-view="image"] #videoStudioWorkspace,
   body[data-studio-view="image"] #audioLabWorkspace {
     display: none !important;
   }
@@ -5399,8 +6466,22 @@ html, body {
     min-height: 0 !important;
   }
 
+  body[data-studio-view="video"] #chatWorkspace,
+  body[data-studio-view="video"] #imageStudioWorkspace,
+  body[data-studio-view="video"] #audioLabWorkspace {
+    display: none !important;
+  }
+  body[data-studio-view="video"] #videoStudioWorkspace {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+  }
+
   body[data-studio-view="audio"] #chatWorkspace,
-  body[data-studio-view="audio"] #imageStudioWorkspace {
+  body[data-studio-view="audio"] #imageStudioWorkspace,
+  body[data-studio-view="audio"] #videoStudioWorkspace {
     display: none !important;
   }
   body[data-studio-view="audio"] #audioLabWorkspace {
@@ -5454,7 +6535,7 @@ html, body {
     overflow-y: auto !important;
     border-right: none !important;
     border-bottom: none !important;
-    padding: 12px 14px 32px 14px !important;
+    padding: 12px 14px 48px 14px !important;
     -webkit-overflow-scrolling: touch;
   }
 
@@ -5522,6 +6603,20 @@ html, body {
   }
 
   /* Generator Controls Mobile Refinements */
+  .inspector-actions {
+    height: 36px !important;
+    min-height: 36px !important;
+  }
+
+  .inspector-actions .generate-btn,
+  .inspector-actions .inspector-sub-btn,
+  .inspector-actions .top-btn {
+    height: 36px !important;
+    min-height: 36px !important;
+    max-height: 36px !important;
+    line-height: 34px !important;
+  }
+
   .inspector-aspect-presets {
     grid-template-columns: repeat(5, 1fr) !important;
     gap: 3px !important;
@@ -5541,6 +6636,117 @@ html, body {
   }
 
   #refreshImgModelsBtn {
+    flex-shrink: 0 !important;
+  }
+
+  /* ─── Video Generation Studio Mobile Architecture ─── */
+  .video-studio-grid {
+    flex-direction: column !important;
+    height: 100% !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    flex: 1 1 0 !important;
+  }
+
+  /* Subtab: Video Stage Canvas & Output (Default) */
+  .video-studio-grid[data-active-subtab="stage"] .video-stage-area {
+    display: flex !important;
+    flex: 1 1 0 !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    flex-direction: column !important;
+    width: 100% !important;
+  }
+
+  .video-studio-grid[data-active-subtab="stage"] .video-studio-inspector {
+    display: none !important;
+  }
+
+  /* Subtab: Generator & Motion Controls */
+  .video-studio-grid[data-active-subtab="inspector"] .video-stage-area {
+    display: none !important;
+  }
+
+  .video-studio-grid[data-active-subtab="inspector"] .video-studio-inspector {
+    display: flex !important;
+    flex: 1 1 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow-y: auto !important;
+    border-right: none !important;
+    border-bottom: none !important;
+    padding: 12px 14px 48px 14px !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Video Stage Controls & Viewport on Mobile */
+  .video-stage-area {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .stage-top-meta-bar {
+    height: 32px !important;
+    min-height: 32px !important;
+    padding: 0 8px !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    overflow: hidden !important;
+    flex-shrink: 0 !important;
+  }
+
+  .stage-meta-left {
+    font-size: 10px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 160px !important;
+    flex-shrink: 1 !important;
+  }
+
+  .stage-actions-group {
+    display: flex !important;
+    gap: 4px !important;
+    flex-shrink: 0 !important;
+    align-items: center !important;
+  }
+
+  .stage-actions-group .top-btn {
+    height: 24px !important;
+    line-height: 22px !important;
+    padding: 0 6px !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+
+  .stage-viewport-box {
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 8px !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  .stage-filmstrip-bar {
+    height: 60px !important;
+    min-height: 60px !important;
+    padding: 0 8px !important;
+    gap: 8px !important;
     flex-shrink: 0 !important;
   }
 
@@ -5688,6 +6894,42 @@ html, body {
   .audio-dropzone {
     padding: 12px 8px !important;
   }
+
+  /* Compact Fleet & Setup Mobile Rules */
+  .compact-hud-strip {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .compact-engine-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 4px !important;
+  }
+  .compact-engine-label {
+    width: auto !important;
+  }
+  .compact-engine-row .form-action-row {
+    width: 100% !important;
+    display: flex !important;
+    gap: 4px !important;
+  }
+  .compact-engine-row .form-input {
+    flex: 1 1 auto !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    font-size: 11px !important;
+    padding: 4px 6px !important;
+  }
+  .compact-engine-row .composer-btn,
+  .compact-engine-row .top-btn {
+    flex: 0 0 auto !important;
+    padding: 0 6px !important;
+    font-size: 10px !important;
+    height: 28px !important;
+    min-height: 28px !important;
+  }
+  .preflight-box-grid {
+    grid-template-columns: 1fr !important;
+  }
 }
 
 </style>
@@ -5695,61 +6937,161 @@ html, body {
 <body data-studio-view="chat">
 
 <div class="window-frame">
-  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
-  <header class="top-header">
-    <div class="top-header-left">
-      <button class="top-btn mobile-ledger-toggle" id="mobileMenuToggle" title="Toggle Session Ledger">☰ Ledger</button>
-      <span class="app-title">
-        <span class="desktop-title-full">Local Intelligence Workstation</span>
-        <span class="desktop-title-short">LI Workstation</span>
-      </span>
-      <div class="studio-nav-segmented" id="studioViewSwitcher">
-        <button type="button" class="studio-nav-btn active" data-view="chat" id="viewBtnChat" title="Chat & Reasoning Studio">💬 Chat</button>
-        <button type="button" class="studio-nav-btn" data-view="image" id="viewBtnImage" title="Diffusion Image Generation Studio">🎨 Image</button>
-        <button type="button" class="studio-nav-btn" data-view="audio" id="viewBtnAudio" title="Speech Transcription & Voice Lab">🎙️ Audio</button>
+  <!-- Slim Left Workstation Rail (Level 1 Global Application Scope) -->
+  <aside class="workstation-rail" id="workstationRail">
+    <div class="rail-top-group">
+      <div class="rail-brand-wrap" title="Local Intelligence Workstation">
+        <span class="rail-brand-glyph">◈</span>
       </div>
+      <nav class="rail-nav-group" id="studioViewSwitcher" aria-label="Studio Modalities">
+        <button type="button" class="rail-nav-btn active" data-view="chat" id="viewBtnChat" title="Chat & Reasoning Studio (⌘1)">
+          <span class="rail-icon">💬</span>
+          <span class="rail-label">Chat</span>
+        </button>
+        <button type="button" class="rail-nav-btn" data-view="image" id="viewBtnImage" title="Diffusion Image Generation Studio (⌘2)">
+          <span class="rail-icon">🎨</span>
+          <span class="rail-label">Image</span>
+        </button>
+        <button type="button" class="rail-nav-btn" data-view="video" id="viewBtnVideo" title="Video & Motion Diffusion Studio (⌘3)">
+          <span class="rail-icon">🎬</span>
+          <span class="rail-label">Video</span>
+        </button>
+        <button type="button" class="rail-nav-btn" data-view="audio" id="viewBtnAudio" title="Speech Transcription & Voice Lab (⌘4)">
+          <span class="rail-icon">🎙️</span>
+          <span class="rail-label">Audio</span>
+        </button>
+        <button type="button" class="rail-nav-btn" data-view="hub" id="viewBtnHub" title="Universal Model Hub (⌘5)">
+          <span class="rail-icon">📦</span>
+          <span class="rail-label">Hub</span>
+        </button>
+      </nav>
     </div>
-    <div class="top-header-right">
-      <select id="modelSelect" class="top-select-btn" title="Select Active Model"></select>
-      <select id="modelModeSelect" class="top-select-btn" title="Select Operating Mode">
-        <option value="thinking">🧠 Thinking</option>
-        <option value="no_think">⚡ Fast</option>
-        <option value="json">📋 JSON</option>
-        <option value="raw">⚡ Raw</option>
-      </select>
-      <button class="top-btn" id="newChatBtn" title="Start New Session">
-        <span class="desktop-text">New Session</span>
-        <span class="mobile-text">+ New</span>
-      </button>
-      <button class="top-btn" id="modelsLibraryBtn" title="Local Models Library">Models</button>
-      <button class="top-btn" id="modelHubBtn" title="Search & Download Models from Ollama, HuggingFace & CivitAI">Hub ↓</button>
-      <button class="top-btn" id="vramPurgeQuickBtn" title="Evict Model from VRAM">
-        <span class="desktop-text">Evict VRAM</span>
-        <span class="mobile-text">Evict</span>
-      </button>
-      <span class="top-header-divider desktop-text" aria-hidden="true"></span>
-      <button class="top-btn top-settings-btn" id="settingsBtn" title="Settings & Diagnostics (⌘, or S in Palette)">
-        <span class="settings-btn-icon">⚙</span>
-        <span class="settings-btn-label">Settings</span>
-        <span class="kbd-shortcut-pill desktop-text">S</span>
-      </button>
 
-      <button id="refreshModelsBtn" style="display:none;"></button>
-      <button id="themeToggle" style="display:none;"></button>
-      <button id="pullModelOpenBtn" style="display:none;"></button>
-      <button id="exportSessionBtn" style="display:none;"></button>
-      <button id="clearChatBtn" style="display:none;"></button>
-      <button id="systemPromptQuickBtn" style="display:none;"></button>
-      <button id="openTelemetryDashboardBtn" style="display:none;"></button>
-      <button id="ecoModeToggleBtn" style="display:none;"></button>
+    <div class="rail-divider"></div>
+
+    <div class="rail-bottom-group">
+      <button type="button" class="rail-nav-btn" id="railShortcutsBtn" title="Keyboard Shortcuts Reference (?)">
+        <span class="rail-icon">⌨</span>
+        <span class="rail-label">Keys</span>
+      </button>
+      <button type="button" class="rail-nav-btn" id="railSettingsBtn" title="Workstation Master Configuration (⌘,)">
+        <span class="rail-icon">⚙</span>
+        <span class="rail-label">Config</span>
+      </button>
     </div>
-  </header>
+  </aside>
+
+  <!-- Workstation Main Stage & Viewport -->
+  <div class="workstation-main-container">
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+    <header class="top-header">
+      <!-- Zone 1: Secondary Panel Toggle & Studio Breadcrumb -->
+      <div class="top-header-left">
+        <button type="button" class="top-btn" id="sidebarToggleBtn" title="Toggle Secondary Panel (⌘B)">
+          <span class="toggle-icon">◨</span> <span id="sidebarToggleText">Ledger</span>
+        </button>
+        <button class="top-btn mobile-ledger-toggle" id="mobileMenuToggle" style="display:none;" title="Toggle Session Ledger">☰</button>
+        <div class="studio-breadcrumb" id="studioBreadcrumb">
+          <span class="breadcrumb-icon" id="studioBreadcrumbIcon">💬</span>
+          <span class="breadcrumb-name" id="studioBreadcrumbName">CHAT STUDIO</span>
+          <span class="breadcrumb-sep">//</span>
+          <span class="breadcrumb-tag" id="studioBreadcrumbTag">AUTOREGRESSIVE LLMs</span>
+        </div>
+      </div>
+
+      <!-- Zone 2: Context-Aware Studio Controls (Model & Parameters) -->
+      <div class="top-header-center">
+        <div class="studio-context-control-group">
+          <!-- Unified Studio Model Selector -->
+          <div class="top-model-selector-wrap">
+            <span class="top-model-label-pill" id="topModelLabelPill">MODEL:</span>
+            <select id="topStudioModelSelector" class="top-select-btn studio-model-select" title="Active Model for Current Studio">
+              <option value="">Detecting Models...</option>
+            </select>
+          </div>
+
+          <!-- Hidden legacy selects to maintain 100% backward compatibility for all existing scripts -->
+          <select id="modelSelect" style="display:none;"></select>
+
+          <!-- Contextual Studio Parameter / Mode Selector -->
+          <div class="top-context-param-wrap" id="topContextParamWrap">
+            <!-- In Chat Mode: -->
+            <select id="modelModeSelect" class="top-select-btn" title="Select Operating Mode">
+              <option value="thinking">🧠 Thinking</option>
+              <option value="no_think">⚡ Fast</option>
+              <option value="json">📋 JSON</option>
+              <option value="raw">⚡ Raw</option>
+            </select>
+
+            <!-- In Image Mode: -->
+            <div class="top-context-pill" id="imageTopSpecPill" style="display:none;" title="Current Image Specs">
+              <span class="pill-dot">●</span> <span id="imageTopSpecText">512×512 · Euler a</span>
+            </div>
+
+            <!-- In Video Mode: -->
+            <div class="top-context-pill" id="videoTopSpecPill" style="display:none;" title="Current Video Specs">
+              <span class="pill-dot">●</span> <span id="videoTopSpecText">16 frames · 12 fps</span>
+            </div>
+
+            <!-- In Audio Mode: -->
+            <div class="top-context-pill" id="audioTopSpecPill" style="display:none;" title="Current Audio Specs">
+              <span class="pill-dot">●</span> <span id="audioTopSpecText">Whisper + Piper</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Zone 3: Primary Studio Action & Fleet Utilities -->
+      <div class="top-header-right">
+        <!-- Contextual Primary Action Button -->
+        <button class="top-btn primary-action-btn" id="topPrimaryActionBtn" title="Action for current studio">
+          <span id="topPrimaryActionText">+ New Session</span>
+        </button>
+
+        <!-- Legacy hidden triggers for backward compatibility -->
+        <button class="top-btn" id="newChatBtn" style="display:none;"></button>
+        <button class="top-btn" id="modelsLibraryBtn" style="display:none;"></button>
+        <button class="top-btn" id="modelHubBtn" style="display:none;"></button>
+
+        <!-- Evict VRAM across active backends -->
+        <button class="top-btn" id="vramPurgeQuickBtn" title="Evict VRAM across active backends">
+          <span class="desktop-text">Evict VRAM</span>
+          <span class="mobile-text">Evict</span>
+        </button>
+
+        <!-- Fleet Controller Shortcut Pill -->
+        <button type="button" class="top-btn fleet-status-pill" id="topFleetPill" title="Open Fleet Controller & Master Setup (⌘,)">
+          <span class="fleet-dot">●</span>
+          <span class="fleet-label desktop-text">Fleet</span>
+          <span class="fleet-count" id="topFleetCount">Online</span>
+        </button>
+
+        <span class="top-header-divider desktop-text" aria-hidden="true"></span>
+        <button class="top-btn top-settings-btn" id="settingsBtn" title="Settings & Diagnostics (⌘, or S in Palette)">
+          <span class="settings-btn-icon">⚙</span>
+          <span class="settings-btn-label">Settings</span>
+          <span class="kbd-shortcut-pill desktop-text">S</span>
+        </button>
+
+        <button id="refreshModelsBtn" style="display:none;"></button>
+        <button id="themeToggle" style="display:none;"></button>
+        <button id="pullModelOpenBtn" style="display:none;"></button>
+        <button id="exportSessionBtn" style="display:none;"></button>
+        <button id="clearChatBtn" style="display:none;"></button>
+        <button id="systemPromptQuickBtn" style="display:none;"></button>
+        <button id="openTelemetryDashboardBtn" style="display:none;"></button>
+        <button id="ecoModeToggleBtn" style="display:none;"></button>
+      </div>
+    </header>
 
   <div class="work-area">
     <aside class="session-ledger-pane" id="sidebar">
       <div class="ledger-header">
         <span>Session Ledger</span>
-        <button class="ledger-close-btn" id="mobileLedgerCloseBtn" title="Close Session Ledger">✕</button>
+        <div style="display:flex; align-items:center; gap:4px;">
+          <button type="button" class="top-btn" id="ledgerExportBtn" title="Export Conversation Session" style="height:22px; padding:0 6px; font-size:10px;">Export ↗</button>
+          <button class="ledger-close-btn" id="mobileLedgerCloseBtn" title="Close Session Ledger">✕</button>
+        </div>
       </div>
       <input type="text" id="sessionSearchInput" style="display:none;">
       <div class="ledger-list" id="sessionList"></div>
@@ -5901,7 +7243,7 @@ html, body {
 
         <div class="inspector-actions">
           <button type="button" class="generate-btn" id="imgGenerateBtn">⚡ GENERATE IMAGE</button>
-          <button type="button" class="top-btn" id="imgRandomizePromptBtn" title="Randomize Seed & Add Quality Modifiers" style="height:32px; padding:0 12px; font-weight:700;">🎲 Random</button>
+          <button type="button" class="inspector-sub-btn" id="imgRandomizePromptBtn" title="Randomize Seed & Add Quality Modifiers">🎲 Random</button>
         </div>
 
         <div id="imgGenerationProgress" class="generation-progress-box" style="display:none;">
@@ -5975,6 +7317,197 @@ html, body {
     </main>
 
     <!-- ═══════════════════════════════════════════════════════════════════
+         VIDEO GENERATION STUDIO WORKSPACE (MOTION SYNTHESIS)
+         ═══════════════════════════════════════════════════════════════════ -->
+    <main class="studio-workspace video-studio-grid" id="videoStudioWorkspace" data-active-subtab="stage" style="display:none;">
+      <!-- Mobile Sub-Navigation Segmented Controller -->
+      <div class="studio-sub-tabs video-studio-sub-tabs">
+        <button type="button" class="studio-sub-tab-btn active" data-subtab="stage">🎬 Canvas &amp; Player</button>
+        <button type="button" class="studio-sub-tab-btn" data-subtab="inspector">⚙ Motion Controls</button>
+      </div>
+
+      <!-- Left Control Inspector -->
+      <aside class="video-studio-inspector">
+        <div class="inspector-section-header">
+          <span class="inspector-title">MOTION DIFFUSION CONTROLS</span>
+          <span class="backend-status-indicator" id="videoBackendStatusBadge">○ STANDBY</span>
+        </div>
+
+        <div class="inspector-field">
+          <div class="field-label-row">
+            <label for="videoModelSelect">Active Video Model:</label>
+            <span class="field-hint" id="videoBackendTypeBadge">Motion Diffusion</span>
+          </div>
+          <div style="display:flex; gap:4px; min-width:0; width:100%;">
+            <select id="videoModelSelect" class="top-select-btn" style="flex:1; width:100%; min-width:0; height:25px;">
+              <option value="svd-xt">Stable Video Diffusion XT (25 frames)</option>
+              <option value="svd">Stable Video Diffusion (14 frames)</option>
+              <option value="animatediff-v3">AnimateDiff v3 (SD 1.5 Motion)</option>
+              <option value="wan2.1-t2v">Wan2.1 (1.3B / 14B)</option>
+              <option value="cogvideox-5b">CogVideoX 5B</option>
+            </select>
+            <button type="button" class="top-btn" id="refreshVideoModelsBtn" title="Refresh video models" style="height:25px; padding:0 8px; flex-shrink:0;">↻</button>
+          </div>
+        </div>
+
+        <div class="inspector-field">
+          <div class="field-label-row">
+            <label>Synthesis Mode:</label>
+          </div>
+          <div class="inspector-aspect-presets" id="videoModePresets">
+            <button type="button" class="aspect-preset-btn active" id="btnModeT2V" data-vmode="t2v">Text-to-Video</button>
+            <button type="button" class="aspect-preset-btn" id="btnModeI2V" data-vmode="i2v">Image-to-Video (Init)</button>
+          </div>
+        </div>
+
+        <div class="inspector-field" id="videoInitImageField" style="display:none;">
+          <div class="field-label-row">
+            <label>Initial Frame Image:</label>
+            <span class="field-hint">PNG / JPG / WEBP</span>
+          </div>
+          <div class="audio-dropzone" id="videoInitDropzone" style="padding:12px; text-align:center; cursor:pointer;">
+            <input type="file" id="videoInitFileInput" accept="image/*" style="display:none;">
+            <div style="font-size:18px; margin-bottom:2px;">🖼️</div>
+            <div>Drop starting frame image or <u>Browse</u></div>
+          </div>
+          <div id="videoInitImagePreview" style="display:none; margin-top:6px; position:relative;">
+            <img id="videoInitThumb" style="max-height:80px; border:1px solid var(--border-frame);" alt="Init Frame">
+            <button type="button" class="attachment-remove-btn" id="clearVideoInitImgBtn" style="position:absolute; top:2px; right:2px;">✕</button>
+          </div>
+        </div>
+
+        <div class="inspector-field">
+          <div class="field-label-row">
+            <label for="videoPromptInput">Motion Prompt:</label>
+            <span class="field-hint">Action / Dynamics</span>
+          </div>
+          <textarea id="videoPromptInput" class="form-input inspector-textarea" rows="3" placeholder="cinematic drone shot flying through a neon futuristic city, smooth camera motion..."></textarea>
+        </div>
+
+        <div class="inspector-field">
+          <div class="field-label-row">
+            <label for="videoNegPromptInput">Negative Prompt:</label>
+            <span class="field-hint">Undesired</span>
+          </div>
+          <textarea id="videoNegPromptInput" class="form-input inspector-textarea" rows="2" placeholder="jitter, strobe, sudden jump cuts, distorted, artifacts, low resolution..."></textarea>
+        </div>
+
+        <div class="inspector-field">
+          <div class="field-label-row">
+            <label>Duration &amp; Frame Rate:</label>
+            <span class="field-hint" id="videoDurationHint">16 frames · 12 fps (~1.3s)</span>
+          </div>
+          <div class="inspector-aspect-presets" id="videoFramePresets" style="margin-bottom:6px;">
+            <button type="button" class="aspect-preset-btn active" data-frames="16">16 Frames</button>
+            <button type="button" class="aspect-preset-btn" data-frames="24">24 Frames</button>
+            <button type="button" class="aspect-preset-btn" data-frames="32">32 Frames</button>
+          </div>
+          <div class="inspector-aspect-presets" id="videoFpsPresets">
+            <button type="button" class="aspect-preset-btn" data-fps="8">8 FPS</button>
+            <button type="button" class="aspect-preset-btn active" data-fps="12">12 FPS</button>
+            <button type="button" class="aspect-preset-btn" data-fps="16">16 FPS</button>
+            <button type="button" class="aspect-preset-btn" data-fps="24">24 FPS</button>
+          </div>
+        </div>
+
+        <div class="inspector-field">
+          <div class="field-label-row">
+            <label>Aspect Ratio &amp; Resolution:</label>
+            <span class="field-hint" id="videoResHint">512×512 (1:1)</span>
+          </div>
+          <div class="inspector-aspect-presets" id="videoAspectPresets">
+            <button type="button" class="aspect-preset-btn active" data-vw="512" data-vh="512">1:1 (512²)</button>
+            <button type="button" class="aspect-preset-btn" data-vw="576" data-vh="1024">9:16 Port</button>
+            <button type="button" class="aspect-preset-btn" data-vw="1024" data-vh="576">16:9 Land</button>
+          </div>
+        </div>
+
+        <div class="inspector-field">
+          <div class="field-label-row">
+            <label for="videoMotionBucketInput">Motion Bucket / Dynamics Scale:</label>
+            <span class="slider-badge" id="videoMotionBucketLabel">127</span>
+          </div>
+          <input type="range" id="videoMotionBucketInput" class="workstation-slider" min="1" max="255" value="127" step="1">
+        </div>
+
+        <div class="inspector-field">
+          <div class="field-label-row">
+            <label for="videoSeedInput">Seed (-1 = Random):</label>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <input type="number" id="videoSeedInput" class="form-input dim-field" style="flex:1; height:26px;" value="-1">
+            <button type="button" class="top-btn" id="randomVideoSeedBtn" title="Random Seed" style="height:26px; padding:0 8px; font-weight:700;">🎲 Seed</button>
+          </div>
+        </div>
+
+        <div class="inspector-actions">
+          <button type="button" class="generate-btn" id="generateVideoBtn">⚡ GENERATE VIDEO</button>
+          <button type="button" class="inspector-sub-btn" id="randomVideoPromptBtn" title="Random Motion Prompt &amp; Seed">🎲 Prompt</button>
+        </div>
+
+        <div id="videoGenProgressBar" class="generation-progress-box" style="display:none;">
+          <div class="progress-bar-rail">
+            <div class="progress-bar-fill" id="videoGenProgressFill" style="width:0%;"></div>
+          </div>
+          <div class="progress-text-row">
+            <span id="videoGenProgressText">Synthesizing frames...</span>
+            <span id="videoGenProgressEta">ETA: —</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Stage Viewport -->
+      <section class="video-stage-area">
+        <div class="stage-top-meta-bar">
+          <div class="stage-meta-left">
+            <span class="stage-live-indicator standby" id="videoStageDot">●</span>
+            <span id="videoStageMetaText">Video Standby · 16 frames · 12 fps · SVD-XT</span>
+          </div>
+          <div class="stage-actions-group">
+            <button type="button" class="top-btn" id="downloadVideoBtn" title="Download video clip" disabled>⬇ Download</button>
+            <button type="button" class="top-btn" id="copyVideoBtn" title="Copy clip" disabled>📋 Copy</button>
+            <button type="button" class="top-btn" id="sendVideoToChatBtn" title="Send video to chat" disabled>💬 Send to Chat</button>
+          </div>
+        </div>
+
+        <div class="stage-viewport-box" id="videoViewportBox">
+          <div class="stage-placeholder" id="videoStagePlaceholder">
+            <div class="placeholder-crosshair-box">
+              <span class="corner-mark top-left">┌</span>
+              <span class="corner-mark top-right">┐</span>
+              <span class="corner-mark btm-left">└</span>
+              <span class="corner-mark btm-right">┘</span>
+              <div class="placeholder-glyph">◈</div>
+              <div class="placeholder-title">VIDEO SYNTHESIS VIEWPORT</div>
+              <div class="placeholder-desc">Configure motion prompt and frame parameters on the left, then click Generate Video.</div>
+              <div class="placeholder-sub">Engine: Stable Video Diffusion / AnimateDiff / Wan2.1 / CogVideoX</div>
+            </div>
+          </div>
+          <div id="videoPlayerContainer" class="video-player-container" style="display:none;">
+            <img id="videoStageWebp" style="max-height:calc(100% - 46px); max-width:100%; object-fit:contain; border:1px solid var(--border-frame);" alt="Generated Video Clip">
+            
+            <!-- Workstation Video Timeline Scrubber -->
+            <div class="video-scrubber-bar" id="videoScrubberBar">
+              <button type="button" class="top-btn" id="videoPlayPauseBtn" style="height:24px; padding:0 8px;">⏸ Pause</button>
+              <input type="range" id="videoFrameScrubber" class="video-timeline-range" min="0" max="15" value="0" step="1">
+              <span class="video-frame-counter" id="videoFrameCounter">Frame 1/16</span>
+              <button type="button" class="top-btn" id="videoLoopToggleBtn" style="height:24px; padding:0 6px;">🔁 Loop: On</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Clips Filmstrip -->
+        <div class="stage-filmstrip-bar">
+          <div class="filmstrip-header-tag">GALLERY (<span id="videoFilmstripCount">0</span>)</div>
+          <div class="filmstrip-scroll" id="videoFilmstripScroll">
+            <span class="filmstrip-empty-text">No video clips generated in this session yet.</span>
+          </div>
+          <button type="button" class="top-btn" id="clearVideoFilmstripBtn" title="Clear gallery history" style="height:24px; font-size:10px; padding:0 8px;">Clear All</button>
+        </div>
+      </section>
+    </main>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
          AUDIO LAB WORKSPACE (SPEECH-TO-TEXT & TEXT-TO-SPEECH)
          ═══════════════════════════════════════════════════════════════════ -->
     <main class="studio-workspace audio-lab-grid" id="audioLabWorkspace" data-active-subtab="asr" style="display:none;">
@@ -6001,7 +7534,7 @@ html, body {
           </div>
           <div class="recorder-controls">
             <button type="button" class="generate-btn mic-record-btn" id="audioRecordToggleBtn" style="height:32px;">● Record Audio</button>
-            <button type="button" class="top-btn" id="audioRecordResetBtn" style="display:none; height:32px; padding:0 10px;">Reset</button>
+            <button type="button" class="inspector-sub-btn" id="audioRecordResetBtn" style="display:none; padding:0 10px;">Reset</button>
           </div>
         </div>
 
@@ -6114,26 +7647,27 @@ html, body {
   <footer class="status-bar" id="telemetryStrip">
     <span>STATUS: <b id="metricStreamStatus">READY</b></span>
     <span>|</span>
-    <span class="backend-telemetry-cluster" title="Active Inference Engines">
+    <span class="backend-telemetry-cluster" title="Active Inference Engines (Click to configure in Master Settings)">
       BACKENDS: 
       <span class="backend-indicator online" id="beOllamaInd" title="Ollama (LLMs & Vision)">OLLAMA <b id="beOllamaDot">●</b></span>
       <span class="backend-indicator" id="beSdInd" title="Stable Diffusion WebUI">SD <b id="beSdDot">○</b></span>
       <span class="backend-indicator" id="beAsrInd" title="Whisper Speech-to-Text">ASR <b id="beAsrDot">○</b></span>
       <span class="backend-indicator" id="beTtsInd" title="Piper Neural Text-to-Speech">TTS <b id="beTtsDot">○</b></span>
-      <a href="/setup" target="_blank" style="margin-left:6px; color:var(--text-main); font-size:9.5px; font-weight:700; text-decoration:none; border:1px solid var(--border-frame); padding:1px 5px; background:var(--bg-btn); cursor:pointer;" title="Launch Setup Guide & Preflight Check">SETUP ↗</a>
     </span>
     <span>|</span>
-    <span>HOST: <span id="serverStatusText">127.0.0.1:11434</span></span>
+    <span id="telemetryHostBlock">HOST: <span id="serverStatusText">127.0.0.1:11434</span></span>
     <span>|</span>
-    <span>MODEL: <b id="statusModelDisplay">—</b></span>
-    <span>|</span>
-    <span>CTX: <span id="metricCtxLabel">0 / 32,768</span></span>
-    <span>|</span>
-    <span>SPEED: <span id="metricTps">0.0 t/s</span></span>
-    <span>|</span>
-    <span>TTFT: <span id="metricTtft">— ms</span></span>
-    <span>|</span>
-    <span>VRAM: <span id="metricVram">Idle</span></span>
+    <span id="telemetryModelBlock">MODEL: <b id="statusModelDisplay">—</b></span>
+    <span id="telemetryExtraGroup">
+      <span>|</span>
+      <span>CTX: <span id="metricCtxLabel">0 / 32,768</span></span>
+      <span>|</span>
+      <span>SPEED: <span id="metricTps">0.0 t/s</span></span>
+      <span>|</span>
+      <span>TTFT: <span id="metricTtft">— ms</span></span>
+      <span>|</span>
+      <span>VRAM: <span id="metricVram">Idle</span></span>
+    </span>
 
     <span id="serverStatusPill" style="display:none;"><span id="serverStatusDot"></span></span>
     <span id="metricPromptTokens" style="display:none;">0</span>
@@ -6151,7 +7685,8 @@ html, body {
     <div id="corsAlertBanner" style="display:none;"></div>
     <span id="tpsTelemetryItem" style="display:none;"></span>
   </footer>
-</div>
+  </div> <!-- /.workstation-main-container -->
+</div> <!-- /.window-frame -->
 
 <div class="drawer-overlay" id="settingsModal">
   <div class="drawer-card">
@@ -6160,105 +7695,248 @@ html, body {
       <button type="button" class="top-btn" id="closeSettingsModalX" title="Close Settings">✕ Close</button>
     </div>
     <div class="modal-tab-bar" id="settingsTabBar">
-      <button class="modal-tab-btn active" data-tab="backendsTab">Backends & Engines</button>
-      <button class="modal-tab-btn" data-tab="serverTab">Hardware & Context</button>
-      <button class="modal-tab-btn" data-tab="personaTab">System Persona</button>
-      <button class="modal-tab-btn" data-tab="hfTab">Hugging Face</button>
-      <button class="modal-tab-btn" data-tab="audioTab">Voice & Speech</button>
+      <button class="modal-tab-btn active" data-tab="fleetTab">🎛️ Fleet & Setup</button>
+      <button class="modal-tab-btn" data-tab="serverTab">🧠 Inference & Context</button>
+      <button class="modal-tab-btn" data-tab="personaTab">👤 System Persona</button>
+      <button class="modal-tab-btn" data-tab="hfTab">🤗 Hugging Face</button>
+      <button class="modal-tab-btn" data-tab="audioTab">🎙️ Voice & Audio</button>
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════════════
-         BACKENDS & INFERENCE ENGINES CONFIGURATION
+         TAB 1: COMPACT FLEET CONTROLLER & MULTI-BACKEND SETUP
          ═══════════════════════════════════════════════════════════════════ -->
-    <div class="modal-tab-pane active" id="backendsTab">
-      <div style="font-size:11px; color:var(--text-muted); margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
-        <span>Local Intelligence Workstation coordinates multiple local engines. Configure daemon URLs and ping latency:</span>
-        <a href="/setup" target="_blank" style="font-family:var(--font-mono); font-size:10px; font-weight:700; color:var(--text-main); text-decoration:none; border:1px solid var(--border-dark); padding:2px 8px; background:var(--bg-btn); white-space:nowrap;">⚙ Setup Guide</a>
+    <div class="modal-tab-pane active" id="fleetTab">
+      <div class="fleet-compact-header">
+        <div class="fleet-compact-title-group">
+          <span class="fleet-compact-title">⚡ INFERENCE FLEET // CONTROLLER & SETUP</span>
+          <span class="fleet-compact-sub">Live engine lifecycle, port mappings, and hardware preflight</span>
+        </div>
+        <div class="fleet-compact-actions">
+          <button type="button" class="top-btn" id="compactRunAllProbesBtn" title="Run health check across all backends">▶ Probe All</button>
+          <a href="/setup" target="_blank" class="top-btn fleet-setup-link-btn" title="Open full-screen fleet dashboard and execution logs">
+            <span>↗ Full Setup Screen</span>
+          </a>
+        </div>
       </div>
 
-      <!-- Ollama Backend -->
-      <div class="form-group" style="border:1px solid var(--border-frame); padding:8px; margin-bottom:8px; background:var(--bg-transcript);">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-          <span style="font-family:var(--font-mono); font-size:11.5px; font-weight:700;">💬 Ollama Daemon (LLMs & VLMs)</span>
-          <span class="backend-status-indicator online" id="statusBeOllama">● ONLINE</span>
+      <!-- Quick 5-Tile Engine Status HUD -->
+      <div class="compact-hud-strip">
+        <div class="compact-hud-tile" id="hudTileOllama">
+          <div class="compact-hud-top">
+            <span class="compact-hud-name">💬 Ollama</span>
+            <span class="compact-hud-port">:11434</span>
+          </div>
+          <div class="compact-hud-bottom">
+            <span class="compact-hud-badge online" id="hudBadgeOllama">● ONLINE</span>
+            <span class="compact-hud-ms" id="hudMsOllama">1ms</span>
+          </div>
         </div>
-        <div class="form-action-row">
-          <input type="text" id="settingBeOllamaUrl" class="form-input" value="http://127.0.0.1:11434">
-          <button type="button" class="composer-btn" id="pingBeOllamaBtn">Ping</button>
+        <div class="compact-hud-tile" id="hudTileSd">
+          <div class="compact-hud-top">
+            <span class="compact-hud-name">🎨 SD WebUI</span>
+            <span class="compact-hud-port">:7860</span>
+          </div>
+          <div class="compact-hud-bottom">
+            <span class="compact-hud-badge" id="hudBadgeSd">○ STANDBY</span>
+            <span class="compact-hud-ms" id="hudMsSd">—</span>
+          </div>
         </div>
-        <div style="font-size:10px; color:var(--text-muted); margin-top:3px;">Launch command: <code>ollama serve</code> (Port 11434)</div>
+        <div class="compact-hud-tile" id="hudTileComfy">
+          <div class="compact-hud-top">
+            <span class="compact-hud-name">🔮 ComfyUI</span>
+            <span class="compact-hud-port">:8188</span>
+          </div>
+          <div class="compact-hud-bottom">
+            <span class="compact-hud-badge" id="hudBadgeComfy">○ STANDBY</span>
+            <span class="compact-hud-ms" id="hudMsComfy">—</span>
+          </div>
+        </div>
+        <div class="compact-hud-tile" id="hudTileWhisper">
+          <div class="compact-hud-top">
+            <span class="compact-hud-name">🎙️ Whisper</span>
+            <span class="compact-hud-port">:8178</span>
+          </div>
+          <div class="compact-hud-bottom">
+            <span class="compact-hud-badge" id="hudBadgeWhisper">○ STANDBY</span>
+            <span class="compact-hud-ms" id="hudMsWhisper">—</span>
+          </div>
+        </div>
+        <div class="compact-hud-tile" id="hudTilePiper">
+          <div class="compact-hud-top">
+            <span class="compact-hud-name">🔊 Piper</span>
+            <span class="compact-hud-port">:5000</span>
+          </div>
+          <div class="compact-hud-bottom">
+            <span class="compact-hud-badge" id="hudBadgePiper">○ STANDBY</span>
+            <span class="compact-hud-ms" id="hudMsPiper">—</span>
+          </div>
+        </div>
       </div>
 
-      <!-- SD WebUI Backend -->
-      <div class="form-group" style="border:1px solid var(--border-frame); padding:8px; margin-bottom:8px; background:var(--bg-transcript);">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-          <span style="font-family:var(--font-mono); font-size:11.5px; font-weight:700;">🎨 Stable Diffusion WebUI (Image Gen)</span>
-          <span class="backend-status-indicator" id="statusBeSd">○ STANDBY</span>
+      <!-- Engine Configuration Cards List -->
+      <div class="compact-engine-list">
+        <!-- 1. Ollama -->
+        <div class="compact-engine-card">
+          <div class="compact-engine-header">
+            <div class="compact-engine-info">
+              <span class="compact-engine-tag">💬 Ollama LLM / VLM</span>
+              <span class="compact-engine-role-pill">Core Engine (Required)</span>
+            </div>
+            <div class="compact-engine-controls">
+              <button type="button" class="top-btn svc-ctrl-btn" data-svc="ollama" data-act="start">▶ Start</button>
+              <button type="button" class="top-btn svc-ctrl-btn" data-svc="ollama" data-act="restart">🔄 Restart</button>
+              <span class="backend-status-indicator online" id="statusBeOllama">● ONLINE</span>
+            </div>
+          </div>
+          <div class="compact-engine-row">
+            <span class="compact-engine-label">Host Daemon URL:</span>
+            <div class="form-action-row" style="flex:1;">
+              <input type="text" id="settingBeOllamaUrl" class="form-input" value="http://127.0.0.1:11434">
+              <button type="button" class="composer-btn" id="pingBeOllamaBtn">Ping</button>
+              <button type="button" class="top-btn" id="resetOllamaDefaultBtn" title="Reset to default (http://127.0.0.1:11434)">↺ Reset</button>
+            </div>
+          </div>
+          <div class="compact-engine-meta">
+            <span>Daemon: <code>127.0.0.1:11434</code></span>
+            <span>Acceleration: <strong>Metal (MPS) / CUDA</strong></span>
+            <span>Health Probe: <code>GET /api/tags</code></span>
+          </div>
         </div>
-        <div class="form-action-row">
-          <input type="text" id="settingBeSdUrl" class="form-input" value="http://127.0.0.1:7860">
-          <button type="button" class="composer-btn" id="pingBeSdBtn">Ping</button>
+
+        <!-- 2. SD WebUI -->
+        <div class="compact-engine-card">
+          <div class="compact-engine-header">
+            <div class="compact-engine-info">
+              <span class="compact-engine-tag">🎨 Stable Diffusion WebUI</span>
+              <span class="compact-engine-role-pill">Image Studio Synthesis</span>
+            </div>
+            <div class="compact-engine-controls">
+              <button type="button" class="top-btn svc-ctrl-btn" data-svc="sd_webui" data-act="start">▶ Start</button>
+              <button type="button" class="top-btn svc-ctrl-btn" data-svc="sd_webui" data-act="stop">⏹ Stop</button>
+              <span class="backend-status-indicator" id="statusBeSd">○ STANDBY</span>
+            </div>
+          </div>
+          <div class="compact-engine-row">
+            <span class="compact-engine-label">API Endpoint URL:</span>
+            <div class="form-action-row" style="flex:1;">
+              <input type="text" id="settingBeSdUrl" class="form-input" value="http://127.0.0.1:7860">
+              <button type="button" class="composer-btn" id="pingBeSdBtn">Ping</button>
+            </div>
+          </div>
+          <div class="compact-engine-meta">
+            <span>Command: <code>./webui.sh --api</code> (Port 7860)</span>
+            <span>Health: <code>GET /sdapi/v1/sd-models</code></span>
+          </div>
         </div>
-        <div style="font-size:10px; color:var(--text-muted); margin-top:3px;">Launch command: <code>./webui.sh --api</code> (AUTOMATIC1111 / Forge, Port 7860)</div>
+
+        <!-- 3. ComfyUI -->
+        <div class="compact-engine-card">
+          <div class="compact-engine-header">
+            <div class="compact-engine-info">
+              <span class="compact-engine-tag">🔮 ComfyUI</span>
+              <span class="compact-engine-role-pill">Modular Node Pipelines</span>
+            </div>
+            <div class="compact-engine-controls">
+              <button type="button" class="top-btn svc-ctrl-btn" data-svc="comfyui" data-act="start">▶ Start</button>
+              <button type="button" class="top-btn svc-ctrl-btn" data-svc="comfyui" data-act="stop">⏹ Stop</button>
+              <span class="backend-status-indicator" id="statusBeComfy">○ STANDBY</span>
+            </div>
+          </div>
+          <div class="compact-engine-row">
+            <span class="compact-engine-label">API Endpoint URL:</span>
+            <div class="form-action-row" style="flex:1;">
+              <input type="text" id="settingBeComfyUrl" class="form-input" value="http://127.0.0.1:8188">
+              <button type="button" class="composer-btn" id="pingBeComfyBtn">Ping</button>
+            </div>
+          </div>
+          <div class="compact-engine-meta">
+            <span>Command: <code>python main.py</code> (Port 8188)</span>
+            <span>Health: <code>GET /system_stats</code></span>
+          </div>
+        </div>
+
+        <!-- 4. Whisper ASR -->
+        <div class="compact-engine-card">
+          <div class="compact-engine-header">
+            <div class="compact-engine-info">
+              <span class="compact-engine-tag">🎙️ Whisper ASR</span>
+              <span class="compact-engine-role-pill">Audio Lab Speech-to-Text</span>
+            </div>
+            <div class="compact-engine-controls">
+              <button type="button" class="top-btn svc-ctrl-btn" data-svc="whisper" data-act="start">▶ Start</button>
+              <button type="button" class="top-btn svc-ctrl-btn" data-svc="whisper" data-act="stop">⏹ Stop</button>
+              <span class="backend-status-indicator" id="statusBeWhisper">○ STANDBY</span>
+            </div>
+          </div>
+          <div class="compact-engine-row">
+            <span class="compact-engine-label">Server Endpoint URL:</span>
+            <div class="form-action-row" style="flex:1;">
+              <input type="text" id="settingBeWhisperUrl" class="form-input" value="http://127.0.0.1:8178">
+              <button type="button" class="composer-btn" id="pingBeWhisperBtn">Ping</button>
+            </div>
+          </div>
+          <div class="compact-engine-meta">
+            <span>Command: <code>./server -m models/ggml-base.bin --port 8178</code></span>
+            <span>Health: <code>GET /health</code></span>
+          </div>
+        </div>
+
+        <!-- 5. Piper TTS -->
+        <div class="compact-engine-card">
+          <div class="compact-engine-header">
+            <div class="compact-engine-info">
+              <span class="compact-engine-tag">🔊 Piper Neural TTS</span>
+              <span class="compact-engine-role-pill">Voice Synthesis Engine</span>
+            </div>
+            <div class="compact-engine-controls">
+              <button type="button" class="top-btn svc-ctrl-btn" data-svc="piper" data-act="start">▶ Start</button>
+              <button type="button" class="top-btn svc-ctrl-btn" data-svc="piper" data-act="stop">⏹ Stop</button>
+              <span class="backend-status-indicator" id="statusBePiper">○ STANDBY</span>
+            </div>
+          </div>
+          <div class="compact-engine-row">
+            <span class="compact-engine-label">Server Endpoint URL:</span>
+            <div class="form-action-row" style="flex:1;">
+              <input type="text" id="settingBePiperUrl" class="form-input" value="http://127.0.0.1:5000">
+              <button type="button" class="composer-btn" id="pingBePiperBtn">Ping</button>
+            </div>
+          </div>
+          <div class="compact-engine-meta">
+            <span>Command: <code>python3 -m piper_http --port 5000</code></span>
+            <span>Health: <code>GET /api/voices</code></span>
+          </div>
+        </div>
       </div>
 
-      <!-- ComfyUI Backend -->
-      <div class="form-group" style="border:1px solid var(--border-frame); padding:8px; margin-bottom:8px; background:var(--bg-transcript);">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-          <span style="font-family:var(--font-mono); font-size:11.5px; font-weight:700;">🔮 ComfyUI API (Alternative Diffusion)</span>
-          <span class="backend-status-indicator" id="statusBeComfy">○ STANDBY</span>
+      <!-- Preflight Hardware Specs Summary -->
+      <div class="compact-preflight-box">
+        <div class="preflight-box-title">SYSTEM PREFLIGHT & HARDWARE RUNTIME</div>
+        <div class="preflight-box-grid">
+          <div class="pf-item">
+            <span class="pf-key">ACCELERATION</span>
+            <span class="pf-val" id="pfAccelVal">Apple Silicon MPS / Metal</span>
+          </div>
+          <div class="pf-item">
+            <span class="pf-key">REVERSE PROXY</span>
+            <span class="pf-val">Active (Port 3300)</span>
+          </div>
+          <div class="pf-item">
+            <span class="pf-key">OLLAMA CLI</span>
+            <span class="pf-val" id="pfOllamaCliVal">Installed (/opt/homebrew/bin/ollama)</span>
+          </div>
+          <div class="pf-item">
+            <span class="pf-key">STORAGE</span>
+            <span class="pf-val">~/.ollama/models</span>
+          </div>
         </div>
-        <div class="form-action-row">
-          <input type="text" id="settingBeComfyUrl" class="form-input" value="http://127.0.0.1:8188">
-          <button type="button" class="composer-btn" id="pingBeComfyBtn">Ping</button>
-        </div>
-        <div style="font-size:10px; color:var(--text-muted); margin-top:3px;">Launch command: <code>python main.py</code> (Port 8188)</div>
-      </div>
-
-      <!-- Whisper ASR Backend -->
-      <div class="form-group" style="border:1px solid var(--border-frame); padding:8px; margin-bottom:8px; background:var(--bg-transcript);">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-          <span style="font-family:var(--font-mono); font-size:11.5px; font-weight:700;">🎙️ Whisper ASR Server (Speech-to-Text)</span>
-          <span class="backend-status-indicator" id="statusBeWhisper">○ STANDBY</span>
-        </div>
-        <div class="form-action-row">
-          <input type="text" id="settingBeWhisperUrl" class="form-input" value="http://127.0.0.1:8178">
-          <button type="button" class="composer-btn" id="pingBeWhisperBtn">Ping</button>
-        </div>
-        <div style="font-size:10px; color:var(--text-muted); margin-top:3px;">Launch command: <code>./server -m models/ggml-base.bin --port 8178</code></div>
-      </div>
-
-      <!-- Piper TTS Backend -->
-      <div class="form-group" style="border:1px solid var(--border-frame); padding:8px; margin-bottom:8px; background:var(--bg-transcript);">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-          <span style="font-family:var(--font-mono); font-size:11.5px; font-weight:700;">🔊 Piper TTS Server (Text-to-Speech)</span>
-          <span class="backend-status-indicator" id="statusBePiper">○ STANDBY</span>
-        </div>
-        <div class="form-action-row">
-          <input type="text" id="settingBePiperUrl" class="form-input" value="http://127.0.0.1:5000">
-          <button type="button" class="composer-btn" id="pingBePiperBtn">Ping</button>
-        </div>
-        <div style="font-size:10px; color:var(--text-muted); margin-top:3px;">Launch command: <code>python3 -m piper_http --port 5000</code></div>
-      </div>
-
-      <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
-        <button type="button" class="composer-btn" id="saveBackendsConfigBtn" style="font-weight:700;">💾 Save Backends & Probe All</button>
-        <span id="backendsSaveStatus" class="inline-status-badge"></span>
       </div>
     </div>
 
+    <!-- ═══════════════════════════════════════════════════════════════════
+         TAB 2: INFERENCE ENGINE & CONTEXT WINDOW PARAMETERS
+         ═══════════════════════════════════════════════════════════════════ -->
     <div class="modal-tab-pane" id="serverTab">
       <div class="form-group">
-        <label for="settingOllamaHost">Ollama Host URL:</label>
-        <div class="form-action-row">
-          <input type="text" id="settingOllamaHost" class="form-input" value="http://127.0.0.1:11434">
-          <button type="button" class="composer-btn" id="testConnBtn">Test Connection</button>
-        </div>
-        <div class="form-status-slot" style="margin-top:4px;">
-          <span id="hostTestResult" class="inline-status-badge"></span>
-        </div>
-      </div>
-      <div class="form-group" style="margin-top:8px;">
         <label for="settingNumCtx">Context Window (num_ctx):</label>
         <select id="settingNumCtx" class="form-input">
           <option value="2048">2,048 Tokens</option>
@@ -6270,10 +7948,60 @@ html, body {
           <option value="131072">131,072 Tokens (128K)</option>
           <option value="262144">262,144 Tokens (256K)</option>
         </select>
+        <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">
+          Governs KV-cache allocation. Higher values enable long document comprehension.
+        </div>
       </div>
-      <div class="form-group" style="margin-top:8px;">
-        <label for="settingTemperature">Temperature: <span id="tempValueLabel">0.7</span></label>
+
+      <div class="form-group" style="margin-top:10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <label for="settingTemperature">Inference Temperature: <span id="tempValueLabel">0.70</span></label>
+          <span id="tempPresetLabel" style="font-size:10px; color:var(--text-muted); font-weight:700;">Balanced</span>
+        </div>
         <input type="range" id="settingTemperature" min="0.0" max="1.5" step="0.05" value="0.7">
+        <div style="display:flex; justify-content:space-between; font-size:9.5px; color:var(--text-muted); margin-top:2px;">
+          <span>0.0 (Deterministic / Code)</span>
+          <span>0.7 (Balanced / Chat)</span>
+          <span>1.5 (Creative / Exploratory)</span>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top:10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <label for="settingTopP">Top-P Sampling: <span id="topPValueLabel">0.90</span></label>
+          <span style="font-size:10px; color:var(--text-muted);">Nucleus probability</span>
+        </div>
+        <input type="range" id="settingTopP" min="0.1" max="1.0" step="0.05" value="0.9">
+      </div>
+
+      <div class="form-group" style="margin-top:10px;">
+        <label for="settingOperatingMode">Default Operating Mode:</label>
+        <select id="settingOperatingMode" class="form-input">
+          <option value="thinking">🧠 Deep Thinking &amp; Reasoning</option>
+          <option value="no_think">⚡ Fast Direct Answers</option>
+          <option value="json">📋 Strict JSON Extraction</option>
+          <option value="raw">⚡ Raw Completion</option>
+        </select>
+      </div>
+
+      <div class="form-group" style="margin-top:12px; border-top:1px solid var(--border-frame); padding-top:10px;">
+        <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+          <input type="checkbox" id="settingExpandThinking">
+          <span style="font-weight:600;">Auto-Expand Thinking Blocks in Chat</span>
+        </label>
+        <div style="font-size:10px; color:var(--text-muted); margin-top:2px; margin-left:22px;">
+          When checked, reasoning traces (<code>&lt;think&gt;</code>) expand automatically upon stream finish.
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top:8px;">
+        <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+          <input type="checkbox" id="settingEcoMode">
+          <span style="font-weight:600;">Workstation Eco-Mode</span>
+        </label>
+        <div style="font-size:10px; color:var(--text-muted); margin-top:2px; margin-left:22px;">
+          Throttles background polling and caches telemetry to minimize CPU / battery usage.
+        </div>
       </div>
     </div>
     <div class="modal-tab-pane" id="personaTab">
@@ -6372,13 +8100,10 @@ html, body {
       </div>
     </div>
     <div class="drawer-footer">
-      <button class="composer-btn" id="closeSettingsBtn">Cancel</button>
-      <button class="composer-btn" id="saveSettingsBtn">Save Configuration</button>
+      <button type="button" class="composer-btn" id="closeSettingsBtn">Cancel</button>
+      <button type="button" class="composer-btn" id="saveSettingsBtn" style="font-weight:700; background:var(--border-dark); color:#FFFFFF;">💾 Save Master Configuration</button>
     </div>
     <div id="specsTab" style="display:none;"></div>
-    <div id="settingOperatingMode" style="display:none;"></div>
-    <input type="checkbox" id="settingExpandThinking" style="display:none;">
-    <input type="checkbox" id="settingEcoMode" style="display:none;">
   </div>
 </div>
 
@@ -6664,6 +8389,7 @@ html, body {
 <div class="toast-container" id="toastContainer"></div>
 <div id="sessionContextMenu" class="session-context-menu" style="display:none;">
   <div class="session-context-item" id="ctxMenuRename">Rename</div>
+  <div class="session-context-item" id="ctxMenuExport">Export Session ↗</div>
   <div class="session-context-item danger" id="ctxMenuDelete">Delete</div>
 </div>
 
@@ -6679,10 +8405,186 @@ html, body {
     <img id="lightboxImg" alt="Enlarged attachment preview">
   </div>
 </div>
-<div id="commandPaletteModal" style="display:none;"><input id="commandPaletteInput"><div id="commandPaletteList"></div><button id="closeCmdPaletteX"></button></div>
-<div id="pullModelModal" style="display:none;"><input id="pullModelInput"><span id="pullStatusText"></span><span id="pullPercentageText"></span><div id="pullProgressBar"></div><span id="pullBytesText"></span><span id="pullSpeedText"></span><div id="pullProgressContainer"></div><button id="executePullBtn"></button><button id="cancelPullBtn"></button><button id="closePullModalX"></button><button id="closePullBtn"></button></div>
-<div id="exportModal" style="display:none;"><button id="exportMarkdownBtn"></button><button id="exportJsonBtn"></button><button id="copyConversationBtn"></button><button id="closeExportModalX"></button><button id="closeExportBtn"></button></div>
-<div id="telemetryModal" style="display:none;"><button id="closeTelemetryModalX"></button><button id="closeTelemetryModalBtn"></button><span id="diagModelTag"></span><span id="diagModelFamily"></span><span id="diagModelParams"></span><span id="diagModelQuant"></span><span id="diagContextWindow"></span><span id="diagVramSize"></span><span id="diagRamOffload"></span><span id="diagServerPing"></span><span id="diagActiveMode"></span><span id="diagTtftVal"></span><span id="diagPromptRate"></span><span id="diagGenRate"></span><span id="diagJsHeap"></span><span id="diagDeviceMem"></span><span id="diagCpuCores"></span><span id="diagDurationsBreakdown"></span></div>
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     CLASSIC WORKSTATION DIALOGS & OVERLAYS
+     ═══════════════════════════════════════════════════════════════════ -->
+
+<!-- 1. Keyboard Shortcuts Modal -->
+<div class="drawer-overlay" id="shortcutsModal">
+  <div class="drawer-card" style="width: 620px;">
+    <div class="drawer-header">
+      <span>KEYBOARD SHORTCUTS REFERENCE</span>
+      <button type="button" class="top-btn" id="closeShortcutsModalX" title="Close (Esc)">✕ Close [Esc]</button>
+    </div>
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; padding: 4px 0;">
+      <div>
+        <div style="font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; border-bottom:1px solid var(--border-frame); padding-bottom:4px; color:var(--text-secondary);">Workspaces & Studios</div>
+        <div class="shortcut-list-row"><span>Chat Studio</span><kbd>⌘ 1</kbd></div>
+        <div class="shortcut-list-row"><span>Image Studio</span><kbd>⌘ 2</kbd></div>
+        <div class="shortcut-list-row"><span>Video Studio</span><kbd>⌘ 3</kbd></div>
+        <div class="shortcut-list-row"><span>Audio Lab</span><kbd>⌘ 4</kbd></div>
+        <div class="shortcut-list-row"><span>Model Hub</span><kbd>⌘ 5</kbd></div>
+      </div>
+      <div>
+        <div style="font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; border-bottom:1px solid var(--border-frame); padding-bottom:4px; color:var(--text-secondary);">Controls & Navigation</div>
+        <div class="shortcut-list-row"><span>Command Palette</span><kbd>⌘ K</kbd></div>
+        <div class="shortcut-list-row"><span>Model Selector</span><kbd>⌘ M</kbd></div>
+        <div class="shortcut-list-row"><span>Master Settings</span><kbd>⌘ ,</kbd></div>
+        <div class="shortcut-list-row"><span>Toggle Sidebar</span><kbd>⌘ B</kbd></div>
+        <div class="shortcut-list-row"><span>New Session / Action</span><kbd>⌘ N</kbd></div>
+      </div>
+      <div>
+        <div style="font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; border-bottom:1px solid var(--border-frame); padding-bottom:4px; color:var(--text-secondary);">Composition & Execution</div>
+        <div class="shortcut-list-row"><span>Send Prompt</span><kbd>Enter</kbd></div>
+        <div class="shortcut-list-row"><span>Newline in Prompt</span><kbd>Shift + Enter</kbd></div>
+        <div class="shortcut-list-row"><span>Abort Generation</span><kbd>Esc</kbd></div>
+        <div class="shortcut-list-row"><span>Dismiss Overlays</span><kbd>Esc</kbd></div>
+      </div>
+    </div>
+    <div style="display:flex; justify-content:flex-end; border-top:1px solid var(--border-frame); padding-top:8px;">
+      <button type="button" class="composer-btn" id="closeShortcutsBtn">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- 2. Command Palette Modal -->
+<div class="drawer-overlay" id="commandPaletteModal">
+  <div class="command-palette-card">
+    <div class="command-palette-input-wrapper">
+      <span class="command-palette-prompt-symbol">&gt;</span>
+      <input type="text" id="commandPaletteInput" placeholder="Type a command or search actions..." autocomplete="off" spellcheck="false">
+      <button type="button" class="top-btn" id="closeCmdPaletteX" title="Close (Esc)" style="height:22px; padding:0 6px; font-size:10px;">✕</button>
+    </div>
+    <div id="commandPaletteList"></div>
+  </div>
+</div>
+
+<!-- 3. Export Conversation Modal -->
+<div class="drawer-overlay" id="exportModal">
+  <div class="drawer-card" style="width: 500px;">
+    <div class="drawer-header">
+      <span>EXPORT CONVERSATION SESSION</span>
+      <button type="button" class="top-btn" id="closeExportModalX" title="Close (Esc)">✕ Close [Esc]</button>
+    </div>
+    <p style="font-size:12px; color:var(--text-secondary); margin: 0 0 10px 0;">
+      Export the active session dialogue transcript, token metrics, and metadata to your preferred format.
+    </p>
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      <button type="button" class="top-btn" id="exportMarkdownBtn" style="height:44px; display:flex; align-items:center; justify-content:space-between; padding:0 12px; text-align:left;">
+        <div style="display:flex; flex-direction:column;">
+          <strong style="font-size:12px;">📄 Markdown Document (.md)</strong>
+          <span style="font-size:10px; color:var(--text-secondary);">Formatted prose transcript with token diagnostics</span>
+        </div>
+        <span style="font-weight:700;">⬇ Download</span>
+      </button>
+
+      <button type="button" class="top-btn" id="exportJsonBtn" style="height:44px; display:flex; align-items:center; justify-content:space-between; padding:0 12px; text-align:left;">
+        <div style="display:flex; flex-direction:column;">
+          <strong style="font-size:12px;">📋 Machine-Readable JSON (.json)</strong>
+          <span style="font-size:10px; color:var(--text-secondary);">Complete session telemetry schema for backups & fine-tuning</span>
+        </div>
+        <span style="font-weight:700;">⬇ Download</span>
+      </button>
+
+      <button type="button" class="top-btn" id="copyConversationBtn" style="height:44px; display:flex; align-items:center; justify-content:space-between; padding:0 12px; text-align:left;">
+        <div style="display:flex; flex-direction:column;">
+          <strong style="font-size:12px;">📑 Copy to Clipboard</strong>
+          <span style="font-size:10px; color:var(--text-secondary);">Raw transcript copied directly to system clipboard</span>
+        </div>
+        <span style="font-weight:700;">📋 Copy</span>
+      </button>
+    </div>
+    <div style="display:flex; justify-content:flex-end; border-top:1px solid var(--border-frame); padding-top:8px; margin-top:8px;">
+      <button type="button" class="composer-btn" id="closeExportBtn">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- 4. Hardware Telemetry & Runtime Diagnostics Modal -->
+<div class="drawer-overlay" id="telemetryModal">
+  <div class="drawer-card" style="width: 640px;">
+    <div class="drawer-header">
+      <span>HARDWARE TELEMETRY & RUNTIME DIAGNOSTICS</span>
+      <button type="button" class="top-btn" id="closeTelemetryModalX" title="Close (Esc)">✕ Close [Esc]</button>
+    </div>
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:10px; font-size:11px;">
+      <div style="background:var(--bg-top-bar); border:1px solid var(--border-frame); padding:8px 10px;">
+        <div style="font-weight:700; margin-bottom:6px; color:var(--text-secondary);">ACTIVE MODEL & ENGINE</div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>Model Tag:</span><strong id="diagModelTag">—</strong></div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>Family:</span><strong id="diagModelFamily">—</strong></div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>Parameters:</span><strong id="diagModelParams">—</strong></div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>Quantization:</span><strong id="diagModelQuant">—</strong></div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>Context Limit:</span><strong id="diagContextWindow">—</strong></div>
+        <div style="display:flex; justify-content:space-between;"><span>Operating Mode:</span><strong id="diagActiveMode">—</strong></div>
+      </div>
+      <div style="background:var(--bg-top-bar); border:1px solid var(--border-frame); padding:8px 10px;">
+        <div style="font-weight:700; margin-bottom:6px; color:var(--text-secondary);">MEMORY & ALLOCATION</div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>VRAM (Metal/GPU):</span><strong id="diagVramSize">—</strong></div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>RAM Offload:</span><strong id="diagRamOffload">—</strong></div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>Engine Latency:</span><strong id="diagServerPing">—</strong></div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>JS Heap:</span><strong id="diagJsHeap">—</strong></div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>System Cores:</span><strong id="diagCpuCores">—</strong></div>
+        <div style="display:flex; justify-content:space-between;"><span>Device Memory:</span><strong id="diagDeviceMem">—</strong></div>
+      </div>
+    </div>
+    <div style="background:var(--bg-top-bar); border:1px solid var(--border-frame); padding:8px 10px; font-size:11px;">
+      <div style="font-weight:700; margin-bottom:6px; color:var(--text-secondary);">INFERENCE SPEED & LATENCY BREAKDOWN</div>
+      <div style="display:flex; gap:16px; margin-bottom:6px;">
+        <div><span>TTFT: </span><strong id="diagTtftVal">— ms</strong></div>
+        <div><span>Prompt Rate: </span><strong id="diagPromptRate">— t/s</strong></div>
+        <div><span>Gen Rate: </span><strong id="diagGenRate">— t/s</strong></div>
+      </div>
+      <div style="font-size:10px; color:var(--text-secondary); word-break:break-all;" id="diagDurationsBreakdown">
+        No recent prompt inference profile recorded in current session.
+      </div>
+    </div>
+    <div style="display:flex; justify-content:space-between; border-top:1px solid var(--border-frame); padding-top:8px;">
+      <button type="button" class="composer-btn" onclick="purgeActiveModelVram();">⚡ Evict VRAM</button>
+      <button type="button" class="composer-btn" id="closeTelemetryModalBtn">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- 5. Pull Model Modal -->
+<div class="drawer-overlay" id="pullModelModal">
+  <div class="drawer-card" style="width: 520px;">
+    <div class="drawer-header">
+      <span>PULL MODEL FROM OLLAMA</span>
+      <button type="button" class="top-btn" id="closePullModalX" title="Close (Esc)">✕ Close [Esc]</button>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <p style="font-size:12px; color:var(--text-secondary); margin:0;">
+        Enter any model tag from the Ollama library (e.g. <code>qwen2.5-coder:7b</code>, <code>llama3.2:3b</code>).
+      </p>
+      <div style="display:flex; gap:6px;">
+        <input type="text" id="pullModelInput" class="form-input" placeholder="e.g. llama3.2:3b" style="flex:1 1 auto;">
+        <button type="button" class="composer-btn" id="executePullBtn" style="background:var(--text-primary); color:var(--bg-transcript);">⬇ Pull</button>
+      </div>
+      <div id="pullProgressContainer" style="display:none; flex-direction:column; gap:6px; background:var(--bg-top-bar); border:1px solid var(--border-frame); padding:10px;">
+        <div style="display:flex; justify-content:space-between; font-size:11px;">
+          <span id="pullStatusText">Initializing...</span>
+          <span id="pullPercentageText">0%</span>
+        </div>
+        <div style="width:100%; height:6px; background:var(--border-frame); overflow:hidden;">
+          <div id="pullProgressBar" style="height:100%; width:0%; background:var(--accent); transition:width 0.2s;"></div>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-secondary);">
+          <span id="pullBytesText">— / —</span>
+          <span id="pullSpeedText">— MB/s</span>
+        </div>
+        <div style="display:flex; justify-content:flex-end; margin-top:4px;">
+          <button type="button" class="composer-btn" id="cancelPullBtn" style="font-size:11px;">Cancel Pull</button>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex; justify-content:space-between; border-top:1px solid var(--border-frame); padding-top:8px; margin-top:8px;">
+      <button type="button" class="composer-btn" onclick="document.getElementById('pullModelModal').classList.remove('open'); HUB.open();">📦 Open Model Hub ↗</button>
+      <button type="button" class="composer-btn" id="closePullBtn">Close</button>
+    </div>
+  </div>
+</div>
+
 <div id="modelManifestModal" style="display:none;"><span id="manifestModelName"></span><span id="manifestFamily"></span><span id="manifestFormat"></span><span id="manifestParams"></span><span id="manifestQuant"></span><span id="manifestTemplateText"></span><span id="manifestSystemParams"></span><div id="manifestCapabilitiesList"></div><button id="closeModelManifestModalX"></button><button id="closeModelManifestBtn"></button></div>
 <button id="purgeModelModalBtn" style="display:none;"></button>
 <button id="purgeAllModelsModalBtn" style="display:none;"></button>
@@ -6832,29 +8734,26 @@ html, body {
   let activeModelManifest = null;
 
   function resolveEffectiveHost(customHost) {
-    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const isHttps = window.location.protocol === 'https:';
-    if (!isLocalhost || isHttps) {
-      if (!customHost || customHost.includes('127.0.0.1') || customHost.includes('localhost')) {
-        return ''; // Uses same-origin reverse proxy: /api/tags, /api/chat
-      }
-    }
-    return customHost || 'http://127.0.0.1:11434';
+    // Local Intelligence Workstation Gateway architecture:
+    // server.py handles multi-backend orchestration and reverse-proxies
+    // /api/* requests to the configured daemon URL in backends.json.
+    return '';
   }
 
   const savedSettings = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
   let config = {
-    host: resolveEffectiveHost(savedSettings.host || 'http://127.0.0.1:11434'),
+    host: '',
+    configuredOllamaUrl: savedSettings.configuredOllamaUrl || savedSettings.host || 'http://127.0.0.1:11434',
     num_ctx: 4096,
     temperature: 0.7,
     top_p: 0.9,
     systemPreset: 'academic',
-    operatingMode: 'reasoning',
+    operatingMode: 'thinking',
     systemPrompt: PERSONA_PRESETS.academic,
     expandThinking: false,
     ...savedSettings
   };
-  config.host = resolveEffectiveHost(config.host);
+  config.host = '';
   config.expandThinking = Boolean(config.expandThinking);
 
   let sessions = JSON.parse(localStorage.getItem(SESSIONS_KEY) || '{}');
@@ -7328,6 +9227,11 @@ html, body {
     await checkOllamaHealthAndModels();
     await checkVramStatus();
     startVramPolling();
+    setTimeout(() => {
+      if (typeof loadSdModels === 'function') loadSdModels();
+      if (typeof loadVideoModels === 'function') loadVideoModels();
+      if (typeof updateTopHeaderContext === 'function') updateTopHeaderContext(currentStudioView);
+    }, 300);
   });
 
   function setupModeAndTelemetryListeners() {
@@ -8264,7 +10168,13 @@ html, body {
       const data = await res.json();
       
       serverStatusDot.classList.add('online');
-      const hostDisplay = config.host ? (new URL(config.host).host || config.host) : 'Proxy (Tunnel)';
+      let hostDisplay = '127.0.0.1:11434';
+      try {
+        const u = new URL(config.configuredOllamaUrl || 'http://127.0.0.1:11434');
+        hostDisplay = u.host || u.hostname;
+      } catch (_) {
+        hostDisplay = config.configuredOllamaUrl || '127.0.0.1:11434';
+      }
       serverStatusText.innerText = `Connected (${hostDisplay})`;
       installedModels = data.models || [];
       window.installedModels = installedModels;
@@ -8283,15 +10193,28 @@ html, body {
         const disp = document.getElementById('statusModelDisplay');
         if (disp) disp.innerText = modelSelect.value || 'None';
         await inspectModelCapabilities(modelSelect.value);
+        if (typeof updateTopStudioModelSelector === 'function') {
+          updateTopStudioModelSelector();
+        }
       } else {
         modelSelect.innerHTML = '<option value="">No models found (Pull a model)</option>';
+        if (typeof updateTopStudioModelSelector === 'function') {
+          updateTopStudioModelSelector();
+        }
       }
       return true;
     } catch (err) {
       serverStatusDot.classList.remove('online');
+      let hostDisplay = '127.0.0.1:11434';
+      try {
+        const u = new URL(config.configuredOllamaUrl || 'http://127.0.0.1:11434');
+        hostDisplay = u.host || u.hostname;
+      } catch (_) {
+        hostDisplay = config.configuredOllamaUrl || '127.0.0.1:11434';
+      }
       const fallbackModel = localStorage.getItem(MODEL_KEY) || 'huihui_ai/qwen3.5-abliterated:latest';
       if (err.status === 403 || (err.message && err.message.includes('403')) || window.location.protocol === 'file:') {
-        serverStatusText.innerText = 'CORS Blocked (403)';
+        serverStatusText.innerText = `CORS Blocked (${hostDisplay})`;
         modelSelect.innerHTML = `
           <option value="${fallbackModel}" selected>${fallbackModel} (Local Model)</option>
           <option value="" disabled>Blocked by Ollama (HTTP 403 - CORS - See alert)</option>
@@ -8299,7 +10222,7 @@ html, body {
         showCorsBanner();
         await inspectModelCapabilities(fallbackModel);
       } else {
-        serverStatusText.innerText = 'Offline / Refused';
+        serverStatusText.innerText = `Offline (${hostDisplay})`;
         modelSelect.innerHTML = `
           <option value="${fallbackModel}" selected>${fallbackModel} (Cached Model)</option>
           <option value="" disabled>Ollama Server Not Responding</option>
@@ -9480,7 +11403,12 @@ html, body {
       });
 
       if (!response.ok) {
-        throw new Error(`Ollama API Error: ${response.status} (${response.statusText})`);
+        let errDetail = `HTTP ${response.status} (${response.statusText})`;
+        try {
+          const errData = await response.json();
+          if (errData.error) errDetail = errData.error;
+        } catch (_) {}
+        throw new Error(errDetail);
       }
 
       const reader = response.body.getReader();
@@ -10089,9 +12017,13 @@ html, body {
 
   
   const settingsModal = document.getElementById('settingsModal');
-  document.getElementById('settingsBtn').addEventListener('click', () => openSettings('serverTab'));
-  serverStatusPill.addEventListener('click', () => openSettings('serverTab'));
-  document.getElementById('systemPromptQuickBtn').addEventListener('click', () => openSettings('personaTab'));
+  document.getElementById('settingsBtn')?.addEventListener('click', () => openSettings('fleetTab'));
+  document.getElementById('topFleetPill')?.addEventListener('click', () => openSettings('fleetTab'));
+  document.getElementById('railSettingsBtn')?.addEventListener('click', () => openSettings('fleetTab'));
+  document.getElementById('railShortcutsBtn')?.addEventListener('click', () => document.getElementById('shortcutsModal')?.classList.add('open'));
+  document.querySelector('.backend-telemetry-cluster')?.addEventListener('click', () => openSettings('fleetTab'));
+  serverStatusPill?.addEventListener('click', () => openSettings('fleetTab'));
+  document.getElementById('systemPromptQuickBtn')?.addEventListener('click', () => openSettings('personaTab'));
 
   function switchSettingsTab(tabId) {
     const tabBtns = document.querySelectorAll('#settingsTabBar .modal-tab-btn');
@@ -10111,80 +12043,155 @@ html, body {
     btn.addEventListener('click', () => switchSettingsTab(btn.dataset.tab));
   });
 
-  function openSettings(defaultTab = 'personaTab') {
+  function openSettings(defaultTab = 'fleetTab') {
     switchSettingsTab(defaultTab);
-    document.getElementById('settingOllamaHost').value = config.host;
-    document.getElementById('settingNumCtx').value = config.num_ctx;
-    document.getElementById('settingTemperature').value = config.temperature;
-    updateCountDisplay(document.getElementById('tempValueLabel'), config.temperature);
-    document.getElementById('settingSystemPromptPreset').value = config.systemPreset || 'academic';
-    document.getElementById('settingOperatingMode').value = config.operatingMode || 'reasoning';
-    document.getElementById('settingSystemPrompt').value = config.systemPrompt || '';
-    document.getElementById('settingEcoMode').checked = Boolean(ecoModeActive);
-    document.getElementById('settingExpandThinking').checked = Boolean(config.expandThinking);
+
+    // 1. Populate Fleet & Backends
+    const beOllama = document.getElementById('settingBeOllamaUrl');
+    if (beOllama && !beOllama.dataset.dirty) {
+      beOllama.value = config.configuredOllamaUrl || config.host || 'http://127.0.0.1:11434';
+    }
+
+    // 2. Populate Inference & Context
+    const numCtxEl = document.getElementById('settingNumCtx');
+    if (numCtxEl) numCtxEl.value = config.num_ctx || 4096;
+
+    const tempEl = document.getElementById('settingTemperature');
+    if (tempEl) {
+      tempEl.value = config.temperature ?? 0.7;
+      updateCountDisplay(document.getElementById('tempValueLabel'), (config.temperature ?? 0.7).toFixed(2));
+    }
+
+    const topPEl = document.getElementById('settingTopP');
+    if (topPEl) {
+      topPEl.value = config.top_p ?? 0.9;
+      const topPLbl = document.getElementById('topPValueLabel');
+      if (topPLbl) topPLbl.textContent = (config.top_p ?? 0.9).toFixed(2);
+    }
+
+    const presetEl = document.getElementById('settingSystemPromptPreset');
+    if (presetEl) presetEl.value = config.systemPreset || 'academic';
+
+    const opModeEl = document.getElementById('settingOperatingMode');
+    if (opModeEl) opModeEl.value = config.operatingMode || 'thinking';
+
+    const sysPromptEl = document.getElementById('settingSystemPrompt');
+    if (sysPromptEl) sysPromptEl.value = config.systemPrompt || '';
+
+    const ecoEl = document.getElementById('settingEcoMode');
+    if (ecoEl) ecoEl.checked = Boolean(ecoModeActive);
+
+    const expandEl = document.getElementById('settingExpandThinking');
+    if (expandEl) expandEl.checked = Boolean(config.expandThinking);
+
+    // Audio & Voice Preferences
+    const autoSpeakEl = document.getElementById('settingAutoSpeak');
+    if (autoSpeakEl) autoSpeakEl.checked = Boolean(config.autoSpeak);
+
+    const ttsVoiceEl = document.getElementById('settingTtsVoiceSelect');
+    if (ttsVoiceEl && config.ttsVoice) ttsVoiceEl.value = config.ttsVoice;
+
+    const ttsSpeedEl = document.getElementById('settingTtsSpeed');
+    if (ttsSpeedEl) {
+      ttsSpeedEl.value = config.ttsSpeed || 1.0;
+      const ttsSpeedLabel = document.getElementById('ttsSpeedLabel');
+      if (ttsSpeedLabel) ttsSpeedLabel.textContent = (config.ttsSpeed || 1.0).toFixed(1) + 'x';
+    }
+
+    // If Model Hub overlay was open, close it cleanly
+    const hubOverlay = document.getElementById('modelHubOverlay');
+    if (hubOverlay?.classList.contains('open')) {
+      hubOverlay.classList.remove('open');
+    }
+
+    // Live probe all backends
+    if (typeof fetchBackendsStatus === 'function') {
+      fetchBackendsStatus();
+    }
+
     populateModelManifestData();
     settingsModal.classList.add('open');
   }
 
-  document.getElementById('closeSettingsBtn').addEventListener('click', () => settingsModal.classList.remove('open'));
-  document.getElementById('closeSettingsModalX').addEventListener('click', () => settingsModal.classList.remove('open'));
+  document.getElementById('closeSettingsBtn')?.addEventListener('click', () => settingsModal.classList.remove('open'));
+  document.getElementById('closeSettingsModalX')?.addEventListener('click', () => settingsModal.classList.remove('open'));
 
-  document.getElementById('settingTemperature').addEventListener('input', (e) => {
+  document.getElementById('settingTemperature')?.addEventListener('input', (e) => {
     const val = parseFloat(e.target.value).toFixed(2);
     updateCountDisplay(document.getElementById('tempValueLabel'), val);
     let label = 'Balanced';
     if (val < 0.3) label = 'Deterministic / Precise';
     else if (val < 0.6) label = 'Focused';
     else if (val > 1.0) label = 'Creative';
-    document.getElementById('tempPresetLabel').innerText = label;
+    const presetLabel = document.getElementById('tempPresetLabel');
+    if (presetLabel) presetLabel.innerText = label;
   });
 
-  document.getElementById('settingSystemPromptPreset').addEventListener('change', (e) => {
+  document.getElementById('settingTopP')?.addEventListener('input', (e) => {
+    const val = parseFloat(e.target.value).toFixed(2);
+    const topPLbl = document.getElementById('topPValueLabel');
+    if (topPLbl) topPLbl.textContent = val;
+  });
+
+  document.getElementById('settingTtsSpeed')?.addEventListener('input', (e) => {
+    const val = parseFloat(e.target.value).toFixed(1);
+    const lbl = document.getElementById('ttsSpeedLabel');
+    if (lbl) lbl.textContent = val + 'x';
+  });
+
+  document.getElementById('settingSystemPromptPreset')?.addEventListener('change', (e) => {
     const preset = e.target.value;
     if (PERSONA_PRESETS[preset] !== undefined) {
       document.getElementById('settingSystemPrompt').value = PERSONA_PRESETS[preset];
     }
   });
 
-  document.getElementById('testConnBtn').addEventListener('click', async () => {
-    const testHost = document.getElementById('settingOllamaHost').value.trim() || 'http://127.0.0.1:11434';
-    const resultBox = document.getElementById('hostTestResult');
-    resultBox.className = 'inline-status-badge checking';
-    resultBox.innerHTML = '<span class="badge-dot pulse"></span> Connecting...';
+  // Master Configuration Save (Unified Master Orchestrator)
+  document.getElementById('saveSettingsBtn')?.addEventListener('click', async () => {
+    const rawOllamaUrl = document.getElementById('settingBeOllamaUrl')?.value.trim() || 'http://127.0.0.1:11434';
+    const rawSdUrl = document.getElementById('settingBeSdUrl')?.value.trim() || 'http://127.0.0.1:7860';
+    const rawComfyUrl = document.getElementById('settingBeComfyUrl')?.value.trim() || 'http://127.0.0.1:8188';
+    const rawWhisperUrl = document.getElementById('settingBeWhisperUrl')?.value.trim() || 'http://127.0.0.1:8178';
+    const rawPiperUrl = document.getElementById('settingBePiperUrl')?.value.trim() || 'http://127.0.0.1:5000';
+
+    // 1. Synchronize all backends on server.py
+    const backendPayload = {
+      ollama: { url: rawOllamaUrl },
+      sd_webui: { url: rawSdUrl },
+      comfyui: { url: rawComfyUrl },
+      whisper: { url: rawWhisperUrl },
+      piper: { url: rawPiperUrl }
+    };
+
     try {
-      const start = performance.now();
-      const res = await fetch(`${testHost}/api/tags`);
-      const elapsed = Math.round(performance.now() - start);
-      if (res.ok) {
-        resultBox.className = 'inline-status-badge success';
-        resultBox.title = `Connected to Ollama server at ${testHost}`;
-        resultBox.innerHTML = `<span class="badge-dot"></span> ${elapsed} ms <span class="badge-tag">ONLINE</span>`;
-      } else if (res.status === 403) {
-        resultBox.className = 'inline-status-badge error';
-        resultBox.title = 'HTTP 403 Forbidden: CORS origin refused. Launch Ollama with: OLLAMA_ORIGINS="*" ollama serve';
-        resultBox.innerHTML = `✕ HTTP 403 <span class="badge-tag">CORS</span>`;
-      } else {
-        resultBox.className = 'inline-status-badge error';
-        resultBox.title = `Server responded with HTTP status ${res.status}`;
-        resultBox.innerHTML = `✕ HTTP ${res.status}`;
-      }
-    } catch(err) {
-      resultBox.className = 'inline-status-badge error';
-      resultBox.title = `Cannot reach Ollama server at ${testHost}. Verify Ollama is running and CORS is enabled.`;
-      resultBox.innerHTML = `✕ Offline`;
+      const res = await fetch('/api/backends/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(backendPayload)
+      });
+      const data = await res.json();
+      backendsRegistry = data.backends || {};
+      updateBackendsTelemetryUI();
+    } catch (e) {
+      console.warn('Backend config push warning:', e);
     }
-  });
 
-  document.getElementById('saveSettingsBtn').addEventListener('click', async () => {
-    config.host = document.getElementById('settingOllamaHost').value.trim() || 'http://127.0.0.1:11434';
-    config.num_ctx = parseInt(document.getElementById('settingNumCtx').value) || 4096;
-    config.temperature = parseFloat(document.getElementById('settingTemperature').value) || 0.7;
-    config.systemPreset = document.getElementById('settingSystemPromptPreset').value;
-    config.operatingMode = document.getElementById('settingOperatingMode').value || 'reasoning';
-    config.systemPrompt = document.getElementById('settingSystemPrompt').value;
-    config.expandThinking = Boolean(document.getElementById('settingExpandThinking').checked);
+    // 2. Synchronize client configuration state
+    config.configuredOllamaUrl = rawOllamaUrl;
+    config.host = resolveEffectiveHost(rawOllamaUrl);
+    config.num_ctx = parseInt(document.getElementById('settingNumCtx')?.value) || 4096;
+    config.temperature = parseFloat(document.getElementById('settingTemperature')?.value) || 0.7;
+    const topPInp = document.getElementById('settingTopP');
+    if (topPInp) config.top_p = parseFloat(topPInp.value) || 0.9;
+    config.systemPreset = document.getElementById('settingSystemPromptPreset')?.value || 'academic';
+    config.operatingMode = document.getElementById('settingOperatingMode')?.value || 'thinking';
+    config.systemPrompt = document.getElementById('settingSystemPrompt')?.value || '';
+    config.expandThinking = Boolean(document.getElementById('settingExpandThinking')?.checked);
+    config.autoSpeak = Boolean(document.getElementById('settingAutoSpeak')?.checked);
+    config.ttsVoice = document.getElementById('settingTtsVoiceSelect')?.value || 'browser-default';
+    config.ttsSpeed = parseFloat(document.getElementById('settingTtsSpeed')?.value) || 1.0;
 
-    const newEco = document.getElementById('settingEcoMode').checked;
+    const newEco = Boolean(document.getElementById('settingEcoMode')?.checked);
     applyEcoMode(newEco);
 
     if (modelModeSelect) {
@@ -10192,10 +12199,36 @@ html, body {
     }
 
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(config));
+
+    // 3. Immediately update UI telemetry strip
     updatePersonaLabel();
     resetTelemetry();
+
+    const ctxLabel = document.getElementById('metricCtxLabel');
+    if (ctxLabel) {
+      ctxLabel.innerText = `0 / ${config.num_ctx.toLocaleString()}`;
+    }
+
+    const hostEl = document.getElementById('serverStatusText');
+    if (hostEl) {
+      try {
+        const u = new URL(rawOllamaUrl);
+        hostEl.innerText = u.host || rawOllamaUrl;
+      } catch (_) {
+        hostEl.innerText = rawOllamaUrl;
+      }
+    }
+
+    // Clear dirty flags
+    ['settingBeOllamaUrl', 'settingBeSdUrl', 'settingBeComfyUrl', 'settingBeWhisperUrl', 'settingBePiperUrl'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) delete el.dataset.dirty;
+    });
+
     settingsModal.classList.remove('open');
-    showToast('Settings saved successfully', 'success');
+    showToast('Master configuration saved & synchronized across all engines', 'success');
+
+    // 4. Probe and refresh models with updated Ollama host
     await checkOllamaHealthAndModels();
   });
 
@@ -10209,9 +12242,24 @@ html, body {
 
   
   const exportModal = document.getElementById('exportModal');
-  document.getElementById('exportSessionBtn').addEventListener('click', () => exportModal.classList.add('open'));
-  document.getElementById('closeExportBtn').addEventListener('click', () => exportModal.classList.remove('open'));
-  document.getElementById('closeExportModalX').addEventListener('click', () => exportModal.classList.remove('open'));
+  document.getElementById('exportSessionBtn')?.addEventListener('click', () => exportModal?.classList.add('open'));
+  document.getElementById('ledgerExportBtn')?.addEventListener('click', () => exportModal?.classList.add('open'));
+  document.getElementById('ctxMenuExport')?.addEventListener('click', () => exportModal?.classList.add('open'));
+  document.getElementById('closeExportBtn')?.addEventListener('click', () => exportModal?.classList.remove('open'));
+  document.getElementById('closeExportModalX')?.addEventListener('click', () => exportModal?.classList.remove('open'));
+
+  // Shortcuts Modal listeners
+  const shortcutsModal = document.getElementById('shortcutsModal');
+  document.getElementById('closeShortcutsModalX')?.addEventListener('click', () => shortcutsModal?.classList.remove('open'));
+  document.getElementById('closeShortcutsBtn')?.addEventListener('click', () => shortcutsModal?.classList.remove('open'));
+
+  // Global '?' key to open keyboard shortcuts
+  window.addEventListener('keydown', (e) => {
+    if (e.key === '?' && !['INPUT', 'TEXTAREA'].includes(e.target?.tagName) && !e.metaKey && !e.ctrlKey) {
+      e.preventDefault();
+      shortcutsModal?.classList.toggle('open');
+    }
+  });
 
   document.getElementById('exportMarkdownBtn').addEventListener('click', () => {
     const session = getActiveSession();
@@ -11115,6 +13163,9 @@ html, body {
     function close() {
       overlay?.classList.remove('open');
       hfConfigPanel?.classList.remove('open');
+      if (typeof currentStudioView !== 'undefined' && currentStudioView === 'hub') {
+        if (typeof switchStudioView === 'function') switchStudioView('chat');
+      }
     }
 
     function updateInstalledSet() {
@@ -12162,43 +14213,484 @@ html, body {
   let activeAudioPlayer = null;
   let activeSpeechBtn = null;
 
-  // ─── 1. Studio View Navigation ──────────────────────────────────────────
+  // ─── 1. Studio View Navigation & Context-Aware Workstation Controls ──────
+
+  currentStudioView = 'chat';
+  window.currentStudioView = 'chat';
+  window.currentVideoFrames = [];
+  let videoPlayInterval = null;
+  let videoHistory = JSON.parse(localStorage.getItem('liw_video_history') || '[]');
+
+  function updateTopHeaderContext(view) {
+    const actionText = document.getElementById('topPrimaryActionText');
+    const modeSelect = document.getElementById('modelModeSelect');
+    const imgPill = document.getElementById('imageTopSpecPill');
+    const vidPill = document.getElementById('videoTopSpecPill');
+    const audPill = document.getElementById('audioTopSpecPill');
+    const bcIcon = document.getElementById('studioBreadcrumbIcon');
+    const bcName = document.getElementById('studioBreadcrumbName');
+    const bcTag = document.getElementById('studioBreadcrumbTag');
+    const sideText = document.getElementById('sidebarToggleText');
+
+    // Contextual Studio Breadcrumb & Sidebar Toggle Label
+    if (view === 'image') {
+      if (bcIcon) bcIcon.textContent = '🎨';
+      if (bcName) bcName.textContent = 'IMAGE STUDIO';
+      if (bcTag) bcTag.textContent = 'DIFFUSION SYNTHESIS';
+      if (sideText) sideText.textContent = 'Controls';
+    } else if (view === 'video') {
+      if (bcIcon) bcIcon.textContent = '🎬';
+      if (bcName) bcName.textContent = 'VIDEO STUDIO';
+      if (bcTag) bcTag.textContent = 'MOTION DIFFUSION';
+      if (sideText) sideText.textContent = 'Controls';
+    } else if (view === 'audio') {
+      if (bcIcon) bcIcon.textContent = '🎙️';
+      if (bcName) bcName.textContent = 'AUDIO LAB';
+      if (bcTag) bcTag.textContent = 'SPEECH & VOICE';
+      if (sideText) sideText.textContent = 'Source';
+    } else if (view === 'hub') {
+      if (bcIcon) bcIcon.textContent = '📦';
+      if (bcName) bcName.textContent = 'MODEL HUB';
+      if (bcTag) bcTag.textContent = 'REGISTRY & CACHE';
+      if (sideText) sideText.textContent = 'Filter';
+    } else {
+      if (bcIcon) bcIcon.textContent = '💬';
+      if (bcName) bcName.textContent = 'CHAT STUDIO';
+      if (bcTag) bcTag.textContent = 'AUTOREGRESSIVE LLMs';
+      if (sideText) sideText.textContent = 'Ledger';
+    }
+
+    // Contextual Action Button
+    if (actionText) {
+      const isMobile = window.innerWidth <= 768;
+      if (view === 'chat') actionText.textContent = isMobile ? '+ New' : '+ New Session';
+      else if (view === 'image') actionText.textContent = isMobile ? '+ New' : '+ New Canvas';
+      else if (view === 'video') actionText.textContent = isMobile ? '+ New' : '+ New Video';
+      else if (view === 'audio') actionText.textContent = isMobile ? '+ New' : '+ New Record';
+      else if (view === 'hub') actionText.textContent = isMobile ? '↻ Hub' : '↻ Search Hub';
+    }
+
+    // Contextual Top Parameter Pill
+    if (modeSelect) modeSelect.style.display = (view === 'chat') ? 'inline-flex' : 'none';
+    if (imgPill) imgPill.style.display = (view === 'image') ? 'inline-flex' : 'none';
+    if (vidPill) vidPill.style.display = (view === 'video') ? 'inline-flex' : 'none';
+    if (audPill) audPill.style.display = (view === 'audio') ? 'inline-flex' : 'none';
+
+    // Update spec text
+    if (view === 'image') {
+      const w = document.getElementById('imgWidthInput')?.value || 512;
+      const h = document.getElementById('imgHeightInput')?.value || 512;
+      const s = document.getElementById('imgSamplerSelect')?.value || 'Euler a';
+      const specEl = document.getElementById('imageTopSpecText');
+      if (specEl) specEl.textContent = `${w}×${h} · ${s}`;
+    } else if (view === 'video') {
+      const specEl = document.getElementById('videoTopSpecText');
+      if (specEl) specEl.textContent = '16 frames · 12 fps · SVD';
+    } else if (view === 'audio') {
+      const specEl = document.getElementById('audioTopSpecText');
+      if (specEl) specEl.textContent = 'Whisper ASR + Piper';
+    }
+
+    updateTopStudioModelSelector();
+    updateContextualTelemetry(view);
+  }
+  window.updateTopHeaderContext = updateTopHeaderContext;
+
+  function updateTopStudioModelSelector() {
+    const sel = document.getElementById('topStudioModelSelector');
+    const labelPill = document.getElementById('topModelLabelPill');
+    if (!sel) return;
+
+    const ollamaModels = window.installedModels || [];
+    const sdModels = window.sdModels || [];
+    const videoModels = window.videoModels || [
+      { id: 'svd-xt', name: 'Stable Video Diffusion XT [25f]' },
+      { id: 'svd', name: 'Stable Video Diffusion [14f]' },
+      { id: 'animatediff-v3', name: 'AnimateDiff v3 [Motion LoRA]' },
+      { id: 'wan2.1-t2v', name: 'Wan2.1 Text-to-Video' },
+      { id: 'cogvideox-5b', name: 'CogVideoX 5B' }
+    ];
+
+    let html = '';
+
+    if (currentStudioView === 'image') {
+      if (labelPill) labelPill.textContent = 'CHECKPOINT:';
+      html += '<optgroup label="── 🎨 DIFFUSION CHECKPOINTS (SD / COMFY) ──">';
+      if (sdModels.length > 0) {
+        sdModels.forEach(m => {
+          const title = m.title || m.model_name;
+          const name = m.model_name || title;
+          html += `<option value="image:${title}">🎨 ${name}</option>`;
+        });
+      } else {
+        html += '<option value="image:v1-5-pruned-emaonly.safetensors [6ce0161689]">🎨 v1-5-pruned-emaonly [SD 1.5]</option>';
+      }
+      html += '</optgroup>';
+      html += '<optgroup label="── 📦 MODEL REGISTRY ──">';
+      html += '<option value="action:open_hub">◈ Discover & Download Diffusion Models in Hub...</option>';
+      html += '</optgroup>';
+      html += '<optgroup label="── ↗ SWITCH STUDIO ──">';
+      html += '<option value="switch:chat">💬 Switch to Chat Studio</option>';
+      html += '<option value="switch:video">🎬 Switch to Video Studio</option>';
+      html += '<option value="switch:audio">🎙️ Switch to Audio Lab</option>';
+      html += '</optgroup>';
+
+      sel.innerHTML = html;
+      const activeSd = document.getElementById('imgModelSelect')?.value || (sdModels[0]?.title) || 'v1-5-pruned-emaonly.safetensors [6ce0161689]';
+      sel.value = `image:${activeSd}`;
+
+    } else if (currentStudioView === 'video') {
+      if (labelPill) labelPill.textContent = 'MOTION MODEL:';
+      html += '<optgroup label="── 🎬 VIDEO & MOTION DIFFUSION ──">';
+      videoModels.forEach(v => {
+        html += `<option value="video:${v.id}">🎬 ${v.name}</option>`;
+      });
+      html += '</optgroup>';
+      html += '<optgroup label="── 📦 MODEL REGISTRY ──">';
+      html += '<option value="action:open_hub">◈ Discover & Download Motion Models in Hub...</option>';
+      html += '</optgroup>';
+      html += '<optgroup label="── ↗ SWITCH STUDIO ──">';
+      html += '<option value="switch:chat">💬 Switch to Chat Studio</option>';
+      html += '<option value="switch:image">🎨 Switch to Image Studio</option>';
+      html += '<option value="switch:audio">🎙️ Switch to Audio Lab</option>';
+      html += '</optgroup>';
+
+      sel.innerHTML = html;
+      const activeVid = document.getElementById('videoModelSelect')?.value || 'svd-xt';
+      sel.value = `video:${activeVid}`;
+
+    } else if (currentStudioView === 'audio') {
+      if (labelPill) labelPill.textContent = 'SPEECH/VOICE:';
+      html += '<optgroup label="── 🎙️ AUDIO & VOICE ENGINES ──">';
+      html += '<option value="audio:whisper_piper">🎙️ Whisper ASR + Piper Neural Voice</option>';
+      html += '<option value="audio:whisper_only">🎙️ Whisper ASR (Transcription Engine)</option>';
+      html += '<option value="audio:piper_only">🔊 Piper Neural Voice (TTS Synthesis)</option>';
+      html += '</optgroup>';
+      html += '<optgroup label="── 📦 MODEL REGISTRY ──">';
+      html += '<option value="action:open_hub">◈ Discover & Download Audio Models in Hub...</option>';
+      html += '</optgroup>';
+      html += '<optgroup label="── ↗ SWITCH STUDIO ──">';
+      html += '<option value="switch:chat">💬 Switch to Chat Studio</option>';
+      html += '<option value="switch:image">🎨 Switch to Image Studio</option>';
+      html += '<option value="switch:video">🎬 Switch to Video Studio</option>';
+      html += '</optgroup>';
+
+      sel.innerHTML = html;
+      sel.value = 'audio:whisper_piper';
+
+    } else if (currentStudioView === 'hub') {
+      if (labelPill) labelPill.textContent = 'SCOPE:';
+      html += '<optgroup label="── 📦 UNIVERSAL MODEL REGISTRY ──">';
+      html += '<option value="hub:all">📦 All Registries (Ollama + HF + Civitai)</option>';
+      html += '<option value="hub:ollama">💬 Ollama Library</option>';
+      html += '<option value="hub:hf">🤗 Hugging Face Models</option>';
+      html += '<option value="hub:civitai">🎨 Civitai Diffusion</option>';
+      html += '</optgroup>';
+      html += '<optgroup label="── ↗ RETURN TO STUDIO ──">';
+      html += '<option value="switch:chat">💬 Return to Chat Studio</option>';
+      html += '<option value="switch:image">🎨 Return to Image Studio</option>';
+      html += '<option value="switch:video">🎬 Return to Video Studio</option>';
+      html += '</optgroup>';
+
+      sel.innerHTML = html;
+      sel.value = 'hub:all';
+
+    } else {
+      // Chat Studio (Default)
+      if (labelPill) labelPill.textContent = 'MODEL:';
+      html += '<optgroup label="── 💬 LOCAL LANGUAGE & VISION (OLLAMA) ──">';
+      if (ollamaModels.length > 0) {
+        ollamaModels.forEach(m => {
+          html += `<option value="ollama:${m.name}">💬 ${m.name}</option>`;
+        });
+      } else {
+        const cur = document.getElementById('modelSelect')?.value || 'Detecting Ollama...';
+        html += `<option value="ollama:${cur}">💬 ${cur}</option>`;
+      }
+      html += '</optgroup>';
+      html += '<optgroup label="── 📦 MODEL REGISTRY ──">';
+      html += '<option value="action:open_hub">◈ Discover & Pull Models in Model Hub...</option>';
+      html += '</optgroup>';
+      html += '<optgroup label="── ↗ SWITCH STUDIO ──">';
+      html += '<option value="switch:image">🎨 Switch to Image Studio</option>';
+      html += '<option value="switch:video">🎬 Switch to Video Studio</option>';
+      html += '<option value="switch:audio">🎙️ Switch to Audio Lab</option>';
+      html += '</optgroup>';
+
+      sel.innerHTML = html;
+      const activeOllama = document.getElementById('modelSelect')?.value || (ollamaModels[0]?.name) || '';
+      if (activeOllama) {
+        sel.value = `ollama:${activeOllama}`;
+      }
+    }
+  }
+  window.updateTopStudioModelSelector = updateTopStudioModelSelector;
+
+  function updateContextualTelemetry(view) {
+    const hostBlock = document.getElementById('telemetryHostBlock');
+    const modelBlock = document.getElementById('telemetryModelBlock');
+    const extraGroup = document.getElementById('telemetryExtraGroup');
+    if (!hostBlock || !modelBlock || !extraGroup) return;
+
+    if (view === 'image') {
+      const activeSd = document.getElementById('imgModelSelect')?.value || 'v1-5-pruned-emaonly';
+      const cleanName = activeSd.split('[')[0].replace('.safetensors', '').trim();
+      const w = document.getElementById('imgWidthInput')?.value || 512;
+      const h = document.getElementById('imgHeightInput')?.value || 512;
+      const s = document.getElementById('imgSamplerSelect')?.value || 'Euler a';
+      const steps = document.getElementById('imgStepsInput')?.value || 25;
+      hostBlock.innerHTML = 'ENGINE: <span>SD WebUI (:7860)</span>';
+      modelBlock.innerHTML = `CHECKPOINT: <b>${cleanName}</b>`;
+      extraGroup.innerHTML = `<span>|</span><span>RES: ${w}×${h}</span><span>|</span><span>SAMPLER: ${s}</span><span>|</span><span>STEPS: ${steps}</span><span>|</span><span>ACCEL: MPS</span>`;
+    } else if (view === 'video') {
+      const vid = document.getElementById('videoModelSelect')?.value || 'svd-xt';
+      hostBlock.innerHTML = 'ENGINE: <span>Motion Diffusion</span>';
+      modelBlock.innerHTML = `MODEL: <b>${vid.toUpperCase()}</b>`;
+      extraGroup.innerHTML = '<span>|</span><span>FRAMES: 16</span><span>|</span><span>FPS: 12</span><span>|</span><span>MOTION BUCKET: 127</span><span>|</span><span>FORMAT: MP4/WEBP</span>';
+    } else if (view === 'audio') {
+      hostBlock.innerHTML = 'ASR: <span>Whisper (:8178)</span>';
+      modelBlock.innerHTML = 'VOICE: <b>Piper Neural TTS</b>';
+      extraGroup.innerHTML = '<span>|</span><span>AUDIO: 16kHz WAV</span><span>|</span><span>FALLBACK: Web Speech API</span>';
+    } else if (view === 'hub') {
+      hostBlock.innerHTML = 'HUB: <span>Universal Discovery</span>';
+      modelBlock.innerHTML = 'SOURCES: <b>Ollama · HuggingFace · CivitAI</b>';
+      extraGroup.innerHTML = '<span>|</span><span>GGUF QUANTIZATIONS</span><span>|</span><span>DIFFUSION CHECKPOINTS</span>';
+    } else {
+      const hostText = document.getElementById('serverStatusText')?.innerText || '127.0.0.1:11434';
+      const modelVal = document.getElementById('modelSelect')?.value || '—';
+      const ctxVal = document.getElementById('metricCtxLabel')?.innerText || '0 / 32,768';
+      const tpsVal = document.getElementById('metricTps')?.innerText || '0.0 t/s';
+      const ttftVal = document.getElementById('metricTtft')?.innerText || '— ms';
+      const vramVal = document.getElementById('metricVram')?.innerText || 'Idle';
+      hostBlock.innerHTML = `HOST: <span id="serverStatusText">${hostText}</span>`;
+      modelBlock.innerHTML = `MODEL: <b id="statusModelDisplay">${modelVal}</b>`;
+      extraGroup.innerHTML = `<span>|</span><span>CTX: <span id="metricCtxLabel">${ctxVal}</span></span><span>|</span><span>SPEED: <span id="metricTps">${tpsVal}</span></span><span>|</span><span>TTFT: <span id="metricTtft">${ttftVal}</span></span><span>|</span><span>VRAM: <span id="metricVram">${vramVal}</span></span>`;
+    }
+  }
 
   function switchStudioView(view) {
     currentStudioView = view;
+    window.currentStudioView = view;
     document.body.setAttribute('data-studio-view', view);
 
     const chatWs = document.getElementById('chatWorkspace');
     const imgWs = document.getElementById('imageStudioWorkspace');
+    const videoWs = document.getElementById('videoStudioWorkspace');
     const audioWs = document.getElementById('audioLabWorkspace');
     const sidebar = document.getElementById('sidebar');
+    const hubOverlay = document.getElementById('modelHubOverlay');
 
-    const btnChat = document.getElementById('viewBtnChat');
-    const btnImg = document.getElementById('viewBtnImage');
-    const btnAudio = document.getElementById('viewBtnAudio');
+    // Close hub overlay if navigating to another studio view
+    if (view !== 'hub' && hubOverlay?.classList.contains('open')) {
+      hubOverlay.classList.remove('open');
+      const hfConfigPanel = document.getElementById('hubHfConfigPanel');
+      if (hfConfigPanel) hfConfigPanel.classList.remove('open');
+    }
 
-    if (btnChat) btnChat.classList.toggle('active', view === 'chat');
-    if (btnImg) btnImg.classList.toggle('active', view === 'image');
-    if (btnAudio) btnAudio.classList.toggle('active', view === 'audio');
+    // Update active states on Left Workstation Rail
+    document.querySelectorAll('.rail-nav-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-view') === view);
+    });
 
     if (chatWs) chatWs.style.setProperty('display', view === 'chat' ? 'flex' : 'none', 'important');
     if (sidebar) sidebar.style.setProperty('display', view === 'chat' ? 'flex' : 'none');
     if (imgWs) imgWs.style.setProperty('display', view === 'image' ? (window.innerWidth <= 768 ? 'flex' : 'grid') : 'none', 'important');
+    if (videoWs) videoWs.style.setProperty('display', view === 'video' ? (window.innerWidth <= 768 ? 'flex' : 'grid') : 'none', 'important');
     if (audioWs) audioWs.style.setProperty('display', view === 'audio' ? (window.innerWidth <= 768 ? 'flex' : 'grid') : 'none', 'important');
 
-    if (view === 'image') {
+    if (view === 'hub') {
+      const hubBtn = document.getElementById('modelHubBtn');
+      if (hubBtn) hubBtn.click();
+    } else if (view === 'image') {
       loadSdModels();
       loadSdSamplers();
       renderImageFilmstrip();
+    } else if (view === 'video') {
+      loadVideoModels();
+      renderVideoFilmstrip();
     } else if (view === 'audio') {
       populateTtsVoiceDropdowns();
     }
+
+    updateTopHeaderContext(view);
   }
   window.switchStudioView = switchStudioView;
 
   document.getElementById('viewBtnChat')?.addEventListener('click', () => switchStudioView('chat'));
   document.getElementById('viewBtnImage')?.addEventListener('click', () => switchStudioView('image'));
+  document.getElementById('viewBtnVideo')?.addEventListener('click', () => switchStudioView('video'));
   document.getElementById('viewBtnAudio')?.addEventListener('click', () => switchStudioView('audio'));
+  document.getElementById('viewBtnHub')?.addEventListener('click', () => switchStudioView('hub'));
+
+  // Studio Model Selector Change Handler (Instant Modality Switch)
+  document.getElementById('topStudioModelSelector')?.addEventListener('change', (e) => {
+    const val = e.target.value;
+    if (!val) return;
+
+    if (val.startsWith('switch:')) {
+      const targetView = val.replace('switch:', '');
+      switchStudioView(targetView);
+      return;
+    }
+
+    if (val === 'action:open_hub') {
+      switchStudioView('hub');
+      return;
+    }
+
+    if (val.startsWith('image:')) {
+      const m = val.replace('image:', '');
+      const imgSelect = document.getElementById('imgModelSelect');
+      if (imgSelect) {
+        imgSelect.value = m;
+        imgSelect.dispatchEvent(new Event('change'));
+      }
+    } else if (val.startsWith('video:')) {
+      const v = val.replace('video:', '');
+      const vidSelect = document.getElementById('videoModelSelect');
+      if (vidSelect) {
+        vidSelect.value = v;
+        vidSelect.dispatchEvent(new Event('change'));
+      }
+    } else if (val.startsWith('ollama:')) {
+      const o = val.replace('ollama:', '');
+      const modelSel = document.getElementById('modelSelect');
+      if (modelSel) {
+        modelSel.value = o;
+        modelSel.dispatchEvent(new Event('change'));
+      }
+    }
+  });
+
+  // Secondary Panel Toggle (Desktop Collapsible / Mobile Offcanvas)
+  document.getElementById('sidebarToggleBtn')?.addEventListener('click', () => {
+    if (window.innerWidth <= 768) {
+      if (currentStudioView === 'chat') {
+        const sb = document.getElementById('sidebar');
+        const sbb = document.getElementById('sidebarBackdrop');
+        sb?.classList.toggle('mobile-open');
+        sbb?.classList.toggle('active');
+      } else if (currentStudioView === 'image') {
+        const cur = document.getElementById('imageStudioWorkspace')?.getAttribute('data-active-subtab');
+        setStudioSubTab('image', cur === 'inspector' ? 'stage' : 'inspector');
+      } else if (currentStudioView === 'video') {
+        const cur = document.getElementById('videoStudioWorkspace')?.getAttribute('data-active-subtab');
+        setStudioSubTab('video', cur === 'inspector' ? 'stage' : 'inspector');
+      } else if (currentStudioView === 'audio') {
+        const cur = document.getElementById('audioLabWorkspace')?.getAttribute('data-active-subtab');
+        setStudioSubTab('audio', cur === 'asr' ? 'stage' : 'asr');
+      }
+    } else {
+      if (currentStudioView === 'chat') {
+        document.getElementById('sidebar')?.classList.toggle('collapsed');
+      } else if (currentStudioView === 'image') {
+        document.querySelector('.image-studio-inspector')?.classList.toggle('collapsed');
+      } else if (currentStudioView === 'video') {
+        document.querySelector('.video-studio-inspector')?.classList.toggle('collapsed');
+      } else if (currentStudioView === 'audio') {
+        document.querySelector('.audio-lab-inspector')?.classList.toggle('collapsed');
+      }
+    }
+  });
+
+  // Rail bottom buttons actions
+  document.getElementById('railShortcutsBtn')?.addEventListener('click', () => {
+    document.getElementById('shortcutsModal')?.classList.add('open');
+  });
+  document.getElementById('railSettingsBtn')?.addEventListener('click', () => {
+    openSettings('fleetTab');
+  });
+
+  // Top Primary Action Button
+  document.getElementById('topPrimaryActionBtn')?.addEventListener('click', () => {
+    if (currentStudioView === 'chat') {
+      document.getElementById('newChatBtn')?.click();
+    } else if (currentStudioView === 'image') {
+      const promptInp = document.getElementById('imgPromptInput');
+      const negInp = document.getElementById('imgNegPromptInput');
+      if (promptInp) promptInp.value = '';
+      if (negInp) negInp.value = '';
+      const placeholder = document.getElementById('stagePlaceholder');
+      const stageImg = document.getElementById('stageImage');
+      if (placeholder) placeholder.style.display = 'flex';
+      if (stageImg) stageImg.style.display = 'none';
+      showToast('New canvas ready for synthesis.');
+    } else if (currentStudioView === 'video') {
+      const pInp = document.getElementById('videoPromptInput');
+      const nInp = document.getElementById('videoNegPromptInput');
+      if (pInp) pInp.value = '';
+      if (nInp) nInp.value = '';
+      const placeholder = document.getElementById('videoStagePlaceholder');
+      const player = document.getElementById('videoPlayerContainer');
+      if (placeholder) placeholder.style.display = 'flex';
+      if (player) player.style.display = 'none';
+      showToast('New video timeline ready.');
+    } else if (currentStudioView === 'audio') {
+      document.getElementById('audioRecordToggleBtn')?.click();
+    } else if (currentStudioView === 'hub') {
+      document.getElementById('hubSearchBtn')?.click();
+    }
+  });
+
+  // VRAM Flush Across Backends
+  document.getElementById('vramPurgeQuickBtn')?.addEventListener('click', async () => {
+    const btn = document.getElementById('vramPurgeQuickBtn');
+    if (btn) btn.disabled = true;
+    try {
+      const res = await fetch('/api/system/evict-all', { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        showToast('✓ VRAM evicted across all active backends (Ollama & SD WebUI)');
+        const vramLabel = document.getElementById('metricVram');
+        if (vramLabel) vramLabel.textContent = 'Evicted (0 MB)';
+      }
+    } catch (e) {
+      showToast('VRAM purge signal sent.');
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  });
+
+  // Keyboard Shortcuts (⌘1 through ⌘5)
+  window.addEventListener('keydown', (e) => {
+    const isCmdOrCtrl = e.metaKey || e.ctrlKey;
+    if (isCmdOrCtrl && !e.shiftKey && !e.altKey) {
+      if (e.key === '1') {
+        e.preventDefault();
+        switchStudioView('chat');
+      } else if (e.key === '2') {
+        e.preventDefault();
+        switchStudioView('image');
+      } else if (e.key === '3') {
+        e.preventDefault();
+        switchStudioView('video');
+      } else if (e.key === '4') {
+        e.preventDefault();
+        switchStudioView('audio');
+      } else if (e.key === '5') {
+        e.preventDefault();
+        switchStudioView('hub');
+      } else if (e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        const cp = document.getElementById('commandPaletteModal');
+        if (cp?.classList.contains('open')) {
+          cp.classList.remove('open');
+        } else {
+          if (typeof openCommandPalette === 'function') openCommandPalette();
+          else cp?.classList.add('open');
+        }
+      } else if (e.key.toLowerCase() === 'm') {
+        e.preventDefault();
+        document.getElementById('topStudioModelSelector')?.focus();
+      } else if (e.key.toLowerCase() === 'b') {
+        e.preventDefault();
+        document.getElementById('sidebarToggleBtn')?.click();
+      } else if (e.key.toLowerCase() === 'n') {
+        e.preventDefault();
+        document.getElementById('topPrimaryActionBtn')?.click();
+      }
+    }
+  });
 
   // ─── Studio Sub-Tabs Navigation (Mobile Workstation) ───────────────────
   function setStudioSubTab(studio, subtab) {
@@ -12206,6 +14698,12 @@ html, body {
       const imgWs = document.getElementById('imageStudioWorkspace');
       if (imgWs) imgWs.setAttribute('data-active-subtab', subtab);
       document.querySelectorAll('.image-studio-sub-tabs .studio-sub-tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-subtab') === subtab);
+      });
+    } else if (studio === 'video') {
+      const vidWs = document.getElementById('videoStudioWorkspace');
+      if (vidWs) vidWs.setAttribute('data-active-subtab', subtab);
+      document.querySelectorAll('.video-studio-sub-tabs .studio-sub-tab-btn').forEach(btn => {
         btn.classList.toggle('active', btn.getAttribute('data-subtab') === subtab);
       });
     } else if (studio === 'audio') {
@@ -12223,6 +14721,13 @@ html, body {
       btn.addEventListener('click', () => {
         const subtab = btn.getAttribute('data-subtab');
         setStudioSubTab('image', subtab);
+      });
+    });
+
+    document.querySelectorAll('.video-studio-sub-tabs .studio-sub-tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const subtab = btn.getAttribute('data-subtab');
+        setStudioSubTab('video', subtab);
       });
     });
 
@@ -12246,6 +14751,387 @@ html, body {
     });
   }
   initStudioSubTabs();
+
+  // ─── Video Studio Controller ──────────────────────────────────────────
+
+  async function loadVideoModels() {
+    try {
+      const res = await fetch('/api/video/models');
+      if (res.ok) {
+        const data = await res.json();
+        window.videoModels = data.models || [];
+        const sel = document.getElementById('videoModelSelect');
+        if (sel && window.videoModels.length > 0) {
+          sel.innerHTML = window.videoModels.map(v => `<option value="${v.id}">${v.name}</option>`).join('');
+        }
+        updateTopStudioModelSelector();
+      }
+    } catch (e) {}
+  }
+
+  function renderVideoFilmstrip() {
+    const scroll = document.getElementById('videoFilmstripScroll');
+    const countEl = document.getElementById('videoFilmstripCount');
+    if (!scroll) return;
+    if (countEl) countEl.textContent = videoHistory.length;
+
+    if (videoHistory.length === 0) {
+      scroll.innerHTML = '<span class="filmstrip-empty-text">No video clips generated in this session yet.</span>';
+      return;
+    }
+
+    scroll.innerHTML = '';
+    videoHistory.forEach((item) => {
+      const card = document.createElement('div');
+      card.className = 'filmstrip-thumb-card';
+      card.title = item.prompt || 'Generated video clip';
+      card.innerHTML = `
+        <img src="${item.thumb || item.video_url}" class="filmstrip-thumb-img" alt="Video Thumb">
+        <span class="filmstrip-time-badge">${item.duration || 1.3}s</span>
+      `;
+      card.addEventListener('click', () => {
+        loadVideoIntoPlayer(item);
+      });
+      scroll.appendChild(card);
+    });
+  }
+
+  function loadVideoIntoPlayer(item) {
+    const placeholder = document.getElementById('videoStagePlaceholder');
+    const container = document.getElementById('videoPlayerContainer');
+    const webpImg = document.getElementById('videoStageWebp');
+    const dlBtn = document.getElementById('downloadVideoBtn');
+    const copyBtn = document.getElementById('copyVideoBtn');
+    const sendChatBtn = document.getElementById('sendVideoToChatBtn');
+
+    if (placeholder) placeholder.style.display = 'none';
+    if (container) container.style.display = 'flex';
+    if (webpImg) webpImg.src = item.video_url;
+
+    window.currentVideoItem = item;
+    window.currentVideoFrames = item.frames_data || [];
+
+    const scrubber = document.getElementById('videoFrameScrubber');
+    if (scrubber) {
+      scrubber.min = 0;
+      scrubber.max = (item.frames_data && item.frames_data.length > 0) ? item.frames_data.length - 1 : 15;
+      scrubber.value = 0;
+    }
+    const counter = document.getElementById('videoFrameCounter');
+    if (counter) counter.textContent = `Frame 1/${item.frames || 16}`;
+
+    if (dlBtn) dlBtn.disabled = false;
+    if (copyBtn) copyBtn.disabled = false;
+    if (sendChatBtn) sendChatBtn.disabled = false;
+  }
+
+  function initVideoStudio() {
+    // Presets for Frames
+    document.querySelectorAll('#videoFramePresets .aspect-preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#videoFramePresets .aspect-preset-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        updateVideoSpecPill();
+      });
+    });
+
+    // Presets for FPS
+    document.querySelectorAll('#videoFpsPresets .aspect-preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#videoFpsPresets .aspect-preset-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        updateVideoSpecPill();
+      });
+    });
+
+    // Presets for Aspect Ratio
+    document.querySelectorAll('#videoAspectPresets .aspect-preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#videoAspectPresets .aspect-preset-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const w = btn.getAttribute('data-vw');
+        const h = btn.getAttribute('data-vh');
+        const hint = document.getElementById('videoResHint');
+        if (hint) hint.textContent = `${w}×${h}`;
+        updateVideoSpecPill();
+      });
+    });
+
+    function updateVideoSpecPill() {
+      const f = document.querySelector('#videoFramePresets .aspect-preset-btn.active')?.getAttribute('data-frames') || 16;
+      const fps = document.querySelector('#videoFpsPresets .aspect-preset-btn.active')?.getAttribute('data-fps') || 12;
+      const pill = document.getElementById('videoTopSpecText');
+      if (pill) pill.textContent = `${f} frames · ${fps} fps`;
+      const durHint = document.getElementById('videoDurationHint');
+      if (durHint) durHint.textContent = `${f} frames · ${fps} fps (~${(f / fps).toFixed(1)}s)`;
+    }
+
+    // Mode: Text-to-Video vs Image-to-Video
+    const btnT2V = document.getElementById('btnModeT2V');
+    const btnI2V = document.getElementById('btnModeI2V');
+    const initField = document.getElementById('videoInitImageField');
+
+    btnT2V?.addEventListener('click', () => {
+      btnT2V.classList.add('active');
+      btnI2V.classList.remove('active');
+      if (initField) initField.style.display = 'none';
+    });
+
+    btnI2V?.addEventListener('click', () => {
+      btnI2V.classList.add('active');
+      btnT2V.classList.remove('active');
+      if (initField) initField.style.display = 'block';
+    });
+
+    // Init Image Dropzone
+    const dropzone = document.getElementById('videoInitDropzone');
+    const fileInput = document.getElementById('videoInitFileInput');
+    const preview = document.getElementById('videoInitImagePreview');
+    const thumb = document.getElementById('videoInitThumb');
+    const clearBtn = document.getElementById('clearVideoInitImgBtn');
+
+    dropzone?.addEventListener('click', () => fileInput?.click());
+    fileInput?.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          window.videoInitImageBase64 = ev.target.result;
+          if (thumb) thumb.src = ev.target.result;
+          if (preview) preview.style.display = 'block';
+          if (dropzone) dropzone.style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    clearBtn?.addEventListener('click', () => {
+      window.videoInitImageBase64 = null;
+      if (preview) preview.style.display = 'none';
+      if (dropzone) dropzone.style.display = 'block';
+      if (fileInput) fileInput.value = '';
+    });
+
+    // Random Seed
+    document.getElementById('randomVideoSeedBtn')?.addEventListener('click', () => {
+      const inp = document.getElementById('videoSeedInput');
+      if (inp) inp.value = Math.floor(Math.random() * 9000000) + 1000000;
+    });
+
+    // Random Video Prompt
+    const videoPromptPresets = [
+      'cinematic aerial drone hyperlapse through a neon cyberpunk metropolis, wet asphalt reflections, smooth forward movement, 4k photorealistic',
+      'macro slow motion water droplet splashing onto a blooming lotus flower, 120fps, cinematic studio lighting, crystal clear',
+      'low-angle smooth tracking shot of a vintage sports car driving along the Pacific Coast Highway at golden hour sunset, 35mm film grain',
+      'slow orbiting camera around a futuristic astronaut gazing at an alien nebula, volumetric starlight, Unreal Engine 5 render',
+      'high-speed camera following a peregrine falcon diving through misty alpine mountain peaks, dramatic cinematic lighting'
+    ];
+    document.getElementById('randomVideoPromptBtn')?.addEventListener('click', () => {
+      const pInp = document.getElementById('videoPromptInput');
+      const sInp = document.getElementById('videoSeedInput');
+      if (pInp) pInp.value = videoPromptPresets[Math.floor(Math.random() * videoPromptPresets.length)];
+      if (sInp) sInp.value = -1;
+      showToast('🎲 Injected cinematic motion prompt.');
+    });
+
+    // Motion bucket slider label
+    document.getElementById('videoMotionBucketInput')?.addEventListener('input', (e) => {
+      const lbl = document.getElementById('videoMotionBucketLabel');
+      if (lbl) lbl.textContent = e.target.value;
+    });
+
+    // Scrubber
+    const scrubber = document.getElementById('videoFrameScrubber');
+    scrubber?.addEventListener('input', (e) => {
+      const idx = parseInt(e.target.value, 10);
+      const counter = document.getElementById('videoFrameCounter');
+      const maxF = (window.currentVideoFrames && window.currentVideoFrames.length) || 16;
+      if (counter) counter.textContent = `Frame ${idx + 1}/${maxF}`;
+      if (window.currentVideoFrames && window.currentVideoFrames[idx]) {
+        const webpImg = document.getElementById('videoStageWebp');
+        if (webpImg) webpImg.src = window.currentVideoFrames[idx];
+      }
+    });
+
+    // Play/Pause button
+    const playPauseBtn = document.getElementById('videoPlayPauseBtn');
+    let isPlaying = true;
+    playPauseBtn?.addEventListener('click', () => {
+      isPlaying = !isPlaying;
+      playPauseBtn.textContent = isPlaying ? '⏸ Pause' : '▶ Play';
+      if (isPlaying && window.currentVideoItem) {
+        const webpImg = document.getElementById('videoStageWebp');
+        if (webpImg) webpImg.src = window.currentVideoItem.video_url;
+      }
+    });
+
+    // Generate Video Button
+    const genBtn = document.getElementById('generateVideoBtn');
+    genBtn?.addEventListener('click', async () => {
+      const prompt = document.getElementById('videoPromptInput')?.value.trim();
+      if (!prompt) {
+        showToast('Please enter a motion prompt.', 'warning');
+        document.getElementById('videoPromptInput')?.focus();
+        return;
+      }
+
+      // Auto-switch to canvas & player tab on mobile so user sees progress and output
+      if (window.innerWidth <= 768) {
+        setStudioSubTab('video', 'stage');
+      }
+
+      const activeBtnF = document.querySelector('#videoFramePresets .aspect-preset-btn.active');
+      const frames = parseInt(activeBtnF?.getAttribute('data-frames') || '16', 10);
+      const activeBtnFps = document.querySelector('#videoFpsPresets .aspect-preset-btn.active');
+      const fps = parseInt(activeBtnFps?.getAttribute('data-fps') || '12', 10);
+      const activeBtnAsp = document.querySelector('#videoAspectPresets .aspect-preset-btn.active');
+      const width = parseInt(activeBtnAsp?.getAttribute('data-vw') || '512', 10);
+      const height = parseInt(activeBtnAsp?.getAttribute('data-vh') || '512', 10);
+      const motionBucket = parseInt(document.getElementById('videoMotionBucketInput')?.value || '127', 10);
+      const seed = parseInt(document.getElementById('videoSeedInput')?.value || '-1', 10);
+      const model = document.getElementById('videoModelSelect')?.value || 'svd-xt';
+
+      const progressBar = document.getElementById('videoGenProgressBar');
+      const progressFill = document.getElementById('videoGenProgressFill');
+      const progressText = document.getElementById('videoGenProgressText');
+      const progressEta = document.getElementById('videoGenProgressEta');
+      const stageDot = document.getElementById('videoStageDot');
+      const stageMeta = document.getElementById('videoStageMetaText');
+
+      if (genBtn) genBtn.disabled = true;
+      if (progressBar) progressBar.style.display = 'flex';
+      if (progressFill) progressFill.style.width = '10%';
+      if (progressText) progressText.textContent = `Initializing motion pipeline (${model})...`;
+      if (progressEta) progressEta.textContent = 'MPS Synth';
+      if (stageDot) stageDot.className = 'stage-live-indicator';
+      if (stageMeta) stageMeta.textContent = `Rendering ${frames} frames · ${fps} fps · ${model}...`;
+
+      let progressSim = 15;
+      const simTimer = setInterval(() => {
+        progressSim = Math.min(progressSim + 6, 92);
+        if (progressFill) progressFill.style.width = `${progressSim}%`;
+        if (progressText) progressText.textContent = `Synthesizing frames (${progressSim}%)...`;
+      }, 1200);
+
+      try {
+        const res = await fetch('/api/video/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prompt,
+            negative_prompt: document.getElementById('videoNegPromptInput')?.value.trim() || '',
+            frames,
+            fps,
+            width,
+            height,
+            motion_bucket_id: motionBucket,
+            seed,
+            video_model: model,
+            init_image: window.videoInitImageBase64 || null
+          })
+        });
+
+        clearInterval(simTimer);
+        const data = await res.json();
+
+        if (data.status === 'success' && data.video_url) {
+          if (progressFill) progressFill.style.width = '100%';
+          if (progressText) progressText.textContent = 'Rendering complete!';
+          if (progressEta) progressEta.textContent = `${data.duration}s WebP`;
+          if (stageDot) stageDot.className = 'stage-live-indicator standby';
+          if (stageMeta) stageMeta.textContent = `Video Ready · ${data.frames} frames · ${data.fps} fps · ${data.duration}s`;
+
+          const item = {
+            id: 'vid_' + Date.now(),
+            prompt,
+            video_url: data.video_url,
+            thumb: (data.frames_data && data.frames_data[0]) || data.video_url,
+            frames: data.frames,
+            fps: data.fps,
+            duration: data.duration,
+            frames_data: data.frames_data,
+            timestamp: Date.now()
+          };
+
+          videoHistory.unshift(item);
+          if (videoHistory.length > 20) videoHistory.pop();
+          localStorage.setItem('liw_video_history', JSON.stringify(videoHistory));
+
+          loadVideoIntoPlayer(item);
+          renderVideoFilmstrip();
+          showToast('✓ Video generated successfully!', 'success');
+        } else {
+          throw new Error(data.error || 'Video generation returned no output');
+        }
+      } catch (err) {
+        clearInterval(simTimer);
+        if (stageDot) stageDot.className = 'stage-live-indicator standby';
+        if (stageMeta) stageMeta.textContent = 'Video Synthesis Failed';
+        showToast(`Video synthesis error: ${err.message}`, 'error');
+      } finally {
+        if (genBtn) genBtn.disabled = false;
+        setTimeout(() => {
+          if (progressBar) progressBar.style.display = 'none';
+        }, 1200);
+      }
+    });
+
+    // Download Video Clip
+    document.getElementById('downloadVideoBtn')?.addEventListener('click', () => {
+      if (!window.currentVideoItem) return;
+      const a = document.createElement('a');
+      a.href = window.currentVideoItem.video_url;
+      a.download = `video_clip_${Date.now()}.webp`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast('Downloading video clip...');
+    });
+
+    // Copy Video Clip to Clipboard
+    document.getElementById('copyVideoBtn')?.addEventListener('click', async () => {
+      if (!window.currentVideoItem) return;
+      try {
+        const res = await fetch(window.currentVideoItem.video_url);
+        const blob = await res.blob();
+        await navigator.clipboard.write([
+          new ClipboardItem({ [blob.type]: blob })
+        ]);
+        showToast('✓ Video clip copied to clipboard.');
+      } catch (e) {
+        showToast('Direct video copy not supported by browser.');
+      }
+    });
+
+    // Send to Chat
+    document.getElementById('sendVideoToChatBtn')?.addEventListener('click', () => {
+      if (!window.currentVideoItem) return;
+      switchStudioView('chat');
+      const container = document.getElementById('chatContainer');
+      if (container) {
+        const msg = document.createElement('div');
+        msg.className = 'chat-message user';
+        msg.innerHTML = `
+          <div class="msg-header"><strong>USER</strong> · Video Attachment</div>
+          <div class="msg-body">
+            <p>Generated Video Clip: <em>${escapeHtml(window.currentVideoItem.prompt)}</em></p>
+            <img src="${window.currentVideoItem.video_url}" style="max-width:320px; border:1px solid var(--border-frame);" alt="Attached Video">
+          </div>
+        `;
+        container.appendChild(msg);
+        showToast('Video clip inserted into chat session.');
+      }
+    });
+
+    // Clear Video Filmstrip
+    document.getElementById('clearVideoFilmstripBtn')?.addEventListener('click', () => {
+      videoHistory = [];
+      localStorage.removeItem('liw_video_history');
+      renderVideoFilmstrip();
+      showToast('Video clip gallery cleared.');
+    });
+  }
+  initVideoStudio();
 
   // ─── 2. Multi-Backend Management & Telemetry ──────────────────────────
 
@@ -12301,6 +15187,17 @@ html, body {
     }
 
     // Studio Header Badges
+    const fleetCount = document.getElementById('topFleetCount');
+    if (fleetCount) {
+      const onlineCount = Object.values(b).filter(x => x.online).length;
+      fleetCount.textContent = `${onlineCount}/5`;
+    }
+    const vidBadge = document.getElementById('videoBackendStatusBadge');
+    if (vidBadge) {
+      const isOnline = b.sd_webui?.online || b.comfyui?.online;
+      vidBadge.textContent = isOnline ? '● ONLINE' : '○ STANDBY';
+      vidBadge.classList.toggle('online', isOnline);
+    }
     const sdBadge = document.getElementById('sdBackendStatusBadge');
     if (sdBadge && b.sd_webui) {
       sdBadge.textContent = b.sd_webui.online ? `● ONLINE (${b.sd_webui.latency_ms || 0}ms)` : '○ STANDBY';
@@ -12363,6 +15260,27 @@ html, body {
         st.classList.toggle('online', b.piper.online);
       }
     }
+
+    // Update compact HUD tiles in settings modal
+    const hudMap = {
+      ollama: { badge: 'hudBadgeOllama', ms: 'hudMsOllama' },
+      sd_webui: { badge: 'hudBadgeSd', ms: 'hudMsSd' },
+      comfyui: { badge: 'hudBadgeComfy', ms: 'hudMsComfy' },
+      whisper: { badge: 'hudBadgeWhisper', ms: 'hudMsWhisper' },
+      piper: { badge: 'hudBadgePiper', ms: 'hudMsPiper' }
+    };
+    for (const [id, elIds] of Object.entries(hudMap)) {
+      const bItem = b[id];
+      const badge = document.getElementById(elIds.badge);
+      const msEl = document.getElementById(elIds.ms);
+      if (bItem && badge) {
+        badge.textContent = bItem.online ? '● ONLINE' : '○ STANDBY';
+        badge.classList.toggle('online', Boolean(bItem.online));
+      }
+      if (bItem && msEl) {
+        msEl.textContent = bItem.online && bItem.latency_ms ? `${bItem.latency_ms}ms` : '—';
+      }
+    }
   }
 
   window.testSingleBackend = async function(backendId) {
@@ -12411,6 +15329,14 @@ html, body {
   };
 
   document.getElementById('pingBeOllamaBtn')?.addEventListener('click', () => testSingleBackend('ollama'));
+  document.getElementById('resetOllamaDefaultBtn')?.addEventListener('click', () => {
+    const inp = document.getElementById('settingBeOllamaUrl');
+    if (inp) {
+      inp.value = 'http://127.0.0.1:11434';
+      document.getElementById('pingBeOllamaBtn')?.click();
+      showToast('Reset Ollama host daemon to http://127.0.0.1:11434', 'info');
+    }
+  });
   document.getElementById('pingBeSdBtn')?.addEventListener('click', () => testSingleBackend('sd_webui'));
   document.getElementById('pingBeComfyBtn')?.addEventListener('click', () => testSingleBackend('comfyui'));
   document.getElementById('pingBeWhisperBtn')?.addEventListener('click', () => testSingleBackend('whisper'));
@@ -12451,6 +15377,52 @@ html, body {
     document.getElementById(id)?.addEventListener('input', (e) => {
       e.target.dataset.dirty = 'true';
     });
+  });
+
+  // Compact Fleet Controller: Engine Service Lifecycle Actions (Start/Stop/Restart)
+  document.querySelectorAll('.svc-ctrl-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      const svc = e.currentTarget.dataset.svc;
+      const act = e.currentTarget.dataset.act;
+      if (!svc || !act) return;
+
+      btn.disabled = true;
+      const origText = btn.textContent;
+      btn.textContent = '⏳ ...';
+
+      try {
+        const res = await fetch('/api/backends/service/action', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: svc, action: act })
+        });
+        const data = await res.json();
+        showToast(`${svc} daemon ${act}: ${data.success !== false ? 'Command sent' : (data.error || 'Failed')}`, data.success !== false ? 'success' : 'warning');
+        setTimeout(() => {
+          fetchBackendsStatus();
+        }, 1200);
+      } catch (err) {
+        showToast(`Service action failed: ${err.message}`, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = origText;
+      }
+    });
+  });
+
+  // Compact Fleet: Run All Probes
+  document.getElementById('compactRunAllProbesBtn')?.addEventListener('click', async () => {
+    const btn = document.getElementById('compactRunAllProbesBtn');
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = '⏳ Probing...';
+    }
+    await fetchBackendsStatus();
+    showToast('Probed all 5 backend engines', 'info');
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = '▶ Probe All';
+    }
   });
 
   // ─── 3. Image Generation Studio ───────────────────────────────────────
@@ -12502,12 +15474,16 @@ html, body {
       const data = await res.json();
       select.innerHTML = '';
       if (data.models && data.models.length > 0) {
+        window.sdModels = data.models;
         data.models.forEach(m => {
           const opt = document.createElement('option');
           opt.value = m.title || m.model_name;
           opt.textContent = m.model_name || m.title;
           select.appendChild(opt);
         });
+        if (typeof updateTopStudioModelSelector === 'function') {
+          updateTopStudioModelSelector();
+        }
       } else {
         select.innerHTML = '<option value="">No SD models loaded (SD WebUI standby)</option>';
       }
@@ -12515,6 +15491,21 @@ html, body {
       select.innerHTML = '<option value="">SD WebUI offline</option>';
     }
   }
+
+  document.getElementById('imgModelSelect')?.addEventListener('change', (e) => {
+    const topSel = document.getElementById('topStudioModelSelector');
+    if (topSel && currentStudioView === 'image') {
+      topSel.value = `image:${e.target.value}`;
+    }
+    const specText = document.getElementById('imageTopSpecText');
+    if (specText) {
+      const w = document.getElementById('imgWidthInput')?.value || 512;
+      const h = document.getElementById('imgHeightInput')?.value || 512;
+      const sampler = document.getElementById('imgSamplerSelect')?.value || 'Euler a';
+      specText.textContent = `${w}×${h} · ${sampler}`;
+    }
+    updateContextualTelemetry('image');
+  });
 
   // Fetch Samplers
   async function loadSdSamplers() {
@@ -13019,6 +16010,11 @@ html, body {
     if (!currentAudioBlob) {
       showToast('Please record audio or upload an audio file first', 'warning');
       return;
+    }
+
+    // Auto-switch to transcript stage tab on mobile
+    if (window.innerWidth <= 768) {
+      setStudioSubTab('audio', 'stage');
     }
 
     const langSel = document.getElementById('audioLangSelect');
