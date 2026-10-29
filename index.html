@@ -6023,6 +6023,82 @@ select option:checked {
   color: var(--text-muted);
 }
 
+/* ─── Video Gallery Filmstrip Cards (Workstation Video Reel) ─── */
+.filmstrip-thumb-card {
+  position: relative;
+  width: 76px;
+  height: 54px;
+  min-width: 76px;
+  flex-shrink: 0;
+  cursor: pointer;
+  background: #000000;
+  border: 1px solid var(--border-dark, #333333);
+  overflow: hidden;
+  box-sizing: border-box;
+  transition: transform 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0 !important;
+}
+
+.filmstrip-thumb-card:hover {
+  border-color: #E5C07B;
+  transform: translateY(-1px);
+}
+
+.filmstrip-thumb-card.active {
+  border: 2px solid #E5C07B !important;
+  box-shadow: 0 0 10px rgba(229, 192, 123, 0.45);
+}
+
+.filmstrip-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  background: #111111;
+  border: none;
+  pointer-events: none;
+}
+
+.filmstrip-play-badge {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  background: rgba(0, 0, 0, 0.75);
+  color: #FFFFFF;
+  font-size: 7.5px;
+  line-height: 1;
+  padding: 2px 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  pointer-events: none;
+  border-radius: 0 !important;
+}
+
+.filmstrip-time-badge {
+  position: absolute;
+  bottom: 3px;
+  right: 3px;
+  background: rgba(0, 0, 0, 0.85);
+  color: #E5C07B;
+  font-family: var(--font-mono, monospace);
+  font-size: 8px;
+  font-weight: 700;
+  padding: 1px 4px;
+  line-height: 1.1;
+  border: 1px solid rgba(229, 192, 123, 0.3);
+  pointer-events: none;
+  white-space: nowrap;
+  letter-spacing: 0.2px;
+  border-radius: 0 !important;
+}
+
 /* ─── Audio Lab Studio ───────────────────────────────────────────────── */
 .audio-lab-grid {
   display: grid;
@@ -6881,11 +6957,80 @@ select option:checked {
   }
 
   .stage-filmstrip-bar {
-    height: 60px !important;
-    min-height: 60px !important;
-    padding: 0 8px !important;
+    height: 56px !important;
+    min-height: 56px !important;
+    padding: 0 max(8px, env(safe-area-inset-right)) 0 max(8px, env(safe-area-inset-left)) !important;
     gap: 8px !important;
     flex-shrink: 0 !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    background: var(--bg-parchment) !important;
+    border-top: 1px solid var(--border-dark) !important;
+  }
+
+  .filmstrip-header-tag {
+    font-size: 9.5px !important;
+    padding-right: 8px !important;
+    height: 28px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .filmstrip-scroll {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 0 4px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+  }
+
+  .filmstrip-scroll::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .filmstrip-thumb-card {
+    width: 58px !important;
+    height: 42px !important;
+    min-width: 58px !important;
+    max-width: 58px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .filmstrip-thumb-img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+
+  .filmstrip-play-badge {
+    top: 2px !important;
+    left: 2px !important;
+    font-size: 6.5px !important;
+    padding: 1px 2px !important;
+  }
+
+  .filmstrip-time-badge {
+    bottom: 2px !important;
+    right: 2px !important;
+    font-size: 7.5px !important;
+    padding: 1px 3px !important;
+  }
+
+  #clearVideoFilmstripBtn, #clearFilmstripBtn {
+    height: 24px !important;
+    line-height: 22px !important;
+    padding: 0 6px !important;
+    font-size: 9.5px !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    box-sizing: border-box !important;
   }
 
   /* ─── Audio Lab Mobile Architecture ─── */
@@ -7449,7 +7594,7 @@ select option:checked {
           <div class="filmstrip-scroll" id="imageFilmstripScroll">
             <span class="filmstrip-empty-text">No images generated in this session yet.</span>
           </div>
-          <button type="button" class="top-btn" id="clearFilmstripBtn" title="Clear gallery history" style="height:24px; font-size:10px; padding:0 8px;">Clear All</button>
+          <button type="button" class="top-btn" id="clearFilmstripBtn" title="Clear gallery history"><span class="btn-lbl-full">Clear All</span><span class="btn-lbl-mobile">Clear</span></button>
         </div>
       </section>
     </main>
@@ -7661,7 +7806,7 @@ select option:checked {
           <div class="filmstrip-scroll" id="videoFilmstripScroll">
             <span class="filmstrip-empty-text">No video clips generated in this session yet.</span>
           </div>
-          <button type="button" class="top-btn" id="clearVideoFilmstripBtn" title="Clear gallery history" style="height:24px; font-size:10px; padding:0 8px;">Clear All</button>
+          <button type="button" class="top-btn" id="clearVideoFilmstripBtn" title="Clear gallery history"><span class="btn-lbl-full">Clear All</span><span class="btn-lbl-mobile">Clear</span></button>
         </div>
       </section>
     </main>
@@ -14943,15 +15088,24 @@ select option:checked {
     }
 
     scroll.innerHTML = '';
-    videoHistory.forEach((item) => {
+    videoHistory.forEach((item, idx) => {
       const card = document.createElement('div');
-      card.className = 'filmstrip-thumb-card';
+      const isCurrent = window.currentVideoItem ? (window.currentVideoItem.id === item.id || window.currentVideoItem.video_url === item.video_url) : (idx === 0);
+      card.className = 'filmstrip-thumb-card' + (isCurrent ? ' active' : '');
       card.title = item.prompt || 'Generated video clip';
+      card.setAttribute('data-id', item.id || ('vid_' + idx));
+
+      const thumbUrl = item.thumb || item.video_url;
+      const durationVal = item.duration ? `${item.duration}s` : (item.frames && item.fps ? `${(item.frames / item.fps).toFixed(2)}s` : '1.3s');
+
       card.innerHTML = `
-        <img src="${item.thumb || item.video_url}" class="filmstrip-thumb-img" alt="Video Thumb">
-        <span class="filmstrip-time-badge">${item.duration || 1.3}s</span>
+        <img src="${thumbUrl}" class="filmstrip-thumb-img" alt="Video Thumb" loading="lazy">
+        <span class="filmstrip-play-badge">▶</span>
+        <span class="filmstrip-time-badge">${durationVal}</span>
       `;
       card.addEventListener('click', () => {
+        document.querySelectorAll('#videoFilmstripScroll .filmstrip-thumb-card').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
         loadVideoIntoPlayer(item);
       });
       scroll.appendChild(card);
@@ -14976,6 +15130,13 @@ select option:checked {
 
     window.currentVideoItem = item;
     window.currentVideoFrames = item.frames_data || [];
+
+    // Highlight active card in filmstrip
+    document.querySelectorAll('#videoFilmstripScroll .filmstrip-thumb-card').forEach(c => {
+      const cid = c.getAttribute('data-id');
+      const isActive = (item.id && cid === item.id) || (c.title === item.prompt);
+      c.classList.toggle('active', isActive);
+    });
 
     const scrubber = document.getElementById('videoFrameScrubber');
     if (scrubber) {
