@@ -5435,9 +5435,12 @@ select option:checked {
 }
 
 .video-timeline-range {
-  flex: 1;
-  accent-color: #FFFFFF;
+  flex: 1 1 auto;
+  accent-color: #E5C07B;
   cursor: pointer;
+  min-width: 40px;
+  height: 18px;
+  margin: 0;
 }
 
 .video-frame-counter {
@@ -7033,6 +7036,57 @@ select option:checked {
     box-sizing: border-box !important;
   }
 
+  /* Video Player & Scrubber Mobile Refinements */
+  .video-player-container {
+    padding: 6px 4px !important;
+    width: 100% !important;
+    height: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  #videoStageWebp {
+    max-height: calc(100% - 44px) !important;
+    max-width: 100% !important;
+    object-fit: contain !important;
+  }
+
+  .video-scrubber-bar {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin-top: 6px !important;
+    padding: 4px 6px !important;
+    gap: 6px !important;
+    font-size: 9.5px !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    flex-shrink: 0 !important;
+  }
+
+  .video-timeline-range {
+    min-width: 40px !important;
+    flex: 1 1 auto !important;
+    height: 18px !important;
+  }
+
+  .video-frame-counter {
+    font-size: 9.5px !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+
+  #videoPlayPauseBtn, #videoLoopToggleBtn {
+    height: 24px !important;
+    line-height: 22px !important;
+    padding: 0 6px !important;
+    font-size: 9.5px !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    box-sizing: border-box !important;
+  }
+
   /* ─── Audio Lab Mobile Architecture ─── */
   .audio-lab-grid {
     flex-direction: column !important;
@@ -7792,10 +7846,10 @@ select option:checked {
             
             <!-- Workstation Video Timeline Scrubber -->
             <div class="video-scrubber-bar" id="videoScrubberBar">
-              <button type="button" class="top-btn" id="videoPlayPauseBtn" style="height:24px; padding:0 8px;">⏸ Pause</button>
-              <input type="range" id="videoFrameScrubber" class="video-timeline-range" min="0" max="15" value="0" step="1">
-              <span class="video-frame-counter" id="videoFrameCounter">Frame 1/16</span>
-              <button type="button" class="top-btn" id="videoLoopToggleBtn" style="height:24px; padding:0 6px;">🔁 Loop: On</button>
+              <button type="button" class="top-btn" id="videoPlayPauseBtn" style="height:24px; padding:0 8px;" title="Pause / Play playback"><span class="btn-lbl-full">⏸ Pause</span><span class="btn-lbl-mobile">⏸</span></button>
+              <input type="range" id="videoFrameScrubber" class="video-timeline-range" min="0" max="15" value="0" step="1" title="Scrub timeline frames">
+              <span class="video-frame-counter" id="videoFrameCounter"><span class="btn-lbl-full">Frame </span>1/16</span>
+              <button type="button" class="top-btn" id="videoLoopToggleBtn" style="height:24px; padding:0 6px;" title="Toggle timeline loop"><span class="btn-lbl-full">🔁 Loop: On</span><span class="btn-lbl-mobile">🔁 On</span></button>
             </div>
           </div>
         </div>
@@ -14522,7 +14576,11 @@ select option:checked {
   currentStudioView = 'chat';
   window.currentStudioView = 'chat';
   window.currentVideoFrames = [];
-  let videoPlayInterval = null;
+  let _videoPlaybackTimer = null;
+  let _videoCurrentFrame = 0;
+  let _videoIsPlaying = true;
+  let _videoIsLooping = true;
+  let _videoPreloadedFrames = [];
   let videoHistory = JSON.parse(localStorage.getItem('liw_video_history') || '[]');
 
   function updateTopHeaderContext(view) {
@@ -14819,6 +14877,14 @@ select option:checked {
       populateTtsVoiceDropdowns();
     }
 
+    if (view !== 'video') {
+      if (typeof stopVideoPlayback === 'function') stopVideoPlayback();
+    } else {
+      if (window.currentVideoItem && _videoIsPlaying && typeof startVideoPlayback === 'function') {
+        startVideoPlayback();
+      }
+    }
+
     updateTopHeaderContext(view);
   }
   window.switchStudioView = switchStudioView;
@@ -15112,7 +15178,123 @@ select option:checked {
     });
   }
 
+  function stopVideoPlayback() {
+    if (_videoPlaybackTimer) {
+      clearInterval(_videoPlaybackTimer);
+      _videoPlaybackTimer = null;
+    }
+  }
+
+  function updateVideoPlayPauseUI() {
+    const playPauseBtn = document.getElementById('videoPlayPauseBtn');
+    if (!playPauseBtn) return;
+    const fullText = _videoIsPlaying ? '⏸ Pause' : '▶ Play';
+    const mobText = _videoIsPlaying ? '⏸' : '▶';
+    playPauseBtn.innerHTML = `<span class="btn-lbl-full">${fullText}</span><span class="btn-lbl-mobile">${mobText}</span>`;
+    playPauseBtn.title = _videoIsPlaying ? 'Pause playback' : 'Resume playback';
+  }
+
+  function updateVideoLoopUI() {
+    const loopBtn = document.getElementById('videoLoopToggleBtn');
+    if (!loopBtn) return;
+    const fullText = _videoIsLooping ? '🔁 Loop: On' : '🔁 Loop: Off';
+    const mobText = _videoIsLooping ? '🔁 On' : '🔁 Off';
+    loopBtn.innerHTML = `<span class="btn-lbl-full">${fullText}</span><span class="btn-lbl-mobile">${mobText}</span>`;
+    loopBtn.title = _videoIsLooping ? 'Continuous loop is ON' : 'Continuous loop is OFF';
+    loopBtn.style.color = _videoIsLooping ? '#E5C07B' : '#888888';
+    loopBtn.style.borderColor = _videoIsLooping ? '#E5C07B' : 'var(--border-dark)';
+  }
+
+  function renderVideoFrame(idx) {
+    const frames = window.currentVideoFrames || [];
+    const total = (frames && frames.length > 0) ? frames.length : ((window.currentVideoItem?.frames) || 16);
+    const validIdx = Math.max(0, Math.min(idx, total - 1));
+    _videoCurrentFrame = validIdx;
+
+    const webpImg = document.getElementById('videoStageWebp');
+    if (webpImg) {
+      if (frames[validIdx]) {
+        webpImg.src = frames[validIdx];
+      } else if (window.currentVideoItem?.video_url && webpImg.src !== window.currentVideoItem.video_url) {
+        webpImg.src = window.currentVideoItem.video_url;
+      }
+    }
+
+    const scrubber = document.getElementById('videoFrameScrubber');
+    if (scrubber && parseInt(scrubber.value, 10) !== validIdx) {
+      scrubber.value = validIdx;
+    }
+
+    const counter = document.getElementById('videoFrameCounter');
+    if (counter) {
+      counter.innerHTML = `<span class="btn-lbl-full">Frame </span>${validIdx + 1}/${total}`;
+    }
+  }
+
+  function pauseVideoPlayback() {
+    stopVideoPlayback();
+    _videoIsPlaying = false;
+    updateVideoPlayPauseUI();
+
+    // Canvas freeze fallback for legacy/external clips without in-memory frame buffers
+    const frames = window.currentVideoFrames || [];
+    if (!frames || frames.length === 0) {
+      const webpImg = document.getElementById('videoStageWebp');
+      if (webpImg && webpImg.complete && webpImg.naturalWidth > 0) {
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = webpImg.naturalWidth;
+          canvas.height = webpImg.naturalHeight;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(webpImg, 0, 0, canvas.width, canvas.height);
+          webpImg.src = canvas.toDataURL('image/png');
+        } catch (e) {
+          console.warn('Canvas freeze fallback skipped:', e);
+        }
+      }
+    }
+  }
+
+  function startVideoPlayback() {
+    stopVideoPlayback();
+    const frames = window.currentVideoFrames || [];
+    const total = (frames && frames.length > 0) ? frames.length : ((window.currentVideoItem?.frames) || 16);
+
+    _videoIsPlaying = true;
+    updateVideoPlayPauseUI();
+
+    if (!frames || frames.length === 0) {
+      const webpImg = document.getElementById('videoStageWebp');
+      if (webpImg && window.currentVideoItem?.video_url) {
+        webpImg.src = window.currentVideoItem.video_url;
+      }
+      return;
+    }
+
+    const fps = Math.max(1, Math.min(60, window.currentVideoItem?.fps || 12));
+    const intervalMs = Math.max(25, Math.round(1000 / fps));
+
+    _videoPlaybackTimer = setInterval(() => {
+      const curFrames = window.currentVideoFrames || [];
+      const curTotal = (curFrames && curFrames.length > 0) ? curFrames.length : 16;
+      let next = _videoCurrentFrame + 1;
+      if (next >= curTotal) {
+        if (_videoIsLooping) {
+          next = 0;
+        } else {
+          next = curTotal - 1;
+          renderVideoFrame(next);
+          pauseVideoPlayback();
+          return;
+        }
+      }
+      renderVideoFrame(next);
+    }, intervalMs);
+  }
+
   function loadVideoIntoPlayer(item) {
+    stopVideoPlayback();
+
     const placeholder = document.getElementById('videoStagePlaceholder');
     const container = document.getElementById('videoPlayerContainer');
     const webpImg = document.getElementById('videoStageWebp');
@@ -15126,10 +15308,17 @@ select option:checked {
     if (livePrev) livePrev.style.display = 'none';
     if (glyph) glyph.style.display = 'block';
     if (container) container.style.display = 'flex';
-    if (webpImg) webpImg.src = item.video_url;
 
     window.currentVideoItem = item;
     window.currentVideoFrames = item.frames_data || [];
+    _videoCurrentFrame = 0;
+
+    // Preload all frames into memory Image cache for zero-lag scrubbing and playback
+    _videoPreloadedFrames = (window.currentVideoFrames || []).map(src => {
+      const img = new Image();
+      img.src = src;
+      return img;
+    });
 
     // Highlight active card in filmstrip
     document.querySelectorAll('#videoFilmstripScroll .filmstrip-thumb-card').forEach(c => {
@@ -15138,18 +15327,25 @@ select option:checked {
       c.classList.toggle('active', isActive);
     });
 
+    const totalFrames = (window.currentVideoFrames && window.currentVideoFrames.length > 0) ? window.currentVideoFrames.length : (item.frames || 16);
     const scrubber = document.getElementById('videoFrameScrubber');
     if (scrubber) {
       scrubber.min = 0;
-      scrubber.max = (item.frames_data && item.frames_data.length > 0) ? item.frames_data.length - 1 : 15;
+      scrubber.max = totalFrames - 1;
       scrubber.value = 0;
     }
     const counter = document.getElementById('videoFrameCounter');
-    if (counter) counter.textContent = `Frame 1/${item.frames || 16}`;
+    if (counter) {
+      counter.innerHTML = `<span class="btn-lbl-full">Frame </span>1/${totalFrames}`;
+    }
 
     if (dlBtn) dlBtn.disabled = false;
     if (copyBtn) copyBtn.disabled = false;
     if (sendChatBtn) sendChatBtn.disabled = false;
+
+    updateVideoLoopUI();
+    renderVideoFrame(0);
+    startVideoPlayback();
   }
 
   function initVideoStudio() {
@@ -15267,28 +15463,39 @@ select option:checked {
       if (lbl) lbl.textContent = e.target.value;
     });
 
-    // Scrubber
+    // Video Frame Scrubber Range Slider
     const scrubber = document.getElementById('videoFrameScrubber');
     scrubber?.addEventListener('input', (e) => {
+      pauseVideoPlayback();
       const idx = parseInt(e.target.value, 10);
-      const counter = document.getElementById('videoFrameCounter');
-      const maxF = (window.currentVideoFrames && window.currentVideoFrames.length) || 16;
-      if (counter) counter.textContent = `Frame ${idx + 1}/${maxF}`;
-      if (window.currentVideoFrames && window.currentVideoFrames[idx]) {
-        const webpImg = document.getElementById('videoStageWebp');
-        if (webpImg) webpImg.src = window.currentVideoFrames[idx];
-      }
+      renderVideoFrame(idx);
     });
 
     // Play/Pause button
     const playPauseBtn = document.getElementById('videoPlayPauseBtn');
-    let isPlaying = true;
     playPauseBtn?.addEventListener('click', () => {
-      isPlaying = !isPlaying;
-      playPauseBtn.textContent = isPlaying ? '⏸ Pause' : '▶ Play';
-      if (isPlaying && window.currentVideoItem) {
-        const webpImg = document.getElementById('videoStageWebp');
-        if (webpImg) webpImg.src = window.currentVideoItem.video_url;
+      if (_videoIsPlaying) {
+        pauseVideoPlayback();
+      } else {
+        const total = (window.currentVideoFrames && window.currentVideoFrames.length) || (window.currentVideoItem?.frames) || 16;
+        if (_videoCurrentFrame >= total - 1) {
+          _videoCurrentFrame = 0;
+        }
+        startVideoPlayback();
+      }
+    });
+
+    // Loop Toggle button
+    const loopBtn = document.getElementById('videoLoopToggleBtn');
+    loopBtn?.addEventListener('click', () => {
+      _videoIsLooping = !_videoIsLooping;
+      updateVideoLoopUI();
+      if (!_videoIsPlaying) {
+        const total = (window.currentVideoFrames && window.currentVideoFrames.length) || (window.currentVideoItem?.frames) || 16;
+        if (_videoCurrentFrame >= total - 1) {
+          _videoCurrentFrame = 0;
+          startVideoPlayback();
+        }
       }
     });
 
@@ -15478,14 +15685,22 @@ select option:checked {
     };
 
     document.addEventListener('visibilitychange', () => {
-      if (!document.hidden && (currentStudioView === 'video' || window.currentStudioView === 'video')) {
+      if (document.hidden) {
+        if (typeof stopVideoPlayback === 'function') stopVideoPlayback();
+      } else if (currentStudioView === 'video' || window.currentStudioView === 'video') {
         window.checkAndResumeVideoProgress();
+        if (window.currentVideoItem && _videoIsPlaying && typeof startVideoPlayback === 'function') {
+          startVideoPlayback();
+        }
       }
     });
 
     window.addEventListener('focus', () => {
       if (currentStudioView === 'video' || window.currentStudioView === 'video') {
         window.checkAndResumeVideoProgress();
+        if (window.currentVideoItem && _videoIsPlaying && typeof startVideoPlayback === 'function') {
+          startVideoPlayback();
+        }
       }
     });
 
@@ -15503,6 +15718,12 @@ select option:checked {
       if (window.innerWidth <= 900 && typeof setStudioSubTab === 'function') {
         setStudioSubTab('video', 'stage');
       }
+
+      stopVideoPlayback();
+      const placeholderInit = document.getElementById('videoStagePlaceholder');
+      const containerInit = document.getElementById('videoPlayerContainer');
+      if (placeholderInit) placeholderInit.style.display = 'flex';
+      if (containerInit) containerInit.style.display = 'none';
 
       const activeBtnF = document.querySelector('#videoFramePresets .aspect-preset-btn.active');
       const frames = parseInt(activeBtnF?.getAttribute('data-frames') || '16', 10);
@@ -15652,9 +15873,22 @@ select option:checked {
 
     // Clear Video Filmstrip
     document.getElementById('clearVideoFilmstripBtn')?.addEventListener('click', () => {
+      stopVideoPlayback();
       videoHistory = [];
+      window.currentVideoItem = null;
+      window.currentVideoFrames = [];
       localStorage.removeItem('liw_video_history');
       renderVideoFilmstrip();
+      const placeholder = document.getElementById('videoStagePlaceholder');
+      const container = document.getElementById('videoPlayerContainer');
+      if (placeholder) placeholder.style.display = 'flex';
+      if (container) container.style.display = 'none';
+      const dlBtn = document.getElementById('downloadVideoBtn');
+      const copyBtn = document.getElementById('copyVideoBtn');
+      const sendChatBtn = document.getElementById('sendVideoToChatBtn');
+      if (dlBtn) dlBtn.disabled = true;
+      if (copyBtn) copyBtn.disabled = true;
+      if (sendChatBtn) sendChatBtn.disabled = true;
       showToast('Video clip gallery cleared.');
     });
   }
