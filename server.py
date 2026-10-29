@@ -523,6 +523,22 @@ _cache = {}
 _cache_lock = threading.Lock()
 CACHE_TTL = 300  # 5 minutes
 
+# Video Generation Real-time Telemetry State
+_video_gen_lock = threading.Lock()
+_video_gen_state = {
+    "active": False,
+    "stage": "idle",
+    "frame_current": 0,
+    "frame_total": 0,
+    "steps_per_frame": 15,
+    "fps": 12,
+    "model": "svd-xt",
+    "prompt": "",
+    "started_at": 0,
+    "completed_at": 0,
+    "last_error": None
+}
+
 
 def cache_get(key):
     with _cache_lock:
@@ -1777,6 +1793,106 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
                 self.send_json_response({"models": video_models, "backend": "sd_webui"})
                 return
 
+            elif path == "/api/video/progress":
+                with _video_gen_lock:
+                    is_active = _video_gen_state["active"]
+                    stage = _video_gen_state["stage"]
+                    frame_curr = _video_gen_state["frame_current"]
+                    frame_tot = _video_gen_state["frame_total"]
+                    steps_per_frame = _video_gen_state["steps_per_frame"]
+                    fps = _video_gen_state["fps"]
+                    model = _video_gen_state["model"]
+                    last_err = _video_gen_state["last_error"]
+
+                if not is_active:
+                    self.send_json_response({
+                        "active": False,
+                        "stage": stage,
+                        "progress": 100.0 if stage == "complete" else 0.0,
+                        "detail": "Standby · Ready to generate video" if stage != "error" else f"Generation error: {last_err}",
+                        "eta_str": "Standby" if stage != "error" else "Error",
+                        "telemetry": f"Engine: SD WebUI :7860 ({model})" if stage != "error" else f"Failed: {last_err}",
+                        "frame_current": frame_curr,
+                        "frame_total": frame_tot,
+                        "sampling_step": 0,
+                        "sampling_steps": steps_per_frame,
+                        "global_step": 0,
+                        "total_global_steps": 0,
+                        "error": last_err
+                    })
+                    return
+
+                # Real-time telemetry probe directly from active SD WebUI sampler
+                sd_progress = 0.0
+                sampling_step = 0
+                sampling_steps = steps_per_frame or 15
+                eta_relative = 0.0
+                preview_b64 = None
+
+                try:
+                    sd_req = urllib.request.Request(
+                        f"{sd_url}/sdapi/v1/progress?skip_current_image=false",
+                        headers={"User-Agent": "LIW-Gateway/1.0"}
+                    )
+                    with urllib.request.urlopen(sd_req, timeout=1.2) as resp:
+                        sd_data = json.loads(resp.read().decode("utf-8"))
+                        sd_progress = float(sd_data.get("progress") or 0.0)
+                        eta_relative = float(sd_data.get("eta_relative") or 0.0)
+                        sd_state = sd_data.get("state") or {}
+                        sampling_step = int(sd_state.get("sampling_step") or 0)
+                        if sd_state.get("sampling_steps"):
+                            sampling_steps = int(sd_state["sampling_steps"])
+                        if sd_data.get("current_image"):
+                            preview_b64 = sd_data["current_image"]
+                except Exception:
+                    pass
+
+                frame_idx = max(frame_curr - 1, 0)
+                tot_frames = max(frame_tot, 1)
+
+                if stage == "assembling_webp":
+                    overall_pct = 98.0
+                    detail = f"[ASSEMBLING] Encoding {tot_frames} frames into animated WebP timeline..."
+                    eta_str = "Finalizing WebP"
+                    telemetry = f"All {tot_frames} frames rendered · Compiling at {fps} fps"
+                    global_step = tot_frames * sampling_steps
+                else:
+                    overall_progress_val = ((frame_idx + sd_progress) / tot_frames) * 100.0
+                    overall_pct = round(min(max(overall_progress_val, 1.0), 96.0), 1)
+
+                    global_step = (frame_idx * sampling_steps) + sampling_step
+                    total_global_steps = tot_frames * sampling_steps
+
+                    if sampling_step > 0:
+                        detail = f"[FRAME {frame_curr}/{tot_frames}] Sampling step {sampling_step}/{sampling_steps} ({round(sd_progress * 100)}%)"
+                    else:
+                        detail = f"[FRAME {frame_curr}/{tot_frames}] Allocating diffusion latents..."
+
+                    if eta_relative > 0:
+                        eta_str = f"ETA: {round(eta_relative, 1)}s"
+                    else:
+                        eta_str = f"Frame {frame_curr}/{tot_frames}"
+
+                    telemetry = f"Step {global_step}/{total_global_steps} · SD WebUI :7860 · {fps} fps · {model}"
+
+                self.send_json_response({
+                    "active": True,
+                    "stage": stage,
+                    "progress": overall_pct,
+                    "frame_progress": round(sd_progress * 100, 1),
+                    "frame_current": frame_curr,
+                    "frame_total": tot_frames,
+                    "sampling_step": sampling_step,
+                    "sampling_steps": sampling_steps,
+                    "global_step": global_step,
+                    "total_global_steps": tot_frames * sampling_steps,
+                    "detail": detail,
+                    "eta_str": eta_str,
+                    "telemetry": telemetry,
+                    "preview_image": preview_b64
+                })
+                return
+
         elif self.command == "POST":
             content_length = int(self.headers.get("Content-Length", 0))
             body = self.rfile.read(content_length) if content_length > 0 else b"{}"
@@ -1792,13 +1908,31 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
                 steps = int(payload.get("steps", 15))
                 cfg = float(payload.get("cfg_scale", 7.0))
                 seed = int(payload.get("seed", -1))
+                video_model = payload.get("video_model", "svd-xt")
                 if seed == -1:
                     seed = random.randint(1000000, 9999999)
 
+                num_gen_frames = min(max(frames_count, 2), 24)
+
+                with _video_gen_lock:
+                    _video_gen_state["active"] = True
+                    _video_gen_state["stage"] = "generating_frames"
+                    _video_gen_state["frame_current"] = 1
+                    _video_gen_state["frame_total"] = num_gen_frames
+                    _video_gen_state["steps_per_frame"] = steps
+                    _video_gen_state["fps"] = fps
+                    _video_gen_state["model"] = video_model
+                    _video_gen_state["prompt"] = prompt
+                    _video_gen_state["started_at"] = time.time()
+                    _video_gen_state["last_error"] = None
+
                 try:
                     frames_b64 = []
-                    num_gen_frames = min(max(frames_count, 4), 24)
                     for i in range(num_gen_frames):
+                        with _video_gen_lock:
+                            _video_gen_state["frame_current"] = i + 1
+                            _video_gen_state["stage"] = "generating_frames"
+
                         frame_seed = seed + i
                         frame_req = {
                             "prompt": prompt,
@@ -1822,6 +1956,9 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
                                 frames_b64.append(res_data["images"][0])
 
                     if frames_b64:
+                        with _video_gen_lock:
+                            _video_gen_state["stage"] = "assembling_webp"
+
                         pil_images = []
                         for fb64 in frames_b64:
                             img_bytes = base64.b64decode(fb64.split(",")[-1])
@@ -1840,6 +1977,11 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
                         webp_b64 = base64.b64encode(webp_buf.getvalue()).decode("utf-8")
                         video_uri = f"data:image/webp;base64,{webp_b64}"
 
+                        with _video_gen_lock:
+                            _video_gen_state["active"] = False
+                            _video_gen_state["stage"] = "complete"
+                            _video_gen_state["completed_at"] = time.time()
+
                         self.send_json_response({
                             "status": "success",
                             "video_url": video_uri,
@@ -1854,6 +1996,10 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
                     else:
                         raise RuntimeError("No frames generated from SD WebUI")
                 except Exception as e:
+                    with _video_gen_lock:
+                        _video_gen_state["active"] = False
+                        _video_gen_state["stage"] = "error"
+                        _video_gen_state["last_error"] = str(e)
                     self.send_json_response({
                         "error": f"Video generation failed: {str(e)}. Ensure SD WebUI is running on {sd_url}.",
                         "status": "error"

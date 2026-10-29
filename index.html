@@ -5231,6 +5231,116 @@ select option:checked {
   overflow: hidden;
 }
 
+/* ─── Video Stage Real-Time Progress Banner (Workstation Telemetry) ─── */
+.video-stage-progress-box {
+  background: var(--bg-top-bar, #1a1816);
+  border-bottom: 1px solid var(--border-dark, #333333);
+  padding: 6px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  width: 100%;
+  border-radius: 0 !important;
+}
+
+.video-stage-progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono, monospace);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-main, #dcdfe4);
+  min-height: 15px;
+  gap: 6px;
+}
+
+.video-stage-progress-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+
+.video-stage-live-dot {
+  color: #98C379;
+  font-size: 10px;
+  animation: video-pulse-dot 1s infinite alternate;
+  flex-shrink: 0;
+}
+
+@keyframes video-pulse-dot {
+  0% { opacity: 0.3; transform: scale(0.9); }
+  100% { opacity: 1; transform: scale(1.1); }
+}
+
+.video-stage-progress-text {
+  font-family: var(--font-mono, monospace);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-main, #ffffff);
+  letter-spacing: 0.2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.video-stage-progress-eta {
+  font-family: var(--font-mono, monospace);
+  font-size: 10px;
+  font-weight: 700;
+  color: #E5C07B;
+  flex-shrink: 0;
+  margin-left: 6px;
+  white-space: nowrap;
+}
+
+.video-stage-progress-rail {
+  height: 5px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-dark, #4b5263);
+  position: relative;
+  overflow: hidden;
+  border-radius: 0 !important;
+}
+
+.video-stage-progress-fill {
+  height: 100%;
+  background: #E5C07B;
+  width: 0%;
+  transition: width 0.25s linear;
+  border-radius: 0 !important;
+}
+
+.video-stage-telemetry-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono, monospace);
+  font-size: 9px;
+  color: var(--text-dim, #888888);
+}
+
+.video-stage-telemetry-sub {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.video-stage-step-counter {
+  flex-shrink: 0;
+  margin-left: 6px;
+  font-weight: 600;
+  color: #61AFEF;
+  white-space: nowrap;
+}
+
 .stage-top-meta-bar {
   background: var(--bg-top-bar);
   border-bottom: 1px solid var(--border-dark);
@@ -7398,9 +7508,11 @@ select option:checked {
             <span class="field-hint" id="videoDurationHint">16 frames · 12 fps (~1.3s)</span>
           </div>
           <div class="inspector-aspect-presets" id="videoFramePresets" style="margin-bottom:6px;">
+            <button type="button" class="aspect-preset-btn" data-frames="2">2 Frames</button>
+            <button type="button" class="aspect-preset-btn" data-frames="4">4 Frames</button>
+            <button type="button" class="aspect-preset-btn" data-frames="8">8 Frames</button>
             <button type="button" class="aspect-preset-btn active" data-frames="16">16 Frames</button>
             <button type="button" class="aspect-preset-btn" data-frames="24">24 Frames</button>
-            <button type="button" class="aspect-preset-btn" data-frames="32">32 Frames</button>
           </div>
           <div class="inspector-aspect-presets" id="videoFpsPresets">
             <button type="button" class="aspect-preset-btn" data-fps="8">8 FPS</button>
@@ -7470,6 +7582,24 @@ select option:checked {
           </div>
         </div>
 
+        <!-- Video Canvas & Player Real-Time Progress Banner (Workstation Telemetry) -->
+        <div id="videoStageProgressBarBox" class="video-stage-progress-box" style="display:none;">
+          <div class="video-stage-progress-header">
+            <div class="video-stage-progress-status">
+              <span class="video-stage-live-dot" id="videoStageLiveDot">●</span>
+              <span id="videoStageProgressText" class="video-stage-progress-text">INITIALIZING MOTION SYNTHESIS...</span>
+            </div>
+            <span id="videoStageProgressEta" class="video-stage-progress-eta">0.0%</span>
+          </div>
+          <div class="video-stage-progress-rail">
+            <div class="video-stage-progress-fill" id="videoStageProgressFill" style="width:0%;"></div>
+          </div>
+          <div class="video-stage-telemetry-row">
+            <span id="videoStageTelemetrySub" class="video-stage-telemetry-sub">Connecting to SD WebUI :7860...</span>
+            <span id="videoStageStepCounter" class="video-stage-step-counter">Step 0/0</span>
+          </div>
+        </div>
+
         <div class="stage-viewport-box" id="videoViewportBox">
           <div class="stage-placeholder" id="videoStagePlaceholder">
             <div class="placeholder-crosshair-box">
@@ -7477,10 +7607,11 @@ select option:checked {
               <span class="corner-mark top-right">┐</span>
               <span class="corner-mark btm-left">└</span>
               <span class="corner-mark btm-right">┘</span>
-              <div class="placeholder-glyph">◈</div>
-              <div class="placeholder-title">VIDEO SYNTHESIS VIEWPORT</div>
-              <div class="placeholder-desc">Configure motion prompt and frame parameters on the left, then click Generate Video.</div>
-              <div class="placeholder-sub">Engine: Stable Video Diffusion / AnimateDiff / Wan2.1 / CogVideoX</div>
+              <div class="placeholder-glyph" id="videoStageGlyph">◈</div>
+              <img id="videoStageLivePreview" style="max-height:140px; max-width:140px; border:1px solid #E5C07B; object-fit:contain; margin-bottom:8px; display:none;" alt="Live Diffusion Preview">
+              <div class="placeholder-title" id="videoStageTitle">VIDEO SYNTHESIS VIEWPORT</div>
+              <div class="placeholder-desc" id="videoStageDesc">Configure motion prompt and frame parameters on the left, then click Generate Video.</div>
+              <div class="placeholder-sub" id="videoStageSub">Engine: Stable Video Diffusion / AnimateDiff / Wan2.1 / CogVideoX</div>
             </div>
           </div>
           <div id="videoPlayerContainer" class="video-player-container" style="display:none;">
@@ -14803,8 +14934,10 @@ select option:checked {
     const dlBtn = document.getElementById('downloadVideoBtn');
     const copyBtn = document.getElementById('copyVideoBtn');
     const sendChatBtn = document.getElementById('sendVideoToChatBtn');
+    const livePrev = document.getElementById('videoStageLivePreview');
 
     if (placeholder) placeholder.style.display = 'none';
+    if (livePrev) livePrev.style.display = 'none';
     if (container) container.style.display = 'flex';
     if (webpImg) webpImg.src = item.video_url;
 
@@ -14976,7 +15109,7 @@ select option:checked {
       }
 
       // Auto-switch to canvas & player tab on mobile so user sees progress and output
-      if (window.innerWidth <= 768) {
+      if (window.innerWidth <= 900) {
         setStudioSubTab('video', 'stage');
       }
 
@@ -14991,27 +15124,96 @@ select option:checked {
       const seed = parseInt(document.getElementById('videoSeedInput')?.value || '-1', 10);
       const model = document.getElementById('videoModelSelect')?.value || 'svd-xt';
 
-      const progressBar = document.getElementById('videoGenProgressBar');
-      const progressFill = document.getElementById('videoGenProgressFill');
-      const progressText = document.getElementById('videoGenProgressText');
-      const progressEta = document.getElementById('videoGenProgressEta');
+      // Elements for Canvas & Player Progress Banner
+      const stageProgressBar = document.getElementById('videoStageProgressBarBox');
+      const stageProgressFill = document.getElementById('videoStageProgressFill');
+      const stageProgressText = document.getElementById('videoStageProgressText');
+      const stageProgressEta = document.getElementById('videoStageProgressEta');
+      const stageTelemetrySub = document.getElementById('videoStageTelemetrySub');
+      const stageStepCounter = document.getElementById('videoStageStepCounter');
+
+      // Elements for Motion Controls Inspector Progress Bar
+      const inspectorProgressBar = document.getElementById('videoGenProgressBar');
+      const inspectorProgressFill = document.getElementById('videoGenProgressFill');
+      const inspectorProgressText = document.getElementById('videoGenProgressText');
+      const inspectorProgressEta = document.getElementById('videoGenProgressEta');
+
       const stageDot = document.getElementById('videoStageDot');
       const stageMeta = document.getElementById('videoStageMetaText');
 
+      const placeholderTitle = document.getElementById('videoStageTitle');
+      const placeholderDesc = document.getElementById('videoStageDesc');
+      const placeholderSub = document.getElementById('videoStageSub');
+
       if (genBtn) genBtn.disabled = true;
-      if (progressBar) progressBar.style.display = 'flex';
-      if (progressFill) progressFill.style.width = '10%';
-      if (progressText) progressText.textContent = `Initializing motion pipeline (${model})...`;
-      if (progressEta) progressEta.textContent = 'MPS Synth';
+      if (stageProgressBar) stageProgressBar.style.display = 'flex';
+      if (inspectorProgressBar) inspectorProgressBar.style.display = 'flex';
+
+      if (stageProgressFill) stageProgressFill.style.width = '2%';
+      if (inspectorProgressFill) inspectorProgressFill.style.width = '2%';
+      if (stageProgressText) stageProgressText.textContent = `Connecting to diffusion pipeline (${model})...`;
+      if (inspectorProgressText) inspectorProgressText.textContent = `Connecting to diffusion pipeline (${model})...`;
+      if (stageProgressEta) stageProgressEta.textContent = '0.0%';
+      if (inspectorProgressEta) inspectorProgressEta.textContent = '0.0%';
+      if (stageTelemetrySub) stageTelemetrySub.textContent = `Allocating ${frames} frames · Engine: SD WebUI :7860 · ${fps} fps`;
+      if (stageStepCounter) stageStepCounter.textContent = `Step 0/${frames * 15}`;
+
       if (stageDot) stageDot.className = 'stage-live-indicator';
       if (stageMeta) stageMeta.textContent = `Rendering ${frames} frames · ${fps} fps · ${model}...`;
 
-      let progressSim = 15;
-      const simTimer = setInterval(() => {
-        progressSim = Math.min(progressSim + 6, 92);
-        if (progressFill) progressFill.style.width = `${progressSim}%`;
-        if (progressText) progressText.textContent = `Synthesizing frames (${progressSim}%)...`;
-      }, 1200);
+      if (placeholderTitle) placeholderTitle.textContent = 'SYNTHESIZING VIDEO FRAMES';
+      if (placeholderDesc) placeholderDesc.textContent = `Connecting to diffusion pipeline (${model})...`;
+      if (placeholderSub) placeholderSub.textContent = `Allocating latent canvas (${width}x${height}) · ${frames} frames`;
+      const livePrevInit = document.getElementById('videoStageLivePreview');
+      if (livePrevInit) livePrevInit.style.display = 'none';
+
+      // Real-time backend progress polling (NO mock / NO simulated increments!)
+      let pollActive = true;
+      const pollProgress = async () => {
+        if (!pollActive) return;
+        try {
+          const pRes = await fetch('/api/video/progress');
+          if (pRes.ok) {
+            const pData = await pRes.json();
+            if (pData.active) {
+              const pct = typeof pData.progress === 'number' ? pData.progress : 0;
+              const pctStr = `${pct.toFixed(1)}%`;
+
+              if (stageProgressFill) stageProgressFill.style.width = `${Math.max(pct, 2)}%`;
+              if (inspectorProgressFill) inspectorProgressFill.style.width = `${Math.max(pct, 2)}%`;
+
+              if (stageProgressText && pData.detail) stageProgressText.textContent = pData.detail;
+              if (inspectorProgressText && pData.detail) inspectorProgressText.textContent = pData.detail;
+
+              if (stageProgressEta) stageProgressEta.textContent = pctStr;
+              if (inspectorProgressEta) inspectorProgressEta.textContent = pData.eta_str ? `${pData.eta_str} (${pctStr})` : pctStr;
+
+              const liveSubText = pData.telemetry ? (pData.eta_str && pData.eta_str !== 'Standby' ? `${pData.telemetry} · ${pData.eta_str}` : pData.telemetry) : '';
+              if (stageTelemetrySub && liveSubText) stageTelemetrySub.textContent = liveSubText;
+              if (stageStepCounter && pData.global_step !== undefined) {
+                stageStepCounter.textContent = `Step ${pData.global_step}/${pData.total_global_steps}`;
+              }
+
+              if (placeholderDesc && pData.detail) placeholderDesc.textContent = pData.detail;
+              if (placeholderSub && liveSubText) placeholderSub.textContent = liveSubText;
+
+              if (pData.preview_image) {
+                const livePrev = document.getElementById('videoStageLivePreview');
+                if (livePrev) {
+                  livePrev.src = pData.preview_image.startsWith('data:') ? pData.preview_image : `data:image/png;base64,${pData.preview_image}`;
+                  livePrev.style.display = 'block';
+                }
+              }
+            }
+          }
+        } catch (err) {
+          console.warn('Video progress poll error:', err);
+        }
+        if (pollActive) {
+          setTimeout(pollProgress, 250);
+        }
+      };
+      setTimeout(pollProgress, 120);
 
       try {
         const res = await fetch('/api/video/generate', {
@@ -15031,13 +15233,17 @@ select option:checked {
           })
         });
 
-        clearInterval(simTimer);
+        pollActive = false;
         const data = await res.json();
 
         if (data.status === 'success' && data.video_url) {
-          if (progressFill) progressFill.style.width = '100%';
-          if (progressText) progressText.textContent = 'Rendering complete!';
-          if (progressEta) progressEta.textContent = `${data.duration}s WebP`;
+          if (stageProgressFill) stageProgressFill.style.width = '100%';
+          if (inspectorProgressFill) inspectorProgressFill.style.width = '100%';
+          if (stageProgressText) stageProgressText.textContent = '✓ Video synthesis complete!';
+          if (inspectorProgressText) inspectorProgressText.textContent = '✓ Complete!';
+          if (stageProgressEta) stageProgressEta.textContent = '100%';
+          if (inspectorProgressEta) inspectorProgressEta.textContent = '100%';
+          if (stageTelemetrySub) stageTelemetrySub.textContent = `Rendered ${data.frames} frames @ ${data.fps} fps · Duration ${data.duration}s`;
           if (stageDot) stageDot.className = 'stage-live-indicator standby';
           if (stageMeta) stageMeta.textContent = `Video Ready · ${data.frames} frames · ${data.fps} fps · ${data.duration}s`;
 
@@ -15064,15 +15270,21 @@ select option:checked {
           throw new Error(data.error || 'Video generation returned no output');
         }
       } catch (err) {
-        clearInterval(simTimer);
+        pollActive = false;
         if (stageDot) stageDot.className = 'stage-live-indicator standby';
         if (stageMeta) stageMeta.textContent = 'Video Synthesis Failed';
+        if (stageProgressText) stageProgressText.textContent = `Error: ${err.message}`;
+        if (stageTelemetrySub) stageTelemetrySub.textContent = 'Synthesis process aborted';
+        if (placeholderTitle) placeholderTitle.textContent = 'VIDEO SYNTHESIS FAILED';
+        if (placeholderDesc) placeholderDesc.textContent = err.message;
         showToast(`Video synthesis error: ${err.message}`, 'error');
       } finally {
+        pollActive = false;
         if (genBtn) genBtn.disabled = false;
         setTimeout(() => {
-          if (progressBar) progressBar.style.display = 'none';
-        }, 1200);
+          if (stageProgressBar) stageProgressBar.style.display = 'none';
+          if (inspectorProgressBar) inspectorProgressBar.style.display = 'none';
+        }, 1500);
       }
     });
 
