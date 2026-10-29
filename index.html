@@ -5382,6 +5382,10 @@ select option:checked {
   align-items: center;
 }
 
+.btn-lbl-mobile {
+  display: none;
+}
+
 .stage-viewport-box {
   flex: 1 1 auto;
   min-height: 0;
@@ -6819,8 +6823,9 @@ select option:checked {
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
-    max-width: 160px !important;
-    flex-shrink: 1 !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
   }
 
   .stage-actions-group {
@@ -6838,6 +6843,14 @@ select option:checked {
     font-weight: 700 !important;
     white-space: nowrap !important;
     flex-shrink: 0 !important;
+  }
+
+  .btn-lbl-full {
+    display: none !important;
+  }
+
+  .btn-lbl-mobile {
+    display: inline !important;
   }
 
   .stage-viewport-box {
@@ -7576,9 +7589,9 @@ select option:checked {
             <span id="videoStageMetaText">Video Standby · 16 frames · 12 fps · SVD-XT</span>
           </div>
           <div class="stage-actions-group">
-            <button type="button" class="top-btn" id="downloadVideoBtn" title="Download video clip" disabled>⬇ Download</button>
-            <button type="button" class="top-btn" id="copyVideoBtn" title="Copy clip" disabled>📋 Copy</button>
-            <button type="button" class="top-btn" id="sendVideoToChatBtn" title="Send video to chat" disabled>💬 Send to Chat</button>
+            <button type="button" class="top-btn" id="downloadVideoBtn" title="Download video clip" disabled>⬇ <span class="btn-lbl-full">Download</span><span class="btn-lbl-mobile">Save</span></button>
+            <button type="button" class="top-btn" id="copyVideoBtn" title="Copy clip" disabled>📋 <span class="btn-lbl-full">Copy</span><span class="btn-lbl-mobile">Copy</span></button>
+            <button type="button" class="top-btn" id="sendVideoToChatBtn" title="Send video to chat" disabled>💬 <span class="btn-lbl-full">Send to Chat</span><span class="btn-lbl-mobile">Chat</span></button>
           </div>
         </div>
 
@@ -7608,7 +7621,7 @@ select option:checked {
               <span class="corner-mark btm-left">└</span>
               <span class="corner-mark btm-right">┘</span>
               <div class="placeholder-glyph" id="videoStageGlyph">◈</div>
-              <img id="videoStageLivePreview" style="max-height:140px; max-width:140px; border:1px solid #E5C07B; object-fit:contain; margin-bottom:8px; display:none;" alt="Live Diffusion Preview">
+              <img id="videoStageLivePreview" style="max-height:180px; max-width:220px; border:1px solid #E5C07B; box-shadow:0 0 12px rgba(229,192,123,0.3); object-fit:contain; margin-bottom:8px; display:none; background:#000000;" alt="Live Diffusion Preview">
               <div class="placeholder-title" id="videoStageTitle">VIDEO SYNTHESIS VIEWPORT</div>
               <div class="placeholder-desc" id="videoStageDesc">Configure motion prompt and frame parameters on the left, then click Generate Video.</div>
               <div class="placeholder-sub" id="videoStageSub">Engine: Stable Video Diffusion / AnimateDiff / Wan2.1 / CogVideoX</div>
@@ -14935,9 +14948,11 @@ select option:checked {
     const copyBtn = document.getElementById('copyVideoBtn');
     const sendChatBtn = document.getElementById('sendVideoToChatBtn');
     const livePrev = document.getElementById('videoStageLivePreview');
+    const glyph = document.getElementById('videoStageGlyph');
 
     if (placeholder) placeholder.style.display = 'none';
     if (livePrev) livePrev.style.display = 'none';
+    if (glyph) glyph.style.display = 'block';
     if (container) container.style.display = 'flex';
     if (webpImg) webpImg.src = item.video_url;
 
@@ -15165,7 +15180,9 @@ select option:checked {
       if (placeholderDesc) placeholderDesc.textContent = `Connecting to diffusion pipeline (${model})...`;
       if (placeholderSub) placeholderSub.textContent = `Allocating latent canvas (${width}x${height}) · ${frames} frames`;
       const livePrevInit = document.getElementById('videoStageLivePreview');
+      const glyphInit = document.getElementById('videoStageGlyph');
       if (livePrevInit) livePrevInit.style.display = 'none';
+      if (glyphInit) glyphInit.style.display = 'block';
 
       // Real-time backend progress polling (NO mock / NO simulated increments!)
       let pollActive = true;
@@ -15199,9 +15216,14 @@ select option:checked {
 
               if (pData.preview_image) {
                 const livePrev = document.getElementById('videoStageLivePreview');
+                const glyph = document.getElementById('videoStageGlyph');
                 if (livePrev) {
                   livePrev.src = pData.preview_image.startsWith('data:') ? pData.preview_image : `data:image/png;base64,${pData.preview_image}`;
                   livePrev.style.display = 'block';
+                }
+                if (glyph) glyph.style.display = 'none';
+                if (placeholderTitle && pData.frame_current) {
+                  placeholderTitle.textContent = `DIFFUSING FRAME ${pData.frame_current}/${pData.frame_total}`;
                 }
               }
             }
@@ -15271,6 +15293,10 @@ select option:checked {
         }
       } catch (err) {
         pollActive = false;
+        const livePrevErr = document.getElementById('videoStageLivePreview');
+        const glyphErr = document.getElementById('videoStageGlyph');
+        if (livePrevErr) livePrevErr.style.display = 'none';
+        if (glyphErr) glyphErr.style.display = 'block';
         if (stageDot) stageDot.className = 'stage-live-indicator standby';
         if (stageMeta) stageMeta.textContent = 'Video Synthesis Failed';
         if (stageProgressText) stageProgressText.textContent = `Error: ${err.message}`;

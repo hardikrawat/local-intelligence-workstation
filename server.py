@@ -1873,7 +1873,7 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
                     else:
                         eta_str = f"Frame {frame_curr}/{tot_frames}"
 
-                    telemetry = f"Step {global_step}/{total_global_steps} · SD WebUI :7860 · {fps} fps · {model}"
+                    telemetry = f"SD WebUI :7860 · {fps} fps · {model}"
 
                 self.send_json_response({
                     "active": True,
