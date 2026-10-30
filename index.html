@@ -7371,7 +7371,7 @@ select option:checked {
 
 /* ==========================================================================
    MINIMALIST WORKSTATION FULLSCREEN STARTUP BOOTLOADER (EDGE-TO-EDGE)
-   Full-screen architectural display, developer stamp, 12-blade spinner, 40s timer
+   Full-screen architectural display, developer stamp, 12-blade spinner, 20s timer
    ========================================================================== */
 .app-splash-screen {
   position: fixed;
@@ -7858,7 +7858,7 @@ select option:checked {
     </div>
     <div class="splash-top-right">
       <span class="splash-build-pill">SYS.VER 2.4.0</span>
-      <span class="splash-countdown-pill" id="splashCountdownBadge">AUTOLOAD IN 40s</span>
+      <span class="splash-countdown-pill" id="splashCountdownBadge">AUTOLOAD IN 20s</span>
     </div>
   </header>
 
@@ -7904,14 +7904,14 @@ select option:checked {
           </div>
         </div>
 
-        <!-- 40-Second Boot Progress Bar & Live Countdown -->
+        <!-- 20-Second Boot Progress Bar & Live Countdown -->
         <div class="splash-progress-container">
           <div class="splash-progress-track">
             <div id="splashProgressBar" class="splash-progress-fill"></div>
           </div>
           <div class="splash-progress-labels">
             <span id="splashProgressPct">0%</span>
-            <span id="splashCountdownText">BOOT TIMER: 40s REMAINING</span>
+            <span id="splashCountdownText">BOOT TIMER: 20s REMAINING</span>
           </div>
         </div>
       </div>
@@ -7934,7 +7934,7 @@ select option:checked {
     <div class="splash-telemetry-sep">|</div>
     <div class="splash-telemetry-item desktop-only">FLEET: OLLAMA · SD WEBUI · COMFYUI · AUDIO</div>
     <div class="splash-telemetry-sep desktop-only">|</div>
-    <div class="splash-telemetry-item">TIMEOUT: 40s</div>
+    <div class="splash-telemetry-item">TIMEOUT: 20s</div>
   </footer>
 </div>
 
@@ -11013,7 +11013,7 @@ select option:checked {
     }, 2500);
   }
 
-  // ─── Minimalist Workstation Fullscreen Startup Bootloader Controller (40s) ───
+  // ─── Minimalist Workstation Fullscreen Startup Bootloader Controller (20s) ───
   function initSplashScreen() {
     const splash = document.getElementById('appSplashScreen');
     if (!splash) return;
@@ -11026,7 +11026,7 @@ select option:checked {
     const progressPct = document.getElementById('splashProgressPct');
     const enterBtn = document.getElementById('splashEnterBtn');
 
-    const TOTAL_DURATION_MS = 40000; // 40 seconds requested by user
+    const TOTAL_DURATION_MS = 20000; // 20 seconds requested by user
     const startTime = performance.now();
     let isDismissed = false;
     let timerInterval = null;
@@ -11070,16 +11070,16 @@ select option:checked {
     };
     window.addEventListener('keydown', onKeyDismiss);
 
-    // Bootloader sequence stages across 40 seconds
+    // Bootloader sequence stages across 20 seconds
     const STAGES = [
-      { atSec: 0,  title: 'INITIALIZING INFERENCE GATEWAY & ACCELERATION...', sub: 'PROBING MULTI-BACKEND DAEMONS: OLLAMA · SD WEBUI · COMFYUI · AUDIO LAB' },
-      { atSec: 3,  title: 'CHECKING HARDWARE ACCELERATION & VRAM POOLS...', sub: 'QUERYING APPLE SILICON MPS / CUDA / UNIFIED HOST RAM' },
-      { atSec: 7,  title: 'CONNECTING LOCAL FLEET SERVICES ◈', sub: 'OLLAMA (11434) · SD WEBUI (7860) · COMFYUI (8188) DETECTED' },
-      { atSec: 12, title: 'SYNCHRONIZING MODEL REGISTRIES & WEIGHT MANIFESTS...', sub: 'INSPECTING LOCAL INSTALLED CHECKPOINTS & GGUF QUANTIZATIONS' },
-      { atSec: 18, title: 'WARMING UP CACHES & REASONING BUFFERS...', sub: 'SESSION LEDGER READY · CONTEXT WINDOW 32K ALLOCATED' },
-      { atSec: 25, title: 'PREPARING MULTI-MODAL REASONING & DIFFUSION ENGINES...', sub: 'AUTOREGRESSIVE LLMs · DIFFUSION GENERATION · AUDIO LAB ONLINE' },
-      { atSec: 32, title: 'SYSTEMS FULLY OPERATIONAL ◈ READY FOR WORKFLOWS', sub: 'ALL COGNITIVE ENGINES RUNNING AT PEAK PERFORMANCE' },
-      { atSec: 38, title: 'ENTERING WORKSTATION ◈', sub: 'LAUNCHING PRIMARY OPERATING ENVIRONMENT' }
+      { atSec: 0,    title: 'INITIALIZING INFERENCE GATEWAY & ACCELERATION...', sub: 'PROBING MULTI-BACKEND DAEMONS: OLLAMA · SD WEBUI · COMFYUI · AUDIO LAB' },
+      { atSec: 2,    title: 'CHECKING HARDWARE ACCELERATION & VRAM POOLS...', sub: 'QUERYING APPLE SILICON MPS / CUDA / UNIFIED HOST RAM' },
+      { atSec: 4,    title: 'CONNECTING LOCAL FLEET SERVICES ◈', sub: 'OLLAMA (11434) · SD WEBUI (7860) · COMFYUI (8188) DETECTED' },
+      { atSec: 7,    title: 'SYNCHRONIZING MODEL REGISTRIES & WEIGHT MANIFESTS...', sub: 'INSPECTING LOCAL INSTALLED CHECKPOINTS & GGUF QUANTIZATIONS' },
+      { atSec: 10,   title: 'WARMING UP CACHES & REASONING BUFFERS...', sub: 'SESSION LEDGER READY · CONTEXT WINDOW 32K ALLOCATED' },
+      { atSec: 13,   title: 'PREPARING MULTI-MODAL REASONING & DIFFUSION ENGINES...', sub: 'AUTOREGRESSIVE LLMs · DIFFUSION GENERATION · AUDIO LAB ONLINE' },
+      { atSec: 16,   title: 'SYSTEMS FULLY OPERATIONAL ◈ READY FOR WORKFLOWS', sub: 'ALL COGNITIVE ENGINES RUNNING AT PEAK PERFORMANCE' },
+      { atSec: 18.5, title: 'ENTERING WORKSTATION ◈', sub: 'LAUNCHING PRIMARY OPERATING ENVIRONMENT' }
     ];
 
     function updateProgress() {
