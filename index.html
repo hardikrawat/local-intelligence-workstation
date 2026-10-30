@@ -4315,11 +4315,6 @@ select option:checked {
     color: #FFFFFF !important;
   }
 
-  /* Pinned footer hidden on mobile to give full screen to canvas/composer */
-  .status-bar {
-    display: none !important;
-  }
-
   /* 3. Session Ledger Off-Canvas Drawer */
   .session-ledger-pane {
     position: fixed;
@@ -4694,7 +4689,7 @@ select option:checked {
     height: 22px;
     min-height: 22px;
     font-size: 9.5px;
-    padding: 0 max(6px, env(safe-area-inset-left));
+    padding: 0 max(8px, env(safe-area-inset-left));
     gap: 6px;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -4702,7 +4697,7 @@ select option:checked {
     border-top: 1px solid var(--border-frame);
     background: var(--bg-top-bar);
     flex-shrink: 0;
-    display: flex;
+    display: flex !important;
     align-items: center;
     border-bottom: max(0px, env(safe-area-inset-bottom)) solid var(--bg-top-bar);
   }
@@ -6297,6 +6292,47 @@ select option:checked {
 
 .backend-indicator.online b {
   color: #28a745;
+}
+
+/* ─── Workstation Status Bar Telemetry Clusters & Host RAM ─────────── */
+.telemetry-ram-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  padding: 0 4px;
+  border-radius: 2px;
+  transition: background 0.15s ease;
+}
+
+.telemetry-ram-container:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.telemetry-ram-metric {
+  font-weight: 700;
+  color: var(--text-bright, #222);
+}
+
+.telemetry-ram-sub {
+  font-size: 0.9em;
+  opacity: 0.8;
+  color: var(--text-muted);
+}
+
+.telemetry-mode-cluster {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+@media (max-width: 768px) {
+  .telemetry-mode-cluster {
+    gap: 6px;
+  }
+  .telemetry-ram-sub {
+    font-size: 0.85em;
+  }
 }
 
 /* ─── CivitAI Model Hub Card Grid ────────────────────────────────────── */
@@ -8013,18 +8049,55 @@ select option:checked {
       <span class="backend-indicator" id="beTtsInd" title="Piper Neural Text-to-Speech">TTS <b id="beTtsDot">○</b></span>
     </span>
     <span>|</span>
-    <span id="telemetryHostBlock">HOST: <span id="serverStatusText">127.0.0.1:11434</span></span>
+    <span id="telemetryRamBlock" class="telemetry-ram-container" title="Host System RAM (Physical Memory on inference machine)">
+      RAM: <span id="metricHostRam" class="telemetry-ram-metric">— / — GB</span>
+      <span id="metricHostRamSub" class="telemetry-ram-sub"></span>
+    </span>
     <span>|</span>
-    <span id="telemetryModelBlock">MODEL: <b id="statusModelDisplay">—</b></span>
+    <span id="telemetryHostBlock"><span id="telemetryHostPrefix">HOST:</span> <span id="serverStatusText">127.0.0.1:11434</span></span>
+    <span>|</span>
+    <span id="telemetryModelBlock"><span id="telemetryModelPrefix">MODEL:</span> <b id="statusModelDisplay">—</b></span>
     <span id="telemetryExtraGroup">
-      <span>|</span>
-      <span>CTX: <span id="metricCtxLabel">0 / 32,768</span></span>
-      <span>|</span>
-      <span>SPEED: <span id="metricTps">0.0 t/s</span></span>
-      <span>|</span>
-      <span>TTFT: <span id="metricTtft">— ms</span></span>
-      <span>|</span>
-      <span>VRAM: <span id="metricVram">Idle</span></span>
+      <span id="telemetryChatCluster" class="telemetry-mode-cluster">
+        <span>|</span>
+        <span>CTX: <span id="metricCtxLabel">0 / 32,768</span></span>
+        <span>|</span>
+        <span>SPEED: <span id="metricTps">0.0 t/s</span></span>
+        <span>|</span>
+        <span>TTFT: <span id="metricTtft">— ms</span></span>
+        <span>|</span>
+        <span>VRAM: <span id="metricVram">Standby</span></span>
+      </span>
+      <span id="telemetryImageCluster" class="telemetry-mode-cluster" style="display:none;">
+        <span>|</span>
+        <span>RES: <span id="metricImgRes">512×512</span></span>
+        <span>|</span>
+        <span>SAMPLER: <span id="metricImgSampler">Euler a</span></span>
+        <span>|</span>
+        <span>STEPS: <span id="metricImgSteps">25</span></span>
+        <span>|</span>
+        <span>PROGRESS: <span id="metricImgCurrentStep">Ready</span></span>
+      </span>
+      <span id="telemetryVideoCluster" class="telemetry-mode-cluster" style="display:none;">
+        <span>|</span>
+        <span>FRAMES: <span id="metricVideoFrames">16</span></span>
+        <span>|</span>
+        <span>FPS: <span id="metricVideoFps">12</span></span>
+        <span>|</span>
+        <span>PROGRESS: <span id="metricVideoProgress">Standby</span></span>
+      </span>
+      <span id="telemetryAudioCluster" class="telemetry-mode-cluster" style="display:none;">
+        <span>|</span>
+        <span>AUDIO: <span id="metricAudioFormat">16kHz WAV</span></span>
+        <span>|</span>
+        <span>ENGINE: <span id="metricAudioEngine">Whisper / Piper</span></span>
+      </span>
+      <span id="telemetryHubCluster" class="telemetry-mode-cluster" style="display:none;">
+        <span>|</span>
+        <span>SOURCES: <span id="metricHubSources">Ollama · HF · CivitAI</span></span>
+        <span>|</span>
+        <span>CATALOG: <span id="metricHubCatalog">GGUF & Checkpoints</span></span>
+      </span>
     </span>
 
     <span id="serverStatusPill" style="display:none;"><span id="serverStatusDot"></span></span>
@@ -9247,6 +9320,10 @@ select option:checked {
 
   function updateCountDisplay(el, rawText, options = {}) {
     if (!el) return;
+    if (el.id && !el.isConnected) {
+      const freshEl = document.getElementById(el.id);
+      if (freshEl) el = freshEl;
+    }
     const text = String(rawText ?? '');
     const isInitial = Boolean(options.initial);
     const lingerMs = options.delayMs || COUNT_UPDATE_LINGER_MS;
@@ -9371,12 +9448,13 @@ select option:checked {
 
   
   async function checkVramStatus() {
-    if (!metricVram) return;
+    const vEl = document.getElementById('metricVram') || metricVram;
+    if (!vEl) return;
     try {
       const res = await fetch(`${config.host}/api/ps`);
       if (!res.ok) {
-        updateCountDisplay(metricVram, 'Standby');
-        metricVram.style.color = 'var(--text-muted)';
+        updateCountDisplay(vEl, 'Standby');
+        vEl.style.color = 'var(--text-muted)';
         updateHeapTelemetry();
         return;
       }
@@ -9396,25 +9474,68 @@ select option:checked {
         const pctGpu = totalBytes > 0 ? Math.round((vramBytes / totalBytes) * 100) : 100;
 
         if (isFullGpu) {
-          updateCountDisplay(metricVram, `${vramGB}G GPU (100%)`);
-          metricVram.style.color = 'var(--success)';
-          metricVram.title = `Model is 100% resident in GPU VRAM (${vramGB} GB)`;
+          updateCountDisplay(vEl, `${vramGB}G GPU (100%)`);
+          vEl.style.color = 'var(--success)';
+          vEl.title = `Model is 100% resident in GPU VRAM (${vramGB} GB)`;
         } else {
           const ramGB = Math.max(0, (totalBytes - vramBytes) / (1024*1024*1024)).toFixed(1);
-          updateCountDisplay(metricVram, `${vramGB}G GPU · ${ramGB}G RAM (${pctGpu}%)`);
-          metricVram.style.color = 'var(--warning)';
-          metricVram.title = `Partial CPU offload: ${vramGB}GB in GPU, ${ramGB}GB in system RAM.`;
+          updateCountDisplay(vEl, `${vramGB}G GPU · ${ramGB}G RAM (${pctGpu}%)`);
+          vEl.style.color = 'var(--warning)';
+          vEl.title = `Partial CPU offload: ${vramGB}GB in GPU, ${ramGB}GB in system RAM.`;
         }
       } else {
-        updateCountDisplay(metricVram, 'Standby');
-        metricVram.style.color = 'var(--text-muted)';
-        metricVram.title = 'Model weights not currently resident in memory';
+        updateCountDisplay(vEl, 'Standby');
+        vEl.style.color = 'var(--text-muted)';
+        vEl.title = 'Model weights not currently resident in memory';
       }
       updateHeapTelemetry();
     } catch (e) {
-      updateCountDisplay(metricVram, 'Standby');
-      metricVram.style.color = 'var(--text-muted)';
+      updateCountDisplay(vEl, 'Standby');
+      vEl.style.color = 'var(--text-muted)';
       updateHeapTelemetry();
+    }
+  }
+
+  async function checkHostRamMetrics() {
+    const ramValEl = document.getElementById('metricHostRam');
+    const ramSubEl = document.getElementById('metricHostRamSub');
+    const ramBlock = document.getElementById('telemetryRamBlock');
+    if (!ramValEl) return;
+
+    try {
+      const res = await fetch('/api/system/metrics');
+      if (!res.ok) return;
+      const data = await res.json();
+      if (!data.success || !data.ram) return;
+
+      const r = data.ram;
+      const pct = typeof r.percent === 'number' ? r.percent : (r.used_gb && r.total_gb ? Math.round((r.used_gb / r.total_gb) * 100) : null);
+
+      if (r.used_gb !== null && r.total_gb !== null) {
+        ramValEl.textContent = `${r.used_gb} / ${r.total_gb} GB`;
+      }
+      if (pct !== null) {
+        const freeText = r.free_gb !== null ? `${r.free_gb}G free · ` : '';
+        if (ramSubEl) {
+          ramSubEl.textContent = `(${freeText}${pct}%)`;
+        }
+      }
+
+      if (pct !== null) {
+        if (pct >= 88) {
+          ramValEl.style.color = 'var(--danger, #e06c75)';
+        } else if (pct >= 75) {
+          ramValEl.style.color = 'var(--warning, #e5c07b)';
+        } else {
+          ramValEl.style.color = 'var(--accent-rubric, #73c991)';
+        }
+      }
+
+      if (ramBlock && r.used_gb !== null && r.total_gb !== null) {
+        ramBlock.title = `Host RAM: ${r.used_gb} GB used of ${r.total_gb} GB (${r.free_gb !== null ? r.free_gb + ' GB free, ' : ''}${pct}% utilized)`;
+      }
+    } catch (e) {
+      // Quiet fail on network hiccup
     }
   }
 
@@ -9562,11 +9683,16 @@ select option:checked {
   function startVramPolling() {
     if (vramPollingInterval) clearInterval(vramPollingInterval);
     
+    // Immediate baseline poll
+    checkVramStatus();
+    checkHostRamMetrics();
+
     vramPollingInterval = setInterval(() => {
       if (document.visibilityState === 'visible') {
         checkVramStatus();
+        checkHostRamMetrics();
       }
-    }, 2000);
+    }, 2500);
   }
 
   
@@ -12548,6 +12674,7 @@ select option:checked {
   document.getElementById('railSettingsBtn')?.addEventListener('click', () => openSettings('fleetTab'));
   document.getElementById('railShortcutsBtn')?.addEventListener('click', () => document.getElementById('shortcutsModal')?.classList.add('open'));
   document.querySelector('.backend-telemetry-cluster')?.addEventListener('click', () => openSettings('fleetTab'));
+  document.getElementById('telemetryRamBlock')?.addEventListener('click', () => openSettings('fleetTab'));
   serverStatusPill?.addEventListener('click', () => openSettings('fleetTab'));
   document.getElementById('systemPromptQuickBtn')?.addEventListener('click', () => openSettings('personaTab'));
 
@@ -14957,44 +15084,79 @@ select option:checked {
   window.updateTopStudioModelSelector = updateTopStudioModelSelector;
 
   function updateContextualTelemetry(view) {
-    const hostBlock = document.getElementById('telemetryHostBlock');
-    const modelBlock = document.getElementById('telemetryModelBlock');
-    const extraGroup = document.getElementById('telemetryExtraGroup');
-    if (!hostBlock || !modelBlock || !extraGroup) return;
+    const hostPrefix = document.getElementById('telemetryHostPrefix');
+    const hostText = document.getElementById('serverStatusText');
+    const modelPrefix = document.getElementById('telemetryModelPrefix');
+    const modelDisplay = document.getElementById('statusModelDisplay');
+
+    const chatCluster = document.getElementById('telemetryChatCluster');
+    const imgCluster = document.getElementById('telemetryImageCluster');
+    const vidCluster = document.getElementById('telemetryVideoCluster');
+    const audCluster = document.getElementById('telemetryAudioCluster');
+    const hubCluster = document.getElementById('telemetryHubCluster');
+
+    // Hide all mode clusters first without touching DOM innerHTML
+    [chatCluster, imgCluster, vidCluster, audCluster, hubCluster].forEach(c => {
+      if (c) c.style.display = 'none';
+    });
 
     if (view === 'image') {
+      if (imgCluster) imgCluster.style.display = 'inline-flex';
       const activeSd = document.getElementById('imgModelSelect')?.value || 'v1-5-pruned-emaonly';
       const cleanName = activeSd.split('[')[0].replace('.safetensors', '').trim();
       const w = document.getElementById('imgWidthInput')?.value || 512;
       const h = document.getElementById('imgHeightInput')?.value || 512;
       const s = document.getElementById('imgSamplerSelect')?.value || 'Euler a';
       const steps = document.getElementById('imgStepsInput')?.value || 25;
-      hostBlock.innerHTML = 'ENGINE: <span>SD WebUI (:7860)</span>';
-      modelBlock.innerHTML = `CHECKPOINT: <b>${cleanName}</b>`;
-      extraGroup.innerHTML = `<span>|</span><span>RES: ${w}×${h}</span><span>|</span><span>SAMPLER: ${s}</span><span>|</span><span>STEPS: ${steps}</span><span>|</span><span>ACCEL: MPS</span>`;
+
+      if (hostPrefix) hostPrefix.textContent = 'ENGINE:';
+      if (hostText) hostText.textContent = 'SD WebUI (:7860)';
+      if (modelPrefix) modelPrefix.textContent = 'CHECKPOINT:';
+      if (modelDisplay) modelDisplay.textContent = cleanName;
+
+      const resEl = document.getElementById('metricImgRes');
+      const samplerEl = document.getElementById('metricImgSampler');
+      const stepsEl = document.getElementById('metricImgSteps');
+      if (resEl) resEl.textContent = `${w}×${h}`;
+      if (samplerEl) samplerEl.textContent = s;
+      if (stepsEl) stepsEl.textContent = steps;
     } else if (view === 'video') {
+      if (vidCluster) vidCluster.style.display = 'inline-flex';
       const vid = document.getElementById('videoModelSelect')?.value || 'svd-xt';
-      hostBlock.innerHTML = 'ENGINE: <span>Motion Diffusion</span>';
-      modelBlock.innerHTML = `MODEL: <b>${vid.toUpperCase()}</b>`;
-      extraGroup.innerHTML = '<span>|</span><span>FRAMES: 16</span><span>|</span><span>FPS: 12</span><span>|</span><span>MOTION BUCKET: 127</span><span>|</span><span>FORMAT: MP4/WEBP</span>';
+      const frames = document.getElementById('videoFramesSelect')?.value || 16;
+      const fps = document.getElementById('videoFpsSelect')?.value || 12;
+
+      if (hostPrefix) hostPrefix.textContent = 'ENGINE:';
+      if (hostText) hostText.textContent = 'Motion Diffusion';
+      if (modelPrefix) modelPrefix.textContent = 'MODEL:';
+      if (modelDisplay) modelDisplay.textContent = vid.toUpperCase();
+
+      const framesEl = document.getElementById('metricVideoFrames');
+      const fpsEl = document.getElementById('metricVideoFps');
+      if (framesEl) framesEl.textContent = frames;
+      if (fpsEl) fpsEl.textContent = fps;
     } else if (view === 'audio') {
-      hostBlock.innerHTML = 'ASR: <span>Whisper (:8178)</span>';
-      modelBlock.innerHTML = 'VOICE: <b>Piper Neural TTS</b>';
-      extraGroup.innerHTML = '<span>|</span><span>AUDIO: 16kHz WAV</span><span>|</span><span>FALLBACK: Web Speech API</span>';
+      if (audCluster) audCluster.style.display = 'inline-flex';
+      if (hostPrefix) hostPrefix.textContent = 'ASR:';
+      if (hostText) hostText.textContent = 'Whisper (:8178)';
+      if (modelPrefix) modelPrefix.textContent = 'VOICE:';
+      if (modelDisplay) modelDisplay.textContent = 'Piper Neural TTS';
     } else if (view === 'hub') {
-      hostBlock.innerHTML = 'HUB: <span>Universal Discovery</span>';
-      modelBlock.innerHTML = 'SOURCES: <b>Ollama · HuggingFace · CivitAI</b>';
-      extraGroup.innerHTML = '<span>|</span><span>GGUF QUANTIZATIONS</span><span>|</span><span>DIFFUSION CHECKPOINTS</span>';
+      if (hubCluster) hubCluster.style.display = 'inline-flex';
+      if (hostPrefix) hostPrefix.textContent = 'HUB:';
+      if (hostText) hostText.textContent = 'Universal Discovery';
+      if (modelPrefix) modelPrefix.textContent = 'SOURCES:';
+      if (modelDisplay) modelDisplay.textContent = 'Ollama · HF · CivitAI';
     } else {
-      const hostText = document.getElementById('serverStatusText')?.innerText || '127.0.0.1:11434';
-      const modelVal = document.getElementById('modelSelect')?.value || '—';
-      const ctxVal = document.getElementById('metricCtxLabel')?.innerText || '0 / 32,768';
-      const tpsVal = document.getElementById('metricTps')?.innerText || '0.0 t/s';
-      const ttftVal = document.getElementById('metricTtft')?.innerText || '— ms';
-      const vramVal = document.getElementById('metricVram')?.innerText || 'Idle';
-      hostBlock.innerHTML = `HOST: <span id="serverStatusText">${hostText}</span>`;
-      modelBlock.innerHTML = `MODEL: <b id="statusModelDisplay">${modelVal}</b>`;
-      extraGroup.innerHTML = `<span>|</span><span>CTX: <span id="metricCtxLabel">${ctxVal}</span></span><span>|</span><span>SPEED: <span id="metricTps">${tpsVal}</span></span><span>|</span><span>TTFT: <span id="metricTtft">${ttftVal}</span></span><span>|</span><span>VRAM: <span id="metricVram">${vramVal}</span></span>`;
+      // Default to Chat Mode
+      if (chatCluster) chatCluster.style.display = 'inline-flex';
+      const activeHost = (typeof getOllamaUrl === 'function' ? getOllamaUrl() : (typeof config !== 'undefined' && (config.configuredOllamaUrl || config.host) ? (config.configuredOllamaUrl || config.host) : '127.0.0.1:11434')).replace(/^https?:\/\//, '') || '127.0.0.1:11434';
+      const activeModel = document.getElementById('modelSelect')?.value || (ollamaModels && ollamaModels[0]?.name) || '—';
+
+      if (hostPrefix) hostPrefix.textContent = 'HOST:';
+      if (hostText) hostText.textContent = activeHost;
+      if (modelPrefix) modelPrefix.textContent = 'MODEL:';
+      if (modelDisplay) modelDisplay.textContent = activeModel;
     }
   }
 
@@ -15726,6 +15888,20 @@ select option:checked {
               if (placeholderDesc && pData.detail) placeholderDesc.textContent = pData.detail;
               if (placeholderSub && liveSubText) placeholderSub.textContent = liveSubText;
 
+              const bottomStatus = document.getElementById('metricStreamStatus');
+              const vidProg = document.getElementById('metricVideoProgress');
+              const frameCur = pData.frame_current || 1;
+              const frameTot = pData.frame_total || 16;
+              const stepCur = pData.global_step !== undefined ? pData.global_step : 1;
+              const stepTot = pData.total_global_steps || 30;
+              if (bottomStatus) {
+                bottomStatus.innerText = `Diffusing Video... Frame ${frameCur}/${frameTot} (${pctStr})`;
+                bottomStatus.style.color = 'var(--accent-rubric)';
+              }
+              if (vidProg) {
+                vidProg.innerText = `Frame ${frameCur}/${frameTot} · Step ${stepCur}/${stepTot} (${pctStr})`;
+              }
+
               if (pData.preview_image) {
                 const livePrev = document.getElementById('videoStageLivePreview');
                 const glyph = document.getElementById('videoStageGlyph');
@@ -15740,6 +15916,16 @@ select option:checked {
               }
             } else if (pData.stage === 'complete' && pData.result_item) {
               _videoPollActive = false;
+              const bottomStatus = document.getElementById('metricStreamStatus');
+              const vidProg = document.getElementById('metricVideoProgress');
+              if (bottomStatus) {
+                bottomStatus.innerText = 'Video Ready';
+                bottomStatus.style.color = 'var(--success)';
+              }
+              if (vidProg) {
+                vidProg.innerText = `Done (${pData.result_item.frames}f · ${pData.result_item.duration}s)`;
+              }
+
               if (stageProgressFill) stageProgressFill.style.width = '100%';
               if (inspectorProgressFill) inspectorProgressFill.style.width = '100%';
               if (stageProgressText) stageProgressText.textContent = '✓ Video synthesis complete!';
@@ -15782,6 +15968,16 @@ select option:checked {
               return;
             } else if (pData.stage === 'error') {
               _videoPollActive = false;
+              const bottomStatus = document.getElementById('metricStreamStatus');
+              const vidProg = document.getElementById('metricVideoProgress');
+              if (bottomStatus) {
+                bottomStatus.innerText = 'Video Error';
+                bottomStatus.style.color = 'var(--danger)';
+              }
+              if (vidProg) {
+                vidProg.innerText = 'Failed';
+              }
+
               if (stageDot) stageDot.className = 'stage-live-indicator standby';
               if (stageMeta) stageMeta.textContent = 'Video Synthesis Failed';
               if (stageProgressText) stageProgressText.textContent = `Error: ${pData.error || 'Synthesis error'}`;
@@ -16533,6 +16729,14 @@ select option:checked {
       genBtn.disabled = true;
       genBtn.textContent = '⏳ SYNTHESIZING...';
     }
+    const streamStatusEl = document.getElementById('metricStreamStatus');
+    const imgProgEl = document.getElementById('metricImgCurrentStep');
+    if (streamStatusEl) {
+      streamStatusEl.innerText = 'Synthesizing...';
+      streamStatusEl.style.color = 'var(--accent-rubric)';
+    }
+    if (imgProgEl) imgProgEl.textContent = '0%';
+
     if (progressBox) progressBox.style.display = 'block';
     if (progressFill) progressFill.style.width = '15%';
     if (progressText) progressText.textContent = 'Submitting prompt to diffusion engine...';
@@ -16546,11 +16750,19 @@ select option:checked {
         if (pRes.ok) {
           const pData = await pRes.json();
           const pct = Math.round((pData.progress || 0) * 100);
+          const currentStep = (pData.state && pData.state.sampling_step) || Math.round(payload.steps * (pData.progress || 0));
           if (progressFill && pct > 0) progressFill.style.width = `${pct}%`;
           if (stageBar && pct > 0) stageBar.style.display = 'block';
           if (stageFill && pct > 0) stageFill.style.width = `${pct}%`;
           if (progressText && pData.eta_relative) {
             progressText.textContent = `Sampling step... ${pct}% (ETA: ${pData.eta_relative.toFixed(1)}s)`;
+          }
+          if (streamStatusEl) {
+            streamStatusEl.innerText = `Synthesizing... Step ${currentStep}/${payload.steps} (${pct}%)`;
+            streamStatusEl.style.color = 'var(--accent-rubric)';
+          }
+          if (imgProgEl) {
+            imgProgEl.textContent = `Step ${currentStep}/${payload.steps} (${pct}%)`;
           }
         }
       } catch (e) {}
@@ -16580,6 +16792,14 @@ select option:checked {
       const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
       const b64 = data.images[0];
       const imgSrc = `data:image/png;base64,${b64}`;
+
+      if (streamStatusEl) {
+        streamStatusEl.innerText = `Ready (${elapsed}s)`;
+        streamStatusEl.style.color = 'var(--success)';
+      }
+      if (imgProgEl) {
+        imgProgEl.textContent = `Done (${elapsed}s)`;
+      }
 
       // Update Stage Canvas
       const stageImg = document.getElementById('stageImage');
@@ -16612,6 +16832,13 @@ select option:checked {
 
     } catch (err) {
       clearInterval(pollInterval);
+      if (streamStatusEl) {
+        streamStatusEl.innerText = 'Diffusion Error';
+        streamStatusEl.style.color = 'var(--danger)';
+      }
+      if (imgProgEl) {
+        imgProgEl.textContent = 'Failed';
+      }
       showToast(`Generation Error: ${err.message}`, 'error');
     } finally {
       if (genBtn) {

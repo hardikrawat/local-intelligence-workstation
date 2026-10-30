@@ -2056,9 +2056,64 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
         self.send_error(404, f"Video endpoint not found: {path}")
 
     def handle_system_request(self):
-        """Unified system actions: evict VRAM across Ollama, SD WebUI, and ComfyUI."""
+        """Unified system actions: evict VRAM across Ollama, SD WebUI, and ComfyUI, or return host system metrics."""
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path
+
+        if path in ("/api/system/metrics", "/api/system/ram"):
+            try:
+                import psutil
+                vm = psutil.virtual_memory()
+                total_bytes = vm.total
+                available_bytes = vm.available
+                used_bytes = total_bytes - available_bytes
+                percent = round(vm.percent, 1)
+                total_gb = round(total_bytes / (1024 ** 3), 1)
+                used_gb = round(used_bytes / (1024 ** 3), 1)
+                free_gb = round(available_bytes / (1024 ** 3), 1)
+
+                cpu_pct = None
+                try:
+                    cpu_pct = psutil.cpu_percent(interval=None)
+                except Exception:
+                    pass
+
+                self.send_json_response({
+                    "success": True,
+                    "ram": {
+                        "total_gb": total_gb,
+                        "used_gb": used_gb,
+                        "free_gb": free_gb,
+                        "percent": percent,
+                        "total_bytes": total_bytes,
+                        "used_bytes": used_bytes,
+                        "available_bytes": available_bytes
+                    },
+                    "cpu": {
+                        "percent": cpu_pct
+                    }
+                })
+            except Exception as e:
+                total_gb = 16.0
+                try:
+                    import subprocess, sys
+                    if sys.platform == "darwin":
+                        out = subprocess.check_output(["sysctl", "-n", "hw.memsize"], timeout=1).decode().strip()
+                        total_gb = round(int(out) / (1024 ** 3), 1)
+                except Exception:
+                    pass
+                self.send_json_response({
+                    "success": False,
+                    "error": str(e),
+                    "ram": {
+                        "total_gb": total_gb,
+                        "used_gb": None,
+                        "free_gb": None,
+                        "percent": None
+                    }
+                })
+            return
+
         if path == "/api/system/evict-all" or path == "/api/system/evict":
             evicted = []
             ollama_url = get_backend_url("ollama")
