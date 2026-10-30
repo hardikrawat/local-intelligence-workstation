@@ -37,6 +37,7 @@
   --border-transcript: #8E8A7E;
   --border-rule: #777777;
   --border-dark: #333333;
+  --border-grid: rgba(0, 0, 0, 0.055);
   --text-main: #1A1816;
   --text-muted: #555555;
   --font-mono: 'IBM Plex Mono', Menlo, Consolas, 'Courier New', Courier, monospace;
@@ -45,6 +46,7 @@
 }
 
 [data-theme="dark"] {
+  --border-grid: rgba(255, 255, 255, 0.04);
   --count-update-color: #38bdf8;
   --count-update-glow: rgba(56, 189, 248, 0.35);
 }
@@ -5251,15 +5253,19 @@ select option:checked {
   flex-direction: column;
   height: 100%;
   min-height: 0;
-  background: #121110;
+  background: var(--bg-parchment);
   position: relative;
   overflow: hidden;
 }
 
+[data-theme="dark"] .video-stage-area {
+  background: #121110;
+}
+
 /* ─── Video Stage Real-Time Progress Banner (Workstation Telemetry) ─── */
 .video-stage-progress-box {
-  background: var(--bg-top-bar, #1a1816);
-  border-bottom: 1px solid var(--border-dark, #333333);
+  background: var(--bg-top-bar);
+  border-bottom: 1px solid var(--border-frame);
   padding: 6px 12px;
   display: flex;
   flex-direction: column;
@@ -5270,6 +5276,11 @@ select option:checked {
   border-radius: 0 !important;
 }
 
+[data-theme="dark"] .video-stage-progress-box {
+  background: #1a1816;
+  border-color: #333333;
+}
+
 .video-stage-progress-header {
   display: flex;
   justify-content: space-between;
@@ -5277,7 +5288,7 @@ select option:checked {
   font-family: var(--font-mono, monospace);
   font-size: 10px;
   font-weight: 700;
-  color: var(--text-main, #dcdfe4);
+  color: var(--text-main);
   min-height: 15px;
   gap: 6px;
 }
@@ -5292,7 +5303,7 @@ select option:checked {
 }
 
 .video-stage-live-dot {
-  color: #98C379;
+  color: #10B981;
   font-size: 10px;
   animation: video-pulse-dot 1s infinite alternate;
   flex-shrink: 0;
@@ -5307,7 +5318,7 @@ select option:checked {
   font-family: var(--font-mono, monospace);
   font-size: 10px;
   font-weight: 700;
-  color: var(--text-main, #ffffff);
+  color: var(--text-main);
   letter-spacing: 0.2px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -5318,7 +5329,7 @@ select option:checked {
   font-family: var(--font-mono, monospace);
   font-size: 10px;
   font-weight: 700;
-  color: #E5C07B;
+  color: #10B981;
   flex-shrink: 0;
   margin-left: 6px;
   white-space: nowrap;
@@ -5326,16 +5337,21 @@ select option:checked {
 
 .video-stage-progress-rail {
   height: 5px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid var(--border-dark, #4b5263);
+  background: rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--border-frame);
   position: relative;
   overflow: hidden;
   border-radius: 0 !important;
 }
 
+[data-theme="dark"] .video-stage-progress-rail {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: #4b5263;
+}
+
 .video-stage-progress-fill {
   height: 100%;
-  background: #E5C07B;
+  background: #10B981;
   width: 0%;
   transition: width 0.25s linear;
   border-radius: 0 !important;
@@ -5347,7 +5363,7 @@ select option:checked {
   align-items: center;
   font-family: var(--font-mono, monospace);
   font-size: 9px;
-  color: var(--text-dim, #888888);
+  color: var(--text-muted);
 }
 
 .video-stage-telemetry-sub {
@@ -5361,14 +5377,14 @@ select option:checked {
 .video-stage-step-counter {
   flex-shrink: 0;
   margin-left: 6px;
-  font-weight: 600;
-  color: #61AFEF;
+  font-weight: 700;
+  color: #10B981;
   white-space: nowrap;
 }
 
 .stage-top-meta-bar {
   background: var(--bg-top-bar);
-  border-bottom: 1px solid var(--border-dark);
+  border-bottom: 1px solid var(--border-frame);
   padding: 0 12px;
   height: 34px;
   min-height: 34px;
@@ -5394,21 +5410,21 @@ select option:checked {
 
 .stage-live-indicator {
   font-size: 10px;
-  color: #73C991;
+  color: #10B981;
 }
 
 .stage-live-indicator.standby {
-  color: #8C877B;
+  color: var(--text-muted);
 }
 
 .stage-live-indicator.busy {
-  color: var(--accent-rubric, #E5C07B);
+  color: #10B981;
   animation: stagePulseBeacon 1.2s infinite ease-in-out;
 }
 
 @keyframes stagePulseBeacon {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(0.85); }
+  0%, 100% { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 5px #10B981); }
+  50% { opacity: 0.4; transform: scale(0.85); filter: none; }
 }
 
 .stage-actions-group {
@@ -5430,12 +5446,19 @@ select option:checked {
   position: relative;
   overflow: auto;
   padding: 24px;
+  background-color: var(--bg-transcript);
+  background-image: 
+    linear-gradient(var(--border-grid, rgba(0, 0, 0, 0.055)) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-grid, rgba(0, 0, 0, 0.055)) 1px, transparent 1px);
+  background-size: 24px 24px;
+  box-sizing: border-box;
+}
+
+[data-theme="dark"] .stage-viewport-box {
   background-color: #121110;
   background-image: 
     linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-  background-size: 24px 24px;
-  box-sizing: border-box;
 }
 
 .video-player-container {
@@ -5456,6 +5479,21 @@ select option:checked {
   gap: 8px;
   width: 100%;
   max-width: 600px;
+  background: var(--bg-top-bar);
+  border: 1px solid var(--border-frame);
+  padding: 6px 10px;
+  margin-top: 8px;
+  box-sizing: border-box;
+  color: var(--text-main);
+  font-size: 10.5px;
+  font-family: var(--font-mono);
+}
+
+[data-theme="dark"] .video-scrubber-bar {
+  background: rgba(26, 24, 22, 0.95);
+  border-color: var(--border-dark);
+  color: #FFFFFF;
+}
   background: rgba(26, 24, 22, 0.95);
   border: 1px solid var(--border-dark);
   padding: 6px 10px;
@@ -5862,21 +5900,22 @@ select option:checked {
   transition: width 0.2s ease;
 }
 
-/* ─── Workstation Active Synthesis Progress Animations ─── */
+/* ─── Workstation Active Synthesis Progress Animations (Glowing Emerald Phosphor Green) ─── */
 .progress-bar-fill.active,
 .stage-canvas-progress-fill.active,
-.video-stage-progress-fill.active {
+.video-stage-progress-fill.active,
+.stage-progress-green-fill.active {
   background: linear-gradient(
     90deg,
-    #E5C07B 0%,
-    #FFF8E7 25%,
-    #E5C07B 50%,
-    #FFF8E7 75%,
-    #E5C07B 100%
+    #10B981 0%,
+    #6EE7B7 25%,
+    #10B981 50%,
+    #A7F3D0 75%,
+    #10B981 100%
   ) !important;
   background-size: 200% 100% !important;
-  animation: progress-laser-sweep 1.3s infinite linear !important;
-  box-shadow: 0 0 8px rgba(229, 192, 123, 0.45);
+  animation: progress-laser-sweep 1.2s infinite linear !important;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.55);
 }
 
 @keyframes progress-laser-sweep {
@@ -5901,11 +5940,11 @@ select option:checked {
   background: linear-gradient(
     180deg,
     transparent 0%,
-    rgba(229, 192, 123, 0.03) 30%,
-    rgba(229, 192, 123, 0.2) 85%,
-    #E5C07B 100%
+    rgba(16, 185, 129, 0.03) 30%,
+    rgba(16, 185, 129, 0.18) 85%,
+    #10B981 100%
   );
-  box-shadow: 0 2px 14px rgba(229, 192, 123, 0.45);
+  box-shadow: 0 2px 14px rgba(16, 185, 129, 0.45);
   pointer-events: none;
   z-index: 15;
   animation: stage-laser-scan 2.4s infinite linear;
@@ -5926,14 +5965,14 @@ select option:checked {
   inset: 0;
   background: repeating-linear-gradient(
     0deg,
-    rgba(0, 0, 0, 0.12) 0px,
-    rgba(0, 0, 0, 0.12) 1px,
+    rgba(0, 0, 0, 0.06) 0px,
+    rgba(0, 0, 0, 0.06) 1px,
     transparent 1px,
     transparent 2px
   ), radial-gradient(
     circle at center,
-    rgba(229, 192, 123, 0.02) 0%,
-    rgba(0, 0, 0, 0.22) 100%
+    rgba(16, 185, 129, 0.04) 0%,
+    rgba(0, 0, 0, 0.08) 100%
   );
   pointer-events: none;
   z-index: 14;
@@ -5950,21 +5989,21 @@ select option:checked {
 /* Crosshair Reticle Pulse During Synthesis */
 .stage-canvas-area.is-synthesizing .placeholder-crosshair-box,
 .stage-viewport-box.is-synthesizing .placeholder-crosshair-box {
-  border: 1px solid rgba(229, 192, 123, 0.45) !important;
-  box-shadow: 0 0 24px rgba(229, 192, 123, 0.12), inset 0 0 16px rgba(229, 192, 123, 0.06) !important;
+  border: 1px solid rgba(16, 185, 129, 0.5) !important;
+  box-shadow: 0 0 24px rgba(16, 185, 129, 0.15), inset 0 0 16px rgba(16, 185, 129, 0.06) !important;
   animation: reticle-box-breathe 2s infinite ease-in-out;
 }
 
 @keyframes reticle-box-breathe {
-  0% { border-color: rgba(229, 192, 123, 0.25); box-shadow: 0 0 16px rgba(229, 192, 123, 0.08); }
-  50% { border-color: rgba(229, 192, 123, 0.65); box-shadow: 0 0 28px rgba(229, 192, 123, 0.22); }
-  100% { border-color: rgba(229, 192, 123, 0.25); box-shadow: 0 0 16px rgba(229, 192, 123, 0.08); }
+  0% { border-color: rgba(16, 185, 129, 0.3); box-shadow: 0 0 16px rgba(16, 185, 129, 0.08); }
+  50% { border-color: rgba(16, 185, 129, 0.7); box-shadow: 0 0 28px rgba(16, 185, 129, 0.25); }
+  100% { border-color: rgba(16, 185, 129, 0.3); box-shadow: 0 0 16px rgba(16, 185, 129, 0.08); }
 }
 
 .stage-canvas-area.is-synthesizing .corner-mark,
 .stage-viewport-box.is-synthesizing .corner-mark {
-  color: #E5C07B !important;
-  text-shadow: 0 0 8px rgba(229, 192, 123, 0.7);
+  color: #10B981 !important;
+  text-shadow: 0 0 8px rgba(16, 185, 129, 0.7);
   animation: corner-mark-pulse 2s infinite ease-in-out;
 }
 
@@ -5976,38 +6015,38 @@ select option:checked {
 
 .stage-canvas-area.is-synthesizing .placeholder-glyph,
 .stage-viewport-box.is-synthesizing .placeholder-glyph {
-  color: #FFF2CC !important;
+  color: #10B981 !important;
   animation: glyph-neon-pulse 1.8s infinite alternate ease-in-out;
 }
 
 @keyframes glyph-neon-pulse {
-  0% { transform: scale(0.92); filter: drop-shadow(0 0 2px rgba(229, 192, 123, 0.4)); }
-  100% { transform: scale(1.08); filter: drop-shadow(0 0 10px rgba(229, 192, 123, 0.85)); }
+  0% { transform: scale(0.92); filter: drop-shadow(0 0 2px rgba(16, 185, 129, 0.4)); }
+  100% { transform: scale(1.08); filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.85)); }
 }
 
 /* Latent Canvas Image Pulse */
 .stage-canvas-area.is-synthesizing .stage-active-image,
 .stage-viewport-box.is-synthesizing #videoStageLivePreview {
-  border: 1px solid rgba(229, 192, 123, 0.65) !important;
-  box-shadow: 0 0 24px rgba(229, 192, 123, 0.3), 0 16px 48px rgba(0, 0, 0, 0.85) !important;
+  border: 1px solid rgba(16, 185, 129, 0.65) !important;
+  box-shadow: 0 0 24px rgba(16, 185, 129, 0.3), 0 12px 36px rgba(0, 0, 0, 0.25) !important;
   animation: latent-frame-pulse 1.6s infinite alternate ease-in-out;
 }
 
 @keyframes latent-frame-pulse {
-  0% { box-shadow: 0 0 14px rgba(229, 192, 123, 0.2), 0 16px 48px rgba(0, 0, 0, 0.85); }
-  100% { box-shadow: 0 0 32px rgba(229, 192, 123, 0.45), 0 16px 48px rgba(0, 0, 0, 0.85); }
+  0% { box-shadow: 0 0 14px rgba(16, 185, 129, 0.2), 0 12px 36px rgba(0, 0, 0, 0.25); }
+  100% { box-shadow: 0 0 32px rgba(16, 185, 129, 0.45), 0 12px 36px rgba(0, 0, 0, 0.25); }
 }
 
 /* Active Radar Beacon Indicator */
 .stage-live-indicator.busy,
 .video-stage-live-dot.busy {
-  color: #E5C07B !important;
+  color: #10B981 !important;
   animation: radar-beacon-pulse 1s infinite alternate ease-in-out;
 }
 
 @keyframes radar-beacon-pulse {
-  0% { transform: scale(0.85); opacity: 0.4; filter: drop-shadow(0 0 2px #E5C07B); }
-  100% { transform: scale(1.25); opacity: 1; filter: drop-shadow(0 0 7px #E5C07B); }
+  0% { transform: scale(0.85); opacity: 0.4; filter: drop-shadow(0 0 2px #10B981); }
+  100% { transform: scale(1.25); opacity: 1; filter: drop-shadow(0 0 7px #10B981); }
 }
 
 /* Video Frame Multi-Segment Pipeline Ticks */
@@ -6022,16 +6061,16 @@ select option:checked {
 .video-frame-tick {
   flex: 1;
   height: 100%;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.08);
   border-radius: 1px;
   transition: background 0.2s ease, box-shadow 0.2s ease;
 }
 .video-frame-tick.done {
-  background: #E5C07B;
+  background: #10B981;
 }
 .video-frame-tick.active {
-  background: #FFF8E7;
-  box-shadow: 0 0 6px #E5C07B;
+  background: #6EE7B7;
+  box-shadow: 0 0 6px #10B981;
   animation: frame-tick-pulse 0.8s infinite alternate ease-in-out;
 }
 @keyframes frame-tick-pulse {
@@ -6052,6 +6091,57 @@ body.eco-mode .video-stage-progress-fill.active {
   animation: none !important;
 }
 
+/* ─── Stage Mesh Canvas (Random Glowing Green Matrix Cells) ─── */
+.stage-mesh-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 4;
+}
+
+/* ─── Centered Workstation Progress Box (Detailed Telemetry Panel) ─── */
+.stage-centered-progress-box {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(440px, calc(100% - 32px));
+  background: var(--bg-top-bar, #ECEBE5);
+  border: 1px solid var(--border-frame, #C2B9A5);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-sizing: border-box;
+  z-index: 25;
+  pointer-events: auto;
+  border-radius: 0 !important;
+}
+
+[data-theme="dark"] .stage-centered-progress-box {
+  background: #181614;
+  border-color: #3A3530;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.65);
+}
+
+.stage-canvas-area.has-preview .stage-centered-progress-box,
+.stage-viewport-box.has-preview .stage-centered-progress-box {
+  top: auto;
+  bottom: 20px;
+  transform: translateX(-50%);
+  background: rgba(236, 235, 229, 0.94);
+  backdrop-filter: blur(8px);
+}
+
+[data-theme="dark"] .stage-canvas-area.has-preview .stage-centered-progress-box,
+[data-theme="dark"] .stage-viewport-box.has-preview .stage-centered-progress-box {
+  background: rgba(24, 22, 20, 0.94);
+  backdrop-filter: blur(8px);
+}
+
 .progress-text-row {
   display: flex;
   justify-content: space-between;
@@ -6061,18 +6151,22 @@ body.eco-mode .video-stage-progress-fill.active {
   color: var(--text-main);
 }
 
-/* ─── Stage Canvas ─── */
+/* ─── Stage Canvas (Light Paper Palette Harmonized) ─── */
 .image-studio-stage {
   display: flex;
   flex-direction: column;
   height: 100%;
   overflow: hidden;
+  background: var(--bg-parchment);
+}
+
+[data-theme="dark"] .image-studio-stage {
   background: #121110;
 }
 
 .stage-toolbar {
   background: var(--bg-top-bar);
-  border-bottom: 1px solid var(--border-dark);
+  border-bottom: 1px solid var(--border-frame);
   padding: 0 10px;
   height: 34px;
   display: flex;
@@ -6099,7 +6193,7 @@ body.eco-mode .video-stage-progress-fill.active {
 }
 
 .stage-status-dot {
-  color: #73C991;
+  color: #10B981;
   font-size: 10px;
   flex-shrink: 0;
 }
@@ -6135,11 +6229,18 @@ body.eco-mode .video-stage-progress-fill.active {
   position: relative;
   overflow: auto;
   padding: 24px;
+  background-color: var(--bg-transcript);
+  background-image: 
+    linear-gradient(var(--border-grid, rgba(0, 0, 0, 0.055)) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-grid, rgba(0, 0, 0, 0.055)) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+[data-theme="dark"] .stage-canvas-area {
   background-color: #121110;
   background-image: 
     linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-  background-size: 24px 24px;
 }
 
 /* Technical Reticle Placeholder */
@@ -6147,22 +6248,32 @@ body.eco-mode .video-stage-progress-fill.active {
   text-align: center;
   font-family: var(--font-mono);
   max-width: 440px;
+  position: relative;
+  z-index: 10;
 }
 
 .placeholder-crosshair-box {
   position: relative;
-  border: 1px dashed rgba(255, 255, 255, 0.15);
-  background: rgba(0, 0, 0, 0.25);
+  border: 1px dashed var(--border-transcript);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(4px);
   padding: 32px 24px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="dark"] .placeholder-crosshair-box {
+  border-color: rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.35);
+  box-shadow: none;
 }
 
 .corner-mark {
   position: absolute;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--border-transcript);
   font-family: monospace;
   font-size: 14px;
   line-height: 1;
@@ -6173,9 +6284,13 @@ body.eco-mode .video-stage-progress-fill.active {
 .corner-mark.btm-left { bottom: 4px; left: 6px; }
 .corner-mark.btm-right { bottom: 4px; right: 6px; }
 
+[data-theme="dark"] .corner-mark {
+  color: rgba(255, 255, 255, 0.4);
+}
+
 .placeholder-glyph {
   font-size: 20px;
-  color: #E5C07B;
+  color: #10B981;
   margin-bottom: 2px;
 }
 
@@ -6183,31 +6298,51 @@ body.eco-mode .video-stage-progress-fill.active {
   font-size: 11.5px;
   font-weight: 700;
   letter-spacing: 0.8px;
-  color: #ECEBE5;
+  color: var(--text-main);
 }
 
 .placeholder-desc {
   font-size: 11px;
   line-height: 1.5;
-  color: #8E8A7E;
+  color: var(--text-muted);
 }
 
 .placeholder-sub {
   font-size: 9.5px;
-  color: #66645E;
+  color: var(--text-muted);
   margin-top: 4px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid var(--border-frame);
   padding-top: 8px;
   width: 100%;
+}
+
+[data-theme="dark"] .placeholder-title {
+  color: #ECEBE5;
+}
+
+[data-theme="dark"] .placeholder-desc {
+  color: #8E8A7E;
+}
+
+[data-theme="dark"] .placeholder-sub {
+  color: #66645E;
+  border-top-color: rgba(255, 255, 255, 0.08);
 }
 
 .stage-active-image {
   max-width: 100%;
   max-height: 100%;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
-  border: 1px solid var(--border-dark);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.16);
+  border: 1px solid var(--border-frame);
   image-rendering: -webkit-optimize-contrast;
   cursor: zoom-in;
+  position: relative;
+  z-index: 10;
+}
+
+[data-theme="dark"] .stage-active-image {
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+  border-color: var(--border-dark);
 }
 
 /* ─── Bottom History Filmstrip ─── */
@@ -8473,19 +8608,42 @@ body.eco-mode .video-stage-progress-fill.active {
         </div>
 
         <div class="stage-canvas-area" id="stageCanvasArea">
+          <!-- Animated glowing green mesh canvas -->
+          <canvas id="imgStageMeshCanvas" class="stage-mesh-canvas"></canvas>
+
+          <!-- Top hairline progress bar (legacy fallback) -->
           <div id="stageCanvasProgressBar" class="stage-canvas-progress" style="display:none;">
-            <div class="stage-canvas-progress-fill" id="stageCanvasProgressFill" style="width:0%;"></div>
+            <div class="stage-canvas-progress-fill stage-progress-green-fill" id="stageCanvasProgressFill" style="width:0%;"></div>
           </div>
+
+          <!-- Centered Real-Time Workstation Progress Box (Detailed Telemetry Panel) -->
+          <div id="imgStageCenteredProgressBox" class="stage-centered-progress-box" style="display:none;">
+            <div class="video-stage-progress-header">
+              <div class="video-stage-progress-status">
+                <span class="video-stage-live-dot busy" id="imgStageCenteredDot">●</span>
+                <span id="imgStageCenteredText" class="video-stage-progress-text">INITIALIZING DIFFUSION SYNTHESIS...</span>
+              </div>
+              <span id="imgStageCenteredEta" class="video-stage-progress-eta">0.0%</span>
+            </div>
+            <div class="video-stage-progress-rail">
+              <div class="video-stage-progress-fill stage-progress-green-fill active" id="imgStageCenteredFill" style="width:0%;"></div>
+            </div>
+            <div class="video-stage-telemetry-row">
+              <span id="imgStageCenteredTelemetry" class="video-stage-telemetry-sub">Connecting to SD WebUI :7860...</span>
+              <span id="imgStageCenteredCounter" class="video-stage-step-counter">Step 0/0</span>
+            </div>
+          </div>
+
           <div class="stage-placeholder" id="stagePlaceholder">
             <div class="placeholder-crosshair-box">
               <span class="corner-mark top-left">┌</span>
               <span class="corner-mark top-right">┐</span>
               <span class="corner-mark btm-left">└</span>
               <span class="corner-mark btm-right">┘</span>
-              <div class="placeholder-glyph">◈</div>
-              <div class="placeholder-title">DIFFUSION CANVAS VIEWPORT</div>
-              <div class="placeholder-desc">Configure synthesis prompt and parameters on the left, then click Generate Image.</div>
-              <div class="placeholder-sub">Engine: Automatic1111 / SD WebUI / Forge / ComfyUI</div>
+              <div class="placeholder-glyph" id="imgStageGlyph">◈</div>
+              <div class="placeholder-title" id="imgStageTitle">DIFFUSION CANVAS VIEWPORT</div>
+              <div class="placeholder-desc" id="imgStageDesc">Configure synthesis prompt and parameters on the left, then click Generate Image.</div>
+              <div class="placeholder-sub" id="imgStageSub">Engine: Automatic1111 / SD WebUI / Forge / ComfyUI</div>
               <button type="button" class="generate-btn mobile-text" onclick="setStudioSubTab('image', 'inspector')" style="height:28px; margin-top:8px; padding:0 12px; font-size:10.5px; width:auto;">⚙ Open Controls</button>
             </div>
           </div>
@@ -8679,6 +8837,27 @@ body.eco-mode .video-stage-progress-fill.active {
         </div>
 
         <div class="stage-viewport-box" id="videoViewportBox">
+          <!-- Animated glowing green mesh canvas -->
+          <canvas id="videoStageMeshCanvas" class="stage-mesh-canvas"></canvas>
+
+          <!-- Centered Real-Time Workstation Progress Box (Detailed Telemetry Panel) -->
+          <div id="videoStageCenteredProgressBox" class="stage-centered-progress-box" style="display:none;">
+            <div class="video-stage-progress-header">
+              <div class="video-stage-progress-status">
+                <span class="video-stage-live-dot busy" id="videoStageCenteredDot">●</span>
+                <span id="videoStageCenteredText" class="video-stage-progress-text">INITIALIZING MOTION SYNTHESIS...</span>
+              </div>
+              <span id="videoStageCenteredEta" class="video-stage-progress-eta">0.0%</span>
+            </div>
+            <div class="video-stage-progress-rail">
+              <div class="video-stage-progress-fill stage-progress-green-fill active" id="videoStageCenteredFill" style="width:0%;"></div>
+            </div>
+            <div class="video-stage-telemetry-row">
+              <span id="videoStageCenteredTelemetry" class="video-stage-telemetry-sub">Connecting to SD WebUI :7860...</span>
+              <span id="videoStageCenteredCounter" class="video-stage-step-counter">Step 0/0</span>
+            </div>
+          </div>
+
           <div class="stage-placeholder" id="videoStagePlaceholder">
             <div class="placeholder-crosshair-box">
               <span class="corner-mark top-left">┌</span>
@@ -8686,7 +8865,7 @@ body.eco-mode .video-stage-progress-fill.active {
               <span class="corner-mark btm-left">└</span>
               <span class="corner-mark btm-right">┘</span>
               <div class="placeholder-glyph" id="videoStageGlyph">◈</div>
-              <img id="videoStageLivePreview" style="max-height:180px; max-width:220px; border:1px solid #E5C07B; box-shadow:0 0 12px rgba(229,192,123,0.3); object-fit:contain; margin-bottom:8px; display:none; background:#000000;" alt="Live Diffusion Preview">
+              <img id="videoStageLivePreview" style="max-height:180px; max-width:220px; border:1px solid var(--border-frame); box-shadow:0 0 16px rgba(16,185,129,0.3); object-fit:contain; margin-bottom:8px; display:none; background:var(--bg-transcript);" alt="Live Diffusion Preview">
               <div class="placeholder-title" id="videoStageTitle">VIDEO SYNTHESIS VIEWPORT</div>
               <div class="placeholder-desc" id="videoStageDesc">Configure motion prompt and frame parameters on the left, then click Generate Video.</div>
               <div class="placeholder-sub" id="videoStageSub">Engine: Stable Video Diffusion / AnimateDiff / Wan2.1 / CogVideoX</div>
@@ -17677,6 +17856,206 @@ body.eco-mode .video-stage-progress-fill.active {
       }
     });
 
+    // ─── Workstation Latent Diffusion Mesh Animation (Glowing Green Matrix Graph Cells) ───
+    const WorkstationMeshGrid = (() => {
+      const CELL_SIZE = 24; // Matches 24px background-size grid exactly
+
+      class StageMeshController {
+        constructor(canvasId) {
+          this.canvasId = canvasId;
+          this.activeCells = [];
+          this.animId = null;
+          this.isRunning = false;
+          this.lastSpawn = 0;
+        }
+
+        getCanvas() {
+          return document.getElementById(this.canvasId);
+        }
+
+        start() {
+          const canvas = this.getCanvas();
+          if (!canvas) return;
+          this.isRunning = true;
+          this.resize();
+          if (!this.animId) {
+            this.lastSpawn = performance.now();
+            this.loop();
+          }
+        }
+
+        stop() {
+          this.isRunning = false;
+          // Fade remaining cells naturally
+        }
+
+        resize() {
+          const canvas = this.getCanvas();
+          if (!canvas) return;
+          const parent = canvas.parentElement;
+          if (!parent) return;
+          const rect = parent.getBoundingClientRect();
+          const dpr = window.devicePixelRatio || 1;
+          const w = Math.floor(rect.width || parent.clientWidth || parent.offsetWidth || 600);
+          const h = Math.floor(rect.height || parent.clientHeight || parent.offsetHeight || 400);
+          if (w > 0 && h > 0 && (canvas.width !== Math.floor(w * dpr) || canvas.height !== Math.floor(h * dpr))) {
+            canvas.width = Math.floor(w * dpr);
+            canvas.height = Math.floor(h * dpr);
+            canvas.style.width = w + 'px';
+            canvas.style.height = h + 'px';
+            const ctx = canvas.getContext('2d');
+            if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          }
+        }
+
+        spawnCell(now) {
+          const canvas = this.getCanvas();
+          if (!canvas) return;
+          const parent = canvas.parentElement;
+          const w = (parent ? parent.clientWidth : canvas.clientWidth) || 600;
+          const h = (parent ? parent.clientHeight : canvas.clientHeight) || 400;
+          const cols = Math.max(1, Math.floor(w / CELL_SIZE));
+          const rows = Math.max(1, Math.floor(h / CELL_SIZE));
+
+          const col = Math.floor(Math.random() * cols);
+          const row = Math.floor(Math.random() * rows);
+
+          if (this.activeCells.some(c => c.col === col && c.row === row)) return;
+
+          const duration = 650 + Math.random() * 850;
+          this.activeCells.push({
+            col,
+            row,
+            birth: now,
+            duration,
+            peak: 0.75 + Math.random() * 0.25,
+            hasCoord: Math.random() > 0.72,
+            coordText: `[${col},${row}]`
+          });
+
+          // Occasionally spawn connected graph cluster
+          if (Math.random() > 0.6) {
+            const dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+            const d = dirs[Math.floor(Math.random() * dirs.length)];
+            const nCol = Math.max(0, Math.min(cols - 1, col + d[0]));
+            const nRow = Math.max(0, Math.min(rows - 1, row + d[1]));
+            if (!this.activeCells.some(c => c.col === nCol && c.row === nRow)) {
+              this.activeCells.push({
+                col: nCol,
+                row: nRow,
+                birth: now + 70,
+                duration: duration * 0.88,
+                peak: 0.65 + Math.random() * 0.25,
+                hasCoord: false
+              });
+            }
+          }
+        }
+
+        loop() {
+          const canvas = this.getCanvas();
+          if (!canvas) {
+            this.animId = null;
+            return;
+          }
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            this.animId = null;
+            return;
+          }
+
+          const now = performance.now();
+          this.resize();
+          const parent = canvas.parentElement;
+          const w = (parent ? parent.clientWidth : canvas.clientWidth) || 600;
+          const h = (parent ? parent.clientHeight : canvas.clientHeight) || 400;
+
+          // Spawn new cells if active
+          if (this.isRunning) {
+            const isEco = document.body.classList.contains('eco-mode');
+            const interval = isEco ? 240 : 80;
+            const maxCells = isEco ? 8 : 28;
+            if (now - this.lastSpawn > interval && this.activeCells.length < maxCells) {
+              const count = isEco ? 1 : (1 + Math.floor(Math.random() * 3));
+              for (let i = 0; i < count; i++) this.spawnCell(now);
+              this.lastSpawn = now;
+            }
+          }
+
+          // Render active glowing cells
+          ctx.clearRect(0, 0, w, h);
+
+          for (let i = this.activeCells.length - 1; i >= 0; i--) {
+            const cell = this.activeCells[i];
+            const age = now - cell.birth;
+            if (age < 0) continue;
+            if (age >= cell.duration) {
+              this.activeCells.splice(i, 1);
+              continue;
+            }
+
+            const progress = age / cell.duration;
+            let alpha = 0;
+            if (progress < 0.22) {
+              alpha = (progress / 0.22) * cell.peak;
+            } else {
+              alpha = (1 - (progress - 0.22) / 0.78) * cell.peak;
+            }
+
+            const x = cell.col * CELL_SIZE;
+            const y = cell.row * CELL_SIZE;
+
+            ctx.save();
+            ctx.shadowColor = '#10B981';
+            ctx.shadowBlur = 9 * alpha;
+
+            // Glowing box fill
+            ctx.fillStyle = `rgba(16, 185, 129, ${0.28 * alpha})`;
+            ctx.fillRect(x + 1, y + 1, CELL_SIZE - 2, CELL_SIZE - 2);
+
+            // Glowing border
+            ctx.strokeStyle = `rgba(16, 185, 129, ${0.88 * alpha})`;
+            ctx.lineWidth = 1;
+            ctx.strokeRect(x + 0.5, y + 0.5, CELL_SIZE - 1, CELL_SIZE - 1);
+
+            // Precision corner tick & coordinate
+            if (alpha > 0.45) {
+              ctx.fillStyle = `rgba(110, 231, 183, ${alpha})`;
+              ctx.fillRect(x + 2, y + 2, 2, 2);
+              ctx.fillRect(x + CELL_SIZE - 4, y + CELL_SIZE - 4, 2, 2);
+
+              if (cell.hasCoord && alpha > 0.6) {
+                ctx.font = '7px "IBM Plex Mono", Menlo, monospace';
+                ctx.fillStyle = `rgba(5, 150, 105, ${alpha * 0.9})`;
+                ctx.fillText(cell.coordText, x + 3, y + CELL_SIZE - 4);
+              }
+            }
+            ctx.restore();
+          }
+
+          if (this.isRunning || this.activeCells.length > 0) {
+            this.animId = requestAnimationFrame(() => this.loop());
+          } else {
+            this.animId = null;
+            ctx.clearRect(0, 0, w, h);
+          }
+        }
+      }
+
+      const imgMesh = new StageMeshController('imgStageMeshCanvas');
+      const videoMesh = new StageMeshController('videoStageMeshCanvas');
+
+      const api = {
+        startImage: () => imgMesh.start(),
+        stopImage: () => imgMesh.stop(),
+        startVideo: () => videoMesh.start(),
+        stopVideo: () => videoMesh.stop()
+      };
+
+      window.WorkstationMeshGrid = api;
+      return api;
+    })();
+
     // ─── Video Progress Polling & Background Resumption ───
     let _videoPollActive = false;
     let _videoPollTimer = null;
@@ -17692,6 +18071,13 @@ body.eco-mode .video-stage-progress-fill.active {
       const stageTelemetrySub = document.getElementById('videoStageTelemetrySub');
       const stageStepCounter = document.getElementById('videoStageStepCounter');
 
+      const centerBox = document.getElementById('videoStageCenteredProgressBox');
+      const centerFill = document.getElementById('videoStageCenteredFill');
+      const centerText = document.getElementById('videoStageCenteredText');
+      const centerEta = document.getElementById('videoStageCenteredEta');
+      const centerTelemetry = document.getElementById('videoStageCenteredTelemetry');
+      const centerCounter = document.getElementById('videoStageCenteredCounter');
+
       const inspectorProgressBar = document.getElementById('videoGenProgressBar');
       const inspectorProgressFill = document.getElementById('videoGenProgressFill');
       const inspectorProgressText = document.getElementById('videoGenProgressText');
@@ -17706,12 +18092,18 @@ body.eco-mode .video-stage-progress-fill.active {
 
       const videoViewport = document.getElementById('videoViewportBox');
       if (videoViewport) videoViewport.classList.add('is-synthesizing');
+      WorkstationMeshGrid.startVideo();
+
       if (genBtn) genBtn.disabled = true;
       if (stageProgressBar) {
         stageProgressBar.style.display = 'flex';
         stageProgressBar.classList.add('active');
       }
       if (stageProgressFill) stageProgressFill.classList.add('active');
+      if (centerBox) {
+        centerBox.style.display = 'flex';
+      }
+      if (centerFill) centerFill.classList.add('active');
       if (inspectorProgressBar) {
         inspectorProgressBar.style.display = 'flex';
         inspectorProgressBar.classList.add('active');
@@ -17727,22 +18119,29 @@ body.eco-mode .video-stage-progress-fill.active {
             const pData = await pRes.json();
             if (pData.active) {
               WorkstationAudio.throttledTick('streamRelayTick', 300);
+              WorkstationMeshGrid.startVideo();
               const pct = typeof pData.progress === 'number' ? pData.progress : 0;
               const pctStr = `${pct.toFixed(1)}%`;
 
               if (stageProgressFill) stageProgressFill.style.width = `${Math.max(pct, 2)}%`;
+              if (centerFill) centerFill.style.width = `${Math.max(pct, 2)}%`;
               if (inspectorProgressFill) inspectorProgressFill.style.width = `${Math.max(pct, 2)}%`;
 
               if (stageProgressText && pData.detail) updateCountDisplay(stageProgressText, pData.detail);
+              if (centerText && pData.detail) updateCountDisplay(centerText, pData.detail);
               if (inspectorProgressText && pData.detail) updateCountDisplay(inspectorProgressText, pData.detail);
 
               if (stageProgressEta) updateCountDisplay(stageProgressEta, pctStr);
+              if (centerEta) updateCountDisplay(centerEta, pData.eta_str ? `${pData.eta_str} (${pctStr})` : pctStr);
               if (inspectorProgressEta) updateCountDisplay(inspectorProgressEta, pData.eta_str ? `${pData.eta_str} (${pctStr})` : pctStr);
 
               const liveSubText = pData.telemetry ? (pData.eta_str && pData.eta_str !== 'Standby' ? `${pData.telemetry} · ${pData.eta_str}` : pData.telemetry) : '';
               if (stageTelemetrySub && liveSubText) updateCountDisplay(stageTelemetrySub, liveSubText);
-              if (stageStepCounter && pData.global_step !== undefined) {
-                updateCountDisplay(stageStepCounter, `Step ${pData.global_step}/${pData.total_global_steps}`);
+              if (centerTelemetry && liveSubText) updateCountDisplay(centerTelemetry, liveSubText);
+              if (pData.global_step !== undefined) {
+                const stepLabel = `Step ${pData.global_step}/${pData.total_global_steps}`;
+                if (stageStepCounter) updateCountDisplay(stageStepCounter, stepLabel);
+                if (centerCounter) updateCountDisplay(centerCounter, stepLabel);
               }
 
               if (placeholderDesc && pData.detail) updateCountDisplay(placeholderDesc, pData.detail);
@@ -17792,6 +18191,7 @@ body.eco-mode .video-stage-progress-fill.active {
               if (pData.preview_image) {
                 const livePrev = document.getElementById('videoStageLivePreview');
                 const glyph = document.getElementById('videoStageGlyph');
+                if (videoViewport) videoViewport.classList.add('has-preview');
                 if (livePrev) {
                   livePrev.src = pData.preview_image.startsWith('data:') ? pData.preview_image : `data:image/png;base64,${pData.preview_image}`;
                   livePrev.style.display = 'block';
@@ -17804,9 +18204,14 @@ body.eco-mode .video-stage-progress-fill.active {
             } else if (pData.stage === 'complete' && pData.result_item) {
               _videoPollActive = false;
               WorkstationAudio.play('completeChirp');
-              if (videoViewport) videoViewport.classList.remove('is-synthesizing');
+              WorkstationMeshGrid.stopVideo();
+              if (videoViewport) {
+                videoViewport.classList.remove('is-synthesizing');
+                videoViewport.classList.remove('has-preview');
+              }
               if (stageProgressBar) stageProgressBar.classList.remove('active');
               if (stageProgressFill) stageProgressFill.classList.remove('active');
+              if (centerFill) centerFill.classList.remove('active');
               if (inspectorProgressBar) inspectorProgressBar.classList.remove('active');
               if (inspectorProgressFill) inspectorProgressFill.classList.remove('active');
               const ticksTrack = document.getElementById('videoFrameTicksTrack');
@@ -17825,12 +18230,16 @@ body.eco-mode .video-stage-progress-fill.active {
               }
 
               if (stageProgressFill) stageProgressFill.style.width = '100%';
+              if (centerFill) centerFill.style.width = '100%';
               if (inspectorProgressFill) inspectorProgressFill.style.width = '100%';
               if (stageProgressText) stageProgressText.textContent = '✓ Video synthesis complete!';
+              if (centerText) centerText.textContent = '✓ Video synthesis complete!';
               if (inspectorProgressText) inspectorProgressText.textContent = '✓ Complete!';
               if (stageProgressEta) updateCountDisplay(stageProgressEta, '100%');
+              if (centerEta) updateCountDisplay(centerEta, '100%');
               if (inspectorProgressEta) updateCountDisplay(inspectorProgressEta, '100%');
               if (stageTelemetrySub) updateCountDisplay(stageTelemetrySub, `Rendered ${pData.result_item.frames} frames @ ${pData.result_item.fps} fps · Duration ${pData.result_item.duration}s`);
+              if (centerTelemetry) updateCountDisplay(centerTelemetry, `Rendered ${pData.result_item.frames} frames @ ${pData.result_item.fps} fps · Duration ${pData.result_item.duration}s`);
               if (stageDot) stageDot.className = 'stage-live-indicator standby';
               if (stageMeta) updateCountDisplay(stageMeta, `Video Ready · ${pData.result_item.frames} frames · ${pData.result_item.fps} fps · ${pData.result_item.duration}s`);
 
@@ -17861,15 +18270,21 @@ body.eco-mode .video-stage-progress-fill.active {
               if (genBtn) genBtn.disabled = false;
               setTimeout(() => {
                 if (stageProgressBar) stageProgressBar.style.display = 'none';
+                if (centerBox) centerBox.style.display = 'none';
                 if (inspectorProgressBar) inspectorProgressBar.style.display = 'none';
               }, 1500);
               return;
             } else if (pData.stage === 'error') {
               _videoPollActive = false;
               WorkstationAudio.play('systemWarningBuzz');
-              if (videoViewport) videoViewport.classList.remove('is-synthesizing');
+              WorkstationMeshGrid.stopVideo();
+              if (videoViewport) {
+                videoViewport.classList.remove('is-synthesizing');
+                videoViewport.classList.remove('has-preview');
+              }
               if (stageProgressBar) stageProgressBar.classList.remove('active');
               if (stageProgressFill) stageProgressFill.classList.remove('active');
+              if (centerFill) centerFill.classList.remove('active');
               if (inspectorProgressBar) inspectorProgressBar.classList.remove('active');
               if (inspectorProgressFill) inspectorProgressFill.classList.remove('active');
               const ticksTrack = document.getElementById('videoFrameTicksTrack');
@@ -17890,7 +18305,9 @@ body.eco-mode .video-stage-progress-fill.active {
               if (stageDot) stageDot.className = 'stage-live-indicator standby';
               if (stageMeta) stageMeta.textContent = 'Video Synthesis Failed';
               if (stageProgressText) stageProgressText.textContent = `Error: ${pData.error || 'Synthesis error'}`;
+              if (centerText) centerText.textContent = `Error: ${pData.error || 'Synthesis error'}`;
               if (stageTelemetrySub) stageTelemetrySub.textContent = 'Synthesis process aborted';
+              if (centerTelemetry) centerTelemetry.textContent = 'Synthesis process aborted';
               if (placeholderTitle) placeholderTitle.textContent = 'VIDEO SYNTHESIS FAILED';
               if (placeholderDesc) placeholderDesc.textContent = pData.error || 'Synthesis error';
               const livePrevErr = document.getElementById('videoStageLivePreview');
@@ -17902,6 +18319,7 @@ body.eco-mode .video-stage-progress-fill.active {
               if (genBtn) genBtn.disabled = false;
               setTimeout(() => {
                 if (stageProgressBar) stageProgressBar.style.display = 'none';
+                if (centerBox) centerBox.style.display = 'none';
                 if (inspectorProgressBar) inspectorProgressBar.style.display = 'none';
               }, 2000);
               return;
@@ -18030,6 +18448,17 @@ body.eco-mode .video-stage-progress-fill.active {
 
       const videoViewport = document.getElementById('videoViewportBox');
       if (videoViewport) videoViewport.classList.add('is-synthesizing');
+      WorkstationMeshGrid.startVideo();
+
+      const centerBox = document.getElementById('videoStageCenteredProgressBox');
+      const centerFill = document.getElementById('videoStageCenteredFill');
+      const centerText = document.getElementById('videoStageCenteredText');
+      const centerEta = document.getElementById('videoStageCenteredEta');
+      const centerTelemetry = document.getElementById('videoStageCenteredTelemetry');
+      const centerCounter = document.getElementById('videoStageCenteredCounter');
+      if (centerBox) centerBox.style.display = 'flex';
+      if (centerFill) centerFill.classList.add('active');
+
       if (genBtn) genBtn.disabled = true;
       if (stageProgressBar) {
         stageProgressBar.style.display = 'flex';
@@ -18044,13 +18473,18 @@ body.eco-mode .video-stage-progress-fill.active {
       if (stageDot) stageDot.className = 'stage-live-indicator busy';
 
       if (stageProgressFill) stageProgressFill.style.width = '2%';
+      if (centerFill) centerFill.style.width = '2%';
       if (inspectorProgressFill) inspectorProgressFill.style.width = '2%';
       if (stageProgressText) stageProgressText.textContent = `Connecting to diffusion pipeline (${model})...`;
+      if (centerText) centerText.textContent = `Connecting to diffusion pipeline (${model})...`;
       if (inspectorProgressText) inspectorProgressText.textContent = `Connecting to diffusion pipeline (${model})...`;
       if (stageProgressEta) stageProgressEta.textContent = '0.0%';
+      if (centerEta) centerEta.textContent = '0.0%';
       if (inspectorProgressEta) inspectorProgressEta.textContent = '0.0%';
       if (stageTelemetrySub) stageTelemetrySub.textContent = `Starting ${frames} frames · Engine: SD WebUI :7860 · ${fps} fps`;
+      if (centerTelemetry) centerTelemetry.textContent = `Starting ${frames} frames · Engine: SD WebUI :7860 · ${fps} fps`;
       if (stageStepCounter) stageStepCounter.textContent = `Step 0/${frames * 15}`;
+      if (centerCounter) centerCounter.textContent = `Step 0/${frames * 15}`;
 
       if (stageDot) stageDot.className = 'stage-live-indicator';
       if (stageMeta) stageMeta.textContent = `Rendering ${frames} frames · ${fps} fps · ${model}...`;
@@ -18092,8 +18526,14 @@ body.eco-mode .video-stage-progress-fill.active {
         }
       } catch (err) {
         if (genBtn) genBtn.disabled = false;
+        WorkstationMeshGrid.stopVideo();
         const videoViewport = document.getElementById('videoViewportBox');
-        if (videoViewport) videoViewport.classList.remove('is-synthesizing');
+        if (videoViewport) {
+          videoViewport.classList.remove('is-synthesizing');
+          videoViewport.classList.remove('has-preview');
+        }
+        const centerBox = document.getElementById('videoStageCenteredProgressBox');
+        if (centerBox) centerBox.style.display = 'none';
         if (stageProgressBar) stageProgressBar.classList.remove('active');
         if (stageProgressFill) stageProgressFill.classList.remove('active');
         if (inspectorProgressBar) inspectorProgressBar.classList.remove('active');
@@ -18117,6 +18557,7 @@ body.eco-mode .video-stage-progress-fill.active {
         setTimeout(() => {
           if (stageProgressBar) stageProgressBar.style.display = 'none';
           if (inspectorProgressBar) inspectorProgressBar.style.display = 'none';
+          if (centerBox) centerBox.style.display = 'none';
         }, 2000);
       }
     });
@@ -18670,6 +19111,13 @@ body.eco-mode .video-stage-progress-fill.active {
     const streamStatusEl = document.getElementById('metricStreamStatus');
     const imgProgEl = document.getElementById('metricImgCurrentStep');
 
+    const centerBox = document.getElementById('imgStageCenteredProgressBox');
+    const centerFill = document.getElementById('imgStageCenteredFill');
+    const centerText = document.getElementById('imgStageCenteredText');
+    const centerEta = document.getElementById('imgStageCenteredEta');
+    const centerTelemetry = document.getElementById('imgStageCenteredTelemetry');
+    const centerCounter = document.getElementById('imgStageCenteredCounter');
+
     if (genBtn) {
       genBtn.disabled = true;
       genBtn.textContent = '⏳ SYNTHESIZING...';
@@ -18678,6 +19126,8 @@ body.eco-mode .video-stage-progress-fill.active {
     if (stageStopBtn) stageStopBtn.style.display = 'inline-flex';
     const stageArea = document.getElementById('stageCanvasArea');
     if (stageArea) stageArea.classList.add('is-synthesizing');
+    WorkstationMeshGrid.startImage();
+
     if (progressBox) {
       progressBox.style.display = 'block';
       progressBox.classList.add('active');
@@ -18688,14 +19138,23 @@ body.eco-mode .video-stage-progress-fill.active {
       stageBar.classList.add('active');
     }
     if (stageFill) stageFill.classList.add('active');
+    if (centerBox) {
+      centerBox.style.display = 'flex';
+    }
+    if (centerFill) centerFill.classList.add('active');
     if (stageDot) stageDot.className = 'stage-live-indicator busy';
 
     function resetImageControls() {
-      if (stageArea) stageArea.classList.remove('is-synthesizing');
+      WorkstationMeshGrid.stopImage();
+      if (stageArea) {
+        stageArea.classList.remove('is-synthesizing');
+        stageArea.classList.remove('has-preview');
+      }
       if (progressBox) progressBox.classList.remove('active');
       if (progressFill) progressFill.classList.remove('active');
       if (stageBar) stageBar.classList.remove('active');
       if (stageFill) stageFill.classList.remove('active');
+      if (centerFill) centerFill.classList.remove('active');
       if (stageDot) stageDot.className = 'stage-live-indicator standby';
       if (genBtn) {
         genBtn.disabled = false;
@@ -18706,6 +19165,7 @@ body.eco-mode .video-stage-progress-fill.active {
       setTimeout(() => {
         if (progressBox) progressBox.style.display = 'none';
         if (stageBar) stageBar.style.display = 'none';
+        if (centerBox) centerBox.style.display = 'none';
       }, 1200);
     }
 
@@ -18717,14 +19177,39 @@ body.eco-mode .video-stage-progress-fill.active {
           const pData = await pRes.json();
           if (pData.active) {
             WorkstationAudio.throttledTick('streamRelayTick', 150);
+            WorkstationMeshGrid.startImage();
             const pct = Math.round((pData.progress || 0) * 100);
             const pctVal = Math.max(pct, 2);
 
             if (progressFill) progressFill.style.width = `${pctVal}%`;
             if (stageFill) stageFill.style.width = `${pctVal}%`;
+            if (centerFill) centerFill.style.width = `${pctVal}%`;
 
             if (progressText && pData.detail) updateCountDisplay(progressText, pData.detail);
+            if (centerText && pData.detail) updateCountDisplay(centerText, pData.detail);
+
             if (progressEta && pData.eta_str) updateCountDisplay(progressEta, pData.eta_str);
+            if (centerEta) updateCountDisplay(centerEta, pData.eta_str ? `${pData.eta_str} (${pctVal}%)` : `${pctVal}%`);
+
+            const liveParams = pData.parameters || {};
+            const sampler = liveParams.sampler_name || 'Euler a';
+            const dim = (liveParams.width && liveParams.height) ? `${liveParams.width}×${liveParams.height}` : '512×512';
+            const cfg = liveParams.cfg_scale ? `CFG ${liveParams.cfg_scale}` : 'CFG 7.0';
+            const seed = (liveParams.seed !== undefined && liveParams.seed !== -1) ? `Seed ${liveParams.seed}` : '';
+            const telemetryStr = [dim, sampler, cfg, seed].filter(Boolean).join(' · ');
+
+            if (centerTelemetry) updateCountDisplay(centerTelemetry, telemetryStr || 'Automatic1111 / SD WebUI');
+            if (pData.sampling_step !== undefined) {
+              const stepLabel = `Step ${pData.sampling_step}/${pData.sampling_steps}`;
+              if (centerCounter) updateCountDisplay(centerCounter, stepLabel);
+            }
+
+            const placeholderTitle = document.getElementById('imgStageTitle');
+            const placeholderDesc = document.getElementById('imgStageDesc');
+            const placeholderSub = document.getElementById('imgStageSub');
+            if (placeholderTitle) updateCountDisplay(placeholderTitle, `DIFFUSING STEP ${pData.sampling_step || 1}/${pData.sampling_steps || 25}`);
+            if (placeholderDesc && pData.detail) updateCountDisplay(placeholderDesc, pData.detail);
+            if (placeholderSub && telemetryStr) updateCountDisplay(placeholderSub, telemetryStr);
 
             if (stageMetaText && pData.detail) {
               updateCountDisplay(stageMetaText, `${pData.detail} · ${pData.eta_str || ''}`);
@@ -18735,6 +19220,7 @@ body.eco-mode .video-stage-progress-fill.active {
 
             // LIVE DENOISING LATENT PREVIEW ON STAGE CANVAS!
             if (pData.preview_image) {
+              if (stageArea) stageArea.classList.add('has-preview');
               if (stageImg) {
                 const prevSrc = pData.preview_image.startsWith('data:') ? pData.preview_image : `data:image/png;base64,${pData.preview_image}`;
                 stageImg.src = prevSrc;
@@ -18754,15 +19240,23 @@ body.eco-mode .video-stage-progress-fill.active {
           } else if (pData.stage === 'complete' && pData.result_item) {
             _imagePollActive = false;
             WorkstationAudio.play('completeChirp');
+            WorkstationMeshGrid.stopImage();
             localStorage.removeItem('liw_active_image_job');
-            if (stageArea) stageArea.classList.remove('is-synthesizing');
+            if (stageArea) {
+              stageArea.classList.remove('is-synthesizing');
+              stageArea.classList.remove('has-preview');
+            }
             if (progressFill) progressFill.classList.remove('active');
             if (stageFill) stageFill.classList.remove('active');
+            if (centerFill) centerFill.classList.remove('active');
 
             if (progressFill) progressFill.style.width = '100%';
             if (stageFill) stageFill.style.width = '100%';
+            if (centerFill) centerFill.style.width = '100%';
             if (progressText) progressText.textContent = '✓ Image synthesis complete!';
+            if (centerText) centerText.textContent = '✓ Image synthesis complete!';
             if (progressEta) updateCountDisplay(progressEta, '100%');
+            if (centerEta) updateCountDisplay(centerEta, '100%');
 
             if (stageDot) stageDot.className = 'stage-live-indicator';
             const elapsedStr = pData.result_item.elapsed ? `${pData.result_item.elapsed}s` : 'Done';
@@ -18770,6 +19264,7 @@ body.eco-mode .video-stage-progress-fill.active {
             const metaStr = `${params.width || 512}×${params.height || 512} · ${params.sampler_name || 'Euler a'} · ${params.steps || 25} steps · ${elapsedStr}`;
             if (stageMetaText) updateCountDisplay(stageMetaText, `Ready · ${metaStr}`);
             if (stageMetaMobileText) updateCountDisplay(stageMetaMobileText, `Ready · ${elapsedStr}`);
+            if (centerTelemetry) updateCountDisplay(centerTelemetry, metaStr);
 
             // Render Final Crisp Image on Canvas
             const finalB64 = pData.result_item.image;
@@ -18811,11 +19306,17 @@ body.eco-mode .video-stage-progress-fill.active {
             return;
           } else if (pData.stage === 'interrupted') {
             _imagePollActive = false;
+            WorkstationMeshGrid.stopImage();
             localStorage.removeItem('liw_active_image_job');
 
+            if (stageArea) {
+              stageArea.classList.remove('is-synthesizing');
+              stageArea.classList.remove('has-preview');
+            }
             if (stageDot) stageDot.className = 'stage-live-indicator standby';
             if (stageMetaText) stageMetaText.textContent = 'Diffusion Synthesis Interrupted';
             if (progressText) progressText.textContent = 'Synthesis stopped';
+            if (centerText) centerText.textContent = 'Synthesis stopped';
 
             if (streamStatusEl) {
               streamStatusEl.innerText = 'Synthesis Stopped';
@@ -18830,11 +19331,17 @@ body.eco-mode .video-stage-progress-fill.active {
             return;
           } else if (pData.stage === 'error') {
             _imagePollActive = false;
+            WorkstationMeshGrid.stopImage();
             localStorage.removeItem('liw_active_image_job');
 
+            if (stageArea) {
+              stageArea.classList.remove('is-synthesizing');
+              stageArea.classList.remove('has-preview');
+            }
             if (stageDot) stageDot.className = 'stage-live-indicator standby';
             if (stageMetaText) stageMetaText.textContent = 'Image Synthesis Failed';
             if (progressText) progressText.textContent = `Error: ${pData.error || 'Synthesis error'}`;
+            if (centerText) centerText.textContent = `Error: ${pData.error || 'Synthesis error'}`;
 
             if (streamStatusEl) {
               streamStatusEl.innerText = 'Diffusion Error';
@@ -18943,6 +19450,25 @@ body.eco-mode .video-stage-progress-fill.active {
     if (window.innerWidth <= 768) {
       setStudioSubTab('image', 'stage');
     }
+    const stageArea = document.getElementById('stageCanvasArea');
+    if (stageArea) stageArea.classList.add('is-synthesizing');
+    WorkstationMeshGrid.startImage();
+    const centerBox = document.getElementById('imgStageCenteredProgressBox');
+    const centerFill = document.getElementById('imgStageCenteredFill');
+    const centerText = document.getElementById('imgStageCenteredText');
+    const centerEta = document.getElementById('imgStageCenteredEta');
+    const centerTelemetry = document.getElementById('imgStageCenteredTelemetry');
+    const centerCounter = document.getElementById('imgStageCenteredCounter');
+    if (centerBox) centerBox.style.display = 'flex';
+    if (centerFill) {
+      centerFill.classList.add('active');
+      centerFill.style.width = '2%';
+    }
+    if (centerText) centerText.textContent = 'ALLOCATING LATENT TENSOR...';
+    if (centerEta) centerEta.textContent = '0.0%';
+    if (centerTelemetry) centerTelemetry.textContent = `${payload.sampler_name} · CFG ${payload.cfg_scale} · ${payload.width}×${payload.height}`;
+    if (centerCounter) centerCounter.textContent = `Step 0/${payload.steps}`;
+
     if (genBtn) {
       genBtn.disabled = true;
       genBtn.textContent = '⏳ SYNTHESIZING...';
@@ -18964,6 +19490,12 @@ body.eco-mode .video-stage-progress-fill.active {
         throw new Error(data.error || 'Failed to start image synthesis in background');
       }
     } catch (err) {
+      WorkstationMeshGrid.stopImage();
+      if (stageArea) {
+        stageArea.classList.remove('is-synthesizing');
+        stageArea.classList.remove('has-preview');
+      }
+      if (centerBox) centerBox.style.display = 'none';
       if (genBtn) {
         genBtn.disabled = false;
         genBtn.textContent = '⚡ GENERATE IMAGE';
