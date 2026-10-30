@@ -691,6 +691,31 @@ select option:checked {
   vertical-align: middle;
 }
 
+#audioMuteQuickBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  width: 26px;
+  min-width: 26px;
+  padding: 0;
+  cursor: pointer;
+  background: var(--bg-btn);
+  border: 1px solid var(--border-frame);
+  border-radius: 2px;
+  font-size: 11px;
+}
+#audioMuteQuickBtn:hover {
+  background: var(--border-frame);
+}
+#audioMuteQuickBtn:active {
+  background: var(--border-dark);
+  color: #FFFFFF;
+}
+#audioMuteQuickBtn.muted {
+  opacity: 0.65;
+}
+
 .top-settings-btn {
   display: inline-flex;
   align-items: center;
@@ -4289,7 +4314,8 @@ select option:checked {
     flex-shrink: 0 !important;
   }
 
-  #settingsBtn {
+  #settingsBtn,
+  #audioMuteQuickBtn {
     height: 28px !important;
     width: 28px !important;
     min-width: 28px !important;
@@ -8043,6 +8069,11 @@ select option:checked {
         </button>
 
         <span class="top-header-divider desktop-text" aria-hidden="true"></span>
+        <!-- Audio Feedback Mute / Unmute Quick Toggle -->
+        <button type="button" class="top-btn" id="audioMuteQuickBtn" title="Audio Feedback Active (Click to Mute)" aria-label="Toggle Sound Effects">
+          <span id="audioMuteQuickIcon">🔊</span>
+        </button>
+
         <button class="top-btn top-settings-btn" id="settingsBtn" title="Settings & Diagnostics (⌘, or S in Palette)">
           <span class="settings-btn-icon">⚙</span>
           <span class="settings-btn-label">Settings</span>
@@ -9115,6 +9146,68 @@ select option:checked {
         <label for="settingTtsSpeed">Speech Playback Speed: <span id="ttsSpeedLabel">1.0x</span></label>
         <input type="range" id="settingTtsSpeed" min="0.5" max="2.0" step="0.1" value="1.0">
       </div>
+
+      <!-- ═══════════════════════════════════════════════════════════════════
+           WORKSTATION SOUND EFFECTS & MICRO-ACOUSTICS
+           ═══════════════════════════════════════════════════════════════════ -->
+      <div class="form-group" style="margin-top:16px; border-top:1px solid var(--border-frame); padding-top:14px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+          <span style="font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:0.5px;">🔊 Workstation Sound Effects & Micro-Acoustics</span>
+          <button type="button" class="top-btn" id="soundTestPreviewBtn" title="Preview Audio Synthesis" style="padding:2px 8px; font-size:10px; height:22px;">▶ Test Sound</button>
+        </div>
+
+        <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+          <input type="checkbox" id="settingSoundEffectsEnabled">
+          <span style="font-weight:600;">Enable Audio Feedback (Clicks, Stream Ticks & Alerts)</span>
+        </label>
+        <div style="font-size:10px; color:var(--text-muted); margin-top:3px; margin-left:20px;">
+          Procedurally synthesized via Web Audio API. Zero external audio downloads.
+        </div>
+
+        <div style="margin-top:12px; display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div>
+            <label for="settingSoundVolume" style="font-size:11px; display:flex; justify-content:space-between; margin-bottom:4px;">
+              <span>Master Volume:</span>
+              <span id="soundVolumeLabel" style="font-weight:700; font-family:var(--font-mono);">25%</span>
+            </label>
+            <input type="range" id="settingSoundVolume" min="0" max="100" step="5" value="25" style="width:100%;">
+          </div>
+          <div>
+            <label for="settingSoundTheme" style="font-size:11px; display:block; margin-bottom:4px;">Acoustic Profile:</label>
+            <select id="settingSoundTheme" class="form-input" style="width:100%; height:28px; padding:2px 6px; font-size:11px;">
+              <option value="futuristic">Futuristic Minimal (Sine Micro-Chirps)</option>
+              <option value="retro">Retro Workstation (DEC/Bell Labs Relays)</option>
+              <option value="chiptune">Sci-Fi 8-Bit (ZzFX Chiptunes)</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-top:12px; border:1px solid var(--border-frame); padding:8px 10px; background:var(--bg-btn);">
+          <div style="font-size:9.5px; font-weight:700; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px; letter-spacing:0.4px;">Micro-Acoustic Trigger Filters:</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px 12px; font-size:11px;">
+            <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+              <input type="checkbox" id="settingSoundClicks">
+              <span>Button & Mode Clicks</span>
+            </label>
+            <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+              <input type="checkbox" id="settingSoundProgress">
+              <span>Stream Progress Ticks</span>
+            </label>
+            <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+              <input type="checkbox" id="settingSoundCompletion">
+              <span>Task Completion Chimes</span>
+            </label>
+            <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+              <input type="checkbox" id="settingSoundAlerts">
+              <span>Alerts & Abort Thuds</span>
+            </label>
+            <label style="display:flex; align-items:center; gap:6px; cursor:pointer; grid-column:span 2;">
+              <input type="checkbox" id="settingSoundHaptics">
+              <span>Mobile Tactile Haptics (Vibration)</span>
+            </label>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="drawer-footer">
       <button type="button" class="composer-btn" id="closeSettingsBtn">Cancel</button>
@@ -9618,6 +9711,632 @@ select option:checked {
     const earlyTheme = localStorage.getItem('ollama_studio_theme') || 'light';
     document.documentElement.setAttribute('data-theme', earlyTheme);
   } catch (e) {}
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     WORKSTATION PROCEDURAL AUDIO FEEDBACK ENGINE (WEB AUDIO API)
+     Zero external sound assets · Micro-acoustic physical modeling
+     ═══════════════════════════════════════════════════════════════════════ */
+  const WorkstationAudio = (() => {
+    const STORAGE_KEY = 'liw_sound_config_v1';
+    let audioCtx = null;
+    let masterGain = null;
+    let lastProgressTickTime = 0;
+    let lastSliderTickTime = 0;
+
+    const DEFAULT_CONFIG = {
+      enabled: true,
+      masterVolume: 0.25,
+      theme: 'futuristic', // 'futuristic' | 'retro' | 'chiptune'
+      clicks: true,
+      progressTicks: true,
+      completion: true,
+      alerts: true,
+      haptics: true
+    };
+
+    let cfg = { ...DEFAULT_CONFIG };
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        cfg = { ...DEFAULT_CONFIG, ...JSON.parse(saved) };
+      }
+    } catch (_) {}
+
+    function getContext() {
+      if (!audioCtx) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return null;
+        try {
+          audioCtx = new AudioCtx();
+          masterGain = audioCtx.createGain();
+          masterGain.gain.setValueAtTime(cfg.masterVolume, audioCtx.currentTime);
+          masterGain.connect(audioCtx.destination);
+        } catch (_) {
+          return null;
+        }
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(() => {});
+      }
+      return audioCtx;
+    }
+
+    function triggerHaptic(pattern) {
+      if (!cfg.haptics) return;
+      try {
+        if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+          navigator.vibrate(pattern);
+        }
+      } catch (_) {}
+    }
+
+    const RECIPES = {
+      // 1. Mechanical Button Click
+      clickMechanical: (c, out, vol) => {
+        const t = c.currentTime;
+        if (cfg.theme === 'retro') {
+          // DEC / VT Terminal relay click: filtered bandpass impulse with crack
+          const osc = c.createOscillator();
+          const gain = c.createGain();
+          const filter = c.createBiquadFilter();
+
+          filter.type = 'bandpass';
+          filter.frequency.setValueAtTime(1200, t);
+          filter.Q.setValueAtTime(3.5, t);
+
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(820, t);
+          osc.frequency.exponentialRampToValueAtTime(180, t + 0.015);
+
+          gain.gain.setValueAtTime(0.3 * vol, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.015);
+
+          osc.connect(filter);
+          filter.connect(gain);
+          gain.connect(out);
+          osc.start(t);
+          osc.stop(t + 0.016);
+        } else if (cfg.theme === 'chiptune') {
+          // 8-bit blip (ZzFX micro-chirp)
+          const osc = c.createOscillator();
+          const gain = c.createGain();
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(880, t);
+          osc.frequency.exponentialRampToValueAtTime(220, t + 0.012);
+
+          gain.gain.setValueAtTime(0.2 * vol, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.012);
+
+          osc.connect(gain);
+          gain.connect(out);
+          osc.start(t);
+          osc.stop(t + 0.014);
+        } else {
+          // Futuristic Minimal (Default): Crisp sine micro-impulse with high-pass
+          const osc = c.createOscillator();
+          const gain = c.createGain();
+          const filter = c.createBiquadFilter();
+
+          filter.type = 'highpass';
+          filter.frequency.setValueAtTime(600, t);
+
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(1800, t);
+          osc.frequency.exponentialRampToValueAtTime(240, t + 0.012);
+
+          gain.gain.setValueAtTime(0.35 * vol, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.012);
+
+          osc.connect(filter);
+          filter.connect(gain);
+          gain.connect(out);
+          osc.start(t);
+          osc.stop(t + 0.014);
+        }
+      },
+
+      // 2. Mode / Studio Switch Chirp
+      modeSwitchChirp: (c, out, vol) => {
+        const t = c.currentTime;
+        if (cfg.theme === 'retro') {
+          // Two-tone mechanical step
+          [0, 0.018].forEach((offset, idx) => {
+            const osc = c.createOscillator();
+            const gain = c.createGain();
+            const noteT = t + offset;
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(idx === 0 ? 380 : 620, noteT);
+            gain.gain.setValueAtTime(0.22 * vol, noteT);
+            gain.gain.exponentialRampToValueAtTime(0.001, noteT + 0.02);
+            osc.connect(gain);
+            gain.connect(out);
+            osc.start(noteT);
+            osc.stop(noteT + 0.022);
+          });
+        } else if (cfg.theme === 'chiptune') {
+          // Rapid 3-note arpeggio
+          [523.25, 659.25, 783.99].forEach((freq, idx) => {
+            const osc = c.createOscillator();
+            const gain = c.createGain();
+            const noteT = t + (idx * 0.016);
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(freq, noteT);
+            gain.gain.setValueAtTime(0.15 * vol, noteT);
+            gain.gain.exponentialRampToValueAtTime(0.001, noteT + 0.02);
+            osc.connect(gain);
+            gain.connect(out);
+            osc.start(noteT);
+            osc.stop(noteT + 0.022);
+          });
+        } else {
+          // Futuristic: Smooth ascending dual harmonic chirp
+          const osc = c.createOscillator();
+          const gain = c.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(440, t);
+          osc.frequency.exponentialRampToValueAtTime(740, t + 0.038);
+
+          gain.gain.setValueAtTime(0.25 * vol, t);
+          gain.gain.linearRampToValueAtTime(0.3 * vol, t + 0.015);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
+
+          osc.connect(gain);
+          gain.connect(out);
+          osc.start(t);
+          osc.stop(t + 0.042);
+        }
+      },
+
+      // 3. Selection Tick
+      selectionTick: (c, out, vol) => {
+        const t = c.currentTime;
+        const osc = c.createOscillator();
+        const gain = c.createGain();
+        osc.type = cfg.theme === 'chiptune' ? 'square' : 'triangle';
+        osc.frequency.setValueAtTime(920, t);
+        osc.frequency.exponentialRampToValueAtTime(460, t + 0.009);
+
+        gain.gain.setValueAtTime(0.25 * vol, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.009);
+
+        osc.connect(gain);
+        gain.connect(out);
+        osc.start(t);
+        osc.stop(t + 0.01);
+      },
+
+      // 4. Transmit Impulse
+      transmitImpulse: (c, out, vol) => {
+        const t = c.currentTime;
+        const osc = c.createOscillator();
+        const gain = c.createGain();
+        osc.type = cfg.theme === 'retro' ? 'sawtooth' : 'sine';
+        osc.frequency.setValueAtTime(380, t);
+        osc.frequency.exponentialRampToValueAtTime(980, t + 0.045);
+
+        gain.gain.setValueAtTime(0.32 * vol, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.045);
+
+        osc.connect(gain);
+        gain.connect(out);
+        osc.start(t);
+        osc.stop(t + 0.048);
+      },
+
+      // 5. Streaming Relay Tick
+      streamRelayTick: (c, out, vol) => {
+        const t = c.currentTime;
+        const osc = c.createOscillator();
+        const gain = c.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1400, t);
+        osc.frequency.exponentialRampToValueAtTime(700, t + 0.005);
+
+        gain.gain.setValueAtTime(0.06 * vol, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.006);
+
+        osc.connect(gain);
+        gain.connect(out);
+        osc.start(t);
+        osc.stop(t + 0.007);
+      },
+
+      // 6. Completion Chime (Harmonious Triad C6-E6-G6)
+      completeChirp: (c, out, vol) => {
+        const now = c.currentTime;
+        const freqs = cfg.theme === 'chiptune'
+          ? [523.25, 659.25, 783.99, 1046.5]
+          : [1046.5, 1318.5, 1567.98];
+        const spacing = cfg.theme === 'chiptune' ? 0.04 : 0.035;
+
+        freqs.forEach((freq, idx) => {
+          const osc = c.createOscillator();
+          const gain = c.createGain();
+          const start = now + (idx * spacing);
+
+          osc.type = cfg.theme === 'chiptune' ? 'square' : (cfg.theme === 'retro' ? 'triangle' : 'sine');
+          osc.frequency.setValueAtTime(freq, start);
+
+          gain.gain.setValueAtTime(0.2 * vol, start);
+          gain.gain.exponentialRampToValueAtTime(0.001, start + 0.16);
+
+          osc.connect(gain);
+          gain.connect(out);
+          osc.start(start);
+          osc.stop(start + 0.17);
+        });
+      },
+
+      // 7. Abort / Evict VRAM Thud
+      abortThud: (c, out, vol) => {
+        const t = c.currentTime;
+        const osc = c.createOscillator();
+        const gain = c.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(280, t);
+        osc.frequency.exponentialRampToValueAtTime(65, t + 0.06);
+
+        gain.gain.setValueAtTime(0.35 * vol, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.065);
+
+        osc.connect(gain);
+        gain.connect(out);
+        osc.start(t);
+        osc.stop(t + 0.07);
+      },
+
+      // 8. Warning / Error Discordant Buzz
+      systemWarningBuzz: (c, out, vol) => {
+        const t = c.currentTime;
+        [220, 233.08].forEach(freq => {
+          const osc = c.createOscillator();
+          const gain = c.createGain();
+          osc.type = cfg.theme === 'chiptune' ? 'square' : 'sawtooth';
+          osc.frequency.setValueAtTime(freq, t);
+
+          gain.gain.setValueAtTime(0.15 * vol, t);
+          gain.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+
+          osc.connect(gain);
+          gain.connect(out);
+          osc.start(t);
+          osc.stop(t + 0.085);
+        });
+      },
+
+      // 9. Action Pop (Copy, Regenerate, Read Aloud)
+      actionPop: (c, out, vol) => {
+        const t = c.currentTime;
+        const osc = c.createOscillator();
+        const gain = c.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(600, t);
+        osc.frequency.exponentialRampToValueAtTime(1100, t + 0.016);
+
+        gain.gain.setValueAtTime(0.28 * vol, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.016);
+
+        osc.connect(gain);
+        gain.connect(out);
+        osc.start(t);
+        osc.stop(t + 0.018);
+      },
+
+      // 10. Stage Action Tick
+      stageActionTick: (c, out, vol) => {
+        const t = c.currentTime;
+        const osc = c.createOscillator();
+        const gain = c.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1500, t);
+        osc.frequency.exponentialRampToValueAtTime(300, t + 0.01);
+
+        gain.gain.setValueAtTime(0.3 * vol, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.01);
+
+        osc.connect(gain);
+        gain.connect(out);
+        osc.start(t);
+        osc.stop(t + 0.012);
+      },
+
+      // 11. Slider Notch
+      sliderNotch: (c, out, vol) => {
+        const t = c.currentTime;
+        const osc = c.createOscillator();
+        const gain = c.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1100, t);
+        osc.frequency.exponentialRampToValueAtTime(500, t + 0.004);
+
+        gain.gain.setValueAtTime(0.12 * vol, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.004);
+
+        osc.connect(gain);
+        gain.connect(out);
+        osc.start(t);
+        osc.stop(t + 0.005);
+      },
+
+      // 12. Filmstrip Thumbnail Select
+      filmstripSelect: (c, out, vol) => {
+        const t = c.currentTime;
+        const osc = c.createOscillator();
+        const gain = c.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(520, t);
+        osc.frequency.exponentialRampToValueAtTime(320, t + 0.014);
+
+        gain.gain.setValueAtTime(0.22 * vol, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.014);
+
+        osc.connect(gain);
+        gain.connect(out);
+        osc.start(t);
+        osc.stop(t + 0.016);
+      },
+
+      // 13. Upload Confirm
+      uploadConfirm: (c, out, vol) => {
+        const t = c.currentTime;
+        [550, 880].forEach((freq, idx) => {
+          const osc = c.createOscillator();
+          const gain = c.createGain();
+          const noteT = t + (idx * 0.022);
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, noteT);
+          gain.gain.setValueAtTime(0.24 * vol, noteT);
+          gain.gain.exponentialRampToValueAtTime(0.001, noteT + 0.025);
+          osc.connect(gain);
+          gain.connect(out);
+          osc.start(noteT);
+          osc.stop(noteT + 0.028);
+        });
+      },
+
+      // 14. Mic Engage
+      micEngage: (c, out, vol) => {
+        const t = c.currentTime;
+        const osc = c.createOscillator();
+        const gain = c.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(300, t);
+        osc.frequency.exponentialRampToValueAtTime(600, t + 0.045);
+
+        gain.gain.setValueAtTime(0.25 * vol, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.045);
+
+        osc.connect(gain);
+        gain.connect(out);
+        osc.start(t);
+        osc.stop(t + 0.05);
+      },
+
+      // 15. Mic Disengage
+      micDisengage: (c, out, vol) => {
+        const t = c.currentTime;
+        const osc = c.createOscillator();
+        const gain = c.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(600, t);
+        osc.frequency.exponentialRampToValueAtTime(300, t + 0.045);
+
+        gain.gain.setValueAtTime(0.25 * vol, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.045);
+
+        osc.connect(gain);
+        gain.connect(out);
+        osc.start(t);
+        osc.stop(t + 0.05);
+      },
+
+      // 16. Milestone Chirp
+      milestoneChirp: (c, out, vol) => {
+        const t = c.currentTime;
+        const osc = c.createOscillator();
+        const gain = c.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1046.5, t);
+
+        gain.gain.setValueAtTime(0.22 * vol, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
+
+        osc.connect(gain);
+        gain.connect(out);
+        osc.start(t);
+        osc.stop(t + 0.095);
+      }
+    };
+
+    const CATEGORY_MAP = {
+      clickMechanical: 'clicks',
+      modeSwitchChirp: 'clicks',
+      selectionTick: 'clicks',
+      actionPop: 'clicks',
+      stageActionTick: 'clicks',
+      filmstripSelect: 'clicks',
+      sliderNotch: 'clicks',
+      transmitImpulse: 'clicks',
+      streamRelayTick: 'progressTicks',
+      completeChirp: 'completion',
+      uploadConfirm: 'completion',
+      milestoneChirp: 'completion',
+      abortThud: 'alerts',
+      systemWarningBuzz: 'alerts',
+      micEngage: 'clicks',
+      micDisengage: 'clicks'
+    };
+
+    const HAPTIC_MAP = {
+      clickMechanical: 8,
+      modeSwitchChirp: [10, 20, 10],
+      selectionTick: 6,
+      actionPop: 10,
+      stageActionTick: 10,
+      filmstripSelect: 8,
+      sliderNotch: 4,
+      transmitImpulse: 15,
+      completeChirp: [12, 40, 15],
+      uploadConfirm: 12,
+      abortThud: 25,
+      systemWarningBuzz: [30, 50, 30],
+      micEngage: 20,
+      micDisengage: [15, 30, 15]
+    };
+
+    function play(name, options = {}) {
+      if (!cfg.enabled) return;
+      if (cfg.masterVolume <= 0) return;
+
+      const cat = CATEGORY_MAP[name] || 'clicks';
+      if (cfg[cat] === false) return;
+
+      const recipe = RECIPES[name];
+      if (!recipe) return;
+
+      const c = getContext();
+      if (!c || !masterGain) return;
+
+      try {
+        recipe(c, masterGain, options.volume || 1.0);
+        if (HAPTIC_MAP[name]) {
+          triggerHaptic(HAPTIC_MAP[name]);
+        }
+      } catch (_) {}
+    }
+
+    function throttledTick(name = 'streamRelayTick', minIntervalMs = 120) {
+      const now = performance.now();
+      if (now - lastProgressTickTime < minIntervalMs) return;
+      lastProgressTickTime = now;
+      play(name);
+    }
+
+    function throttledSliderTick(minIntervalMs = 45) {
+      const now = performance.now();
+      if (now - lastSliderTickTime < minIntervalMs) return;
+      lastSliderTickTime = now;
+      play('sliderNotch');
+    }
+
+    function toggleMute() {
+      cfg.enabled = !cfg.enabled;
+      saveConfig();
+      updateMuteUI();
+      if (cfg.enabled) {
+        play('clickMechanical');
+      }
+      return cfg.enabled;
+    }
+
+    function setMuted(muted) {
+      cfg.enabled = !muted;
+      saveConfig();
+      updateMuteUI();
+    }
+
+    function updateConfig(newConfig) {
+      cfg = { ...cfg, ...newConfig };
+      if (masterGain && audioCtx) {
+        masterGain.gain.setValueAtTime(cfg.masterVolume, audioCtx.currentTime);
+      }
+      saveConfig();
+      updateMuteUI();
+    }
+
+    function saveConfig() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg));
+      } catch (_) {}
+    }
+
+    function updateMuteUI() {
+      const btn = document.getElementById('audioMuteQuickBtn');
+      const icon = document.getElementById('audioMuteQuickIcon');
+      const chk = document.getElementById('settingSoundEffectsEnabled');
+      if (icon) {
+        icon.textContent = cfg.enabled ? '🔊' : '🔇';
+      }
+      if (btn) {
+        btn.title = cfg.enabled ? 'Audio Feedback Active (Click to Mute)' : 'Audio Feedback Muted (Click to Unmute)';
+        if (!cfg.enabled) {
+          btn.classList.add('muted');
+          btn.style.opacity = '0.65';
+        } else {
+          btn.classList.remove('muted');
+          btn.style.opacity = '1';
+        }
+      }
+      if (chk && chk.checked !== cfg.enabled) {
+        chk.checked = cfg.enabled;
+      }
+    }
+
+    return {
+      play,
+      throttledTick,
+      throttledSliderTick,
+      toggleMute,
+      setMuted,
+      updateConfig,
+      updateMuteUI,
+      ensureContext: getContext,
+      get config() { return { ...cfg }; }
+    };
+  })();
+
+  window.WorkstationAudio = WorkstationAudio;
+
+  // Global Event Delegation for Interactive Workstation Micro-Acoustics
+  document.addEventListener('pointerdown', (e) => {
+    WorkstationAudio.ensureContext();
+    const target = e.target;
+    if (!target) return;
+
+    const interactive = target.closest('button, .top-btn, .composer-btn, .rail-btn, .modal-tab-btn, .stage-icon-btn, .inspector-sub-btn, .filmstrip-item, .model-mode-btn, .pill-btn, .btn-key, .nav-btn, summary, input[type="checkbox"], input[type="radio"]');
+    if (!interactive) return;
+
+    if (interactive.dataset.sound === 'none' || interactive.id === 'audioMuteQuickBtn') {
+      return;
+    }
+
+    if (interactive.dataset.sound) {
+      WorkstationAudio.play(interactive.dataset.sound);
+      return;
+    }
+
+    if (interactive.id === 'vramPurgeQuickBtn' || interactive.id === 'imgInterruptBtn' || interactive.id === 'streamInlineStopBtn' || (interactive.id === 'sendBtn' && typeof isGenerating !== 'undefined' && isGenerating)) {
+      WorkstationAudio.play('abortThud');
+    } else if (interactive.classList.contains('rail-btn') || interactive.classList.contains('modal-tab-btn')) {
+      WorkstationAudio.play('modeSwitchChirp');
+    } else if (interactive.classList.contains('filmstrip-item')) {
+      WorkstationAudio.play('filmstripSelect');
+    } else if (interactive.classList.contains('stage-icon-btn')) {
+      WorkstationAudio.play('stageActionTick');
+    } else if (interactive.classList.contains('action-btn') || interactive.classList.contains('copy-btn') || interactive.classList.contains('regenerate-btn') || interactive.classList.contains('tts-btn')) {
+      WorkstationAudio.play('actionPop');
+    } else {
+      WorkstationAudio.play('clickMechanical');
+    }
+  }, { passive: true });
+
+  document.addEventListener('change', (e) => {
+    const target = e.target;
+    if (!target) return;
+    if (target.tagName === 'SELECT') {
+      WorkstationAudio.play('selectionTick');
+    } else if (target.type === 'checkbox' || target.type === 'radio') {
+      WorkstationAudio.play('clickMechanical');
+    }
+  }, { passive: true });
+
+  document.addEventListener('input', (e) => {
+    const target = e.target;
+    if (!target) return;
+    if (target.type === 'range') {
+      WorkstationAudio.throttledSliderTick(40);
+    }
+  }, { passive: true });
 
 
 
@@ -10397,6 +11116,7 @@ select option:checked {
   }
 
   window.addEventListener('DOMContentLoaded', async () => {
+    WorkstationAudio.updateMuteUI();
     initTheme();
     initSplashScreen();
     applyEcoMode(ecoModeActive);
@@ -10903,6 +11623,9 @@ select option:checked {
 
   
   function showToast(message, type = 'info', title = '') {
+    if (type === 'error' || type === 'warning') {
+      WorkstationAudio.play('systemWarningBuzz');
+    }
     const container = document.getElementById('toastContainer');
     if (!container) return;
     const toast = document.createElement('div');
@@ -12300,6 +13023,8 @@ select option:checked {
       return;
     }
 
+    WorkstationAudio.play('transmitImpulse');
+
     const session = getActiveSession();
 
     let finalPromptContent = text;
@@ -12689,6 +13414,7 @@ select option:checked {
     const renderThrottleMs = ecoModeActive ? 180 : 50;
 
     function renderDOM() {
+      WorkstationAudio.throttledTick('streamRelayTick', 120);
       if (accumulatedThought) {
         reasoningBox.style.display = 'block';
         thoughtBody.innerHTML = marked.parse(accumulatedThought);
@@ -13042,6 +13768,7 @@ select option:checked {
 
       
       attachAssistantActions(botRow, accumulatedContent);
+      WorkstationAudio.play('completeChirp');
 
       smartScrollToBottom();
       checkVramStatus();
@@ -13051,6 +13778,7 @@ select option:checked {
     } catch (err) {
       clearInterval(stopwatchInterval);
       if (err.name === 'AbortError') {
+        WorkstationAudio.play('abortThud');
         const elapsedSec = ((performance.now() - requestStartTime) / 1000).toFixed(1);
         updateCountDisplay(metricStreamTime, `${elapsedSec}s`);
         const timeVisAbort = document.getElementById('metricStreamTimeVisible');
@@ -13135,6 +13863,7 @@ select option:checked {
             }
           }, 600);
         } else {
+          WorkstationAudio.play('systemWarningBuzz');
           metricStreamStatus.innerText = 'Error';
           metricStreamStatus.style.color = 'var(--danger)';
           const errorHtml = `
@@ -13609,6 +14338,36 @@ select option:checked {
       if (ttsSpeedLabel) ttsSpeedLabel.textContent = (config.ttsSpeed || 1.0).toFixed(1) + 'x';
     }
 
+    // Workstation Sound Effects & Micro-Acoustics
+    const sEffectsEl = document.getElementById('settingSoundEffectsEnabled');
+    if (sEffectsEl) sEffectsEl.checked = Boolean(WorkstationAudio.config.enabled);
+
+    const sVolEl = document.getElementById('settingSoundVolume');
+    const sVolLbl = document.getElementById('soundVolumeLabel');
+    if (sVolEl) {
+      const pct = Math.round((WorkstationAudio.config.masterVolume !== undefined ? WorkstationAudio.config.masterVolume : 0.25) * 100);
+      sVolEl.value = pct;
+      if (sVolLbl) sVolLbl.textContent = `${pct}%`;
+    }
+
+    const sThemeEl = document.getElementById('settingSoundTheme');
+    if (sThemeEl) sThemeEl.value = WorkstationAudio.config.theme || 'futuristic';
+
+    const sClicksEl = document.getElementById('settingSoundClicks');
+    if (sClicksEl) sClicksEl.checked = Boolean(WorkstationAudio.config.clicks !== false);
+
+    const sProgressEl = document.getElementById('settingSoundProgress');
+    if (sProgressEl) sProgressEl.checked = Boolean(WorkstationAudio.config.progressTicks !== false);
+
+    const sCompletionEl = document.getElementById('settingSoundCompletion');
+    if (sCompletionEl) sCompletionEl.checked = Boolean(WorkstationAudio.config.completion !== false);
+
+    const sAlertsEl = document.getElementById('settingSoundAlerts');
+    if (sAlertsEl) sAlertsEl.checked = Boolean(WorkstationAudio.config.alerts !== false);
+
+    const sHapticsEl = document.getElementById('settingSoundHaptics');
+    if (sHapticsEl) sHapticsEl.checked = Boolean(WorkstationAudio.config.haptics !== false);
+
     // If Model Hub overlay was open, close it cleanly
     const hubOverlay = document.getElementById('modelHubOverlay');
     if (hubOverlay?.classList.contains('open')) {
@@ -13648,6 +14407,25 @@ select option:checked {
     const val = parseFloat(e.target.value).toFixed(1);
     const lbl = document.getElementById('ttsSpeedLabel');
     if (lbl) lbl.textContent = val + 'x';
+  });
+
+  document.getElementById('settingSoundVolume')?.addEventListener('input', (e) => {
+    const val = e.target.value;
+    const lbl = document.getElementById('soundVolumeLabel');
+    if (lbl) lbl.textContent = val + '%';
+  });
+
+  document.getElementById('soundTestPreviewBtn')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    WorkstationAudio.ensureContext();
+    WorkstationAudio.play('completeChirp');
+  });
+
+  document.getElementById('audioMuteQuickBtn')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const enabled = WorkstationAudio.toggleMute();
+    showToast(enabled ? '🔊 Audio feedback active' : '🔇 Audio feedback muted', 'info');
   });
 
   document.getElementById('settingSystemPromptPreset')?.addEventListener('change', (e) => {
@@ -13710,6 +14488,18 @@ select option:checked {
     }
 
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(config));
+
+    // Save Sound Effects & Micro-Acoustics
+    WorkstationAudio.updateConfig({
+      enabled: Boolean(document.getElementById('settingSoundEffectsEnabled')?.checked),
+      masterVolume: (parseInt(document.getElementById('settingSoundVolume')?.value, 10) || 25) / 100,
+      theme: document.getElementById('settingSoundTheme')?.value || 'futuristic',
+      clicks: Boolean(document.getElementById('settingSoundClicks')?.checked),
+      progressTicks: Boolean(document.getElementById('settingSoundProgress')?.checked),
+      completion: Boolean(document.getElementById('settingSoundCompletion')?.checked),
+      alerts: Boolean(document.getElementById('settingSoundAlerts')?.checked),
+      haptics: Boolean(document.getElementById('settingSoundHaptics')?.checked)
+    });
 
     // Update all existing reasoning boxes in chat immediately
     document.querySelectorAll('#chatContainer details.reasoning-box').forEach(d => {
@@ -16734,6 +17524,7 @@ select option:checked {
           if (pRes.ok) {
             const pData = await pRes.json();
             if (pData.active) {
+              WorkstationAudio.throttledTick('streamRelayTick', 300);
               const pct = typeof pData.progress === 'number' ? pData.progress : 0;
               const pctStr = `${pct.toFixed(1)}%`;
 
@@ -16783,6 +17574,7 @@ select option:checked {
               }
             } else if (pData.stage === 'complete' && pData.result_item) {
               _videoPollActive = false;
+              WorkstationAudio.play('completeChirp');
               const bottomStatus = document.getElementById('metricStreamStatus');
               const vidProg = document.getElementById('metricVideoProgress');
               if (bottomStatus) {
@@ -16835,6 +17627,7 @@ select option:checked {
               return;
             } else if (pData.stage === 'error') {
               _videoPollActive = false;
+              WorkstationAudio.play('systemWarningBuzz');
               const bottomStatus = document.getElementById('metricStreamStatus');
               const vidProg = document.getElementById('metricVideoProgress');
               if (bottomStatus) {
@@ -17636,6 +18429,7 @@ select option:checked {
         if (pRes.ok) {
           const pData = await pRes.json();
           if (pData.active) {
+            WorkstationAudio.throttledTick('streamRelayTick', 150);
             const pct = Math.round((pData.progress || 0) * 100);
             const pctVal = Math.max(pct, 2);
 
@@ -17672,6 +18466,7 @@ select option:checked {
             }
           } else if (pData.stage === 'complete' && pData.result_item) {
             _imagePollActive = false;
+            WorkstationAudio.play('completeChirp');
             localStorage.removeItem('liw_active_image_job');
 
             if (progressFill) progressFill.style.width = '100%';
@@ -18039,6 +18834,7 @@ select option:checked {
     if (audioRecorder && audioRecorder.state === 'recording') {
       // Stop recording
       audioRecorder.stop();
+      WorkstationAudio.play('micDisengage');
       if (btn) {
         btn.textContent = '● Record Audio';
         btn.classList.remove('recording');
@@ -18051,6 +18847,7 @@ select option:checked {
 
     // Start recording
     try {
+      WorkstationAudio.play('micEngage');
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       audioChunks = [];
       recordSeconds = 0;
