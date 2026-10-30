@@ -5862,6 +5862,196 @@ select option:checked {
   transition: width 0.2s ease;
 }
 
+/* ─── Workstation Active Synthesis Progress Animations ─── */
+.progress-bar-fill.active,
+.stage-canvas-progress-fill.active,
+.video-stage-progress-fill.active {
+  background: linear-gradient(
+    90deg,
+    #E5C07B 0%,
+    #FFF8E7 25%,
+    #E5C07B 50%,
+    #FFF8E7 75%,
+    #E5C07B 100%
+  ) !important;
+  background-size: 200% 100% !important;
+  animation: progress-laser-sweep 1.3s infinite linear !important;
+  box-shadow: 0 0 8px rgba(229, 192, 123, 0.45);
+}
+
+@keyframes progress-laser-sweep {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Active Viewport Laser Raster Scan */
+.stage-canvas-area.is-synthesizing,
+.stage-viewport-box.is-synthesizing {
+  overflow: hidden !important;
+}
+
+.stage-canvas-area.is-synthesizing::before,
+.stage-viewport-box.is-synthesizing::before {
+  content: '';
+  position: absolute;
+  top: -60px;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(229, 192, 123, 0.03) 30%,
+    rgba(229, 192, 123, 0.2) 85%,
+    #E5C07B 100%
+  );
+  box-shadow: 0 2px 14px rgba(229, 192, 123, 0.45);
+  pointer-events: none;
+  z-index: 15;
+  animation: stage-laser-scan 2.4s infinite linear;
+}
+
+@keyframes stage-laser-scan {
+  0% { top: -60px; opacity: 0; }
+  4% { opacity: 0.95; }
+  94% { opacity: 0.95; }
+  100% { top: 100%; opacity: 0; }
+}
+
+/* Synthesizing Subtle CRT Phosphor Scanline Texture */
+.stage-canvas-area.is-synthesizing::after,
+.stage-viewport-box.is-synthesizing::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.12) 0px,
+    rgba(0, 0, 0, 0.12) 1px,
+    transparent 1px,
+    transparent 2px
+  ), radial-gradient(
+    circle at center,
+    rgba(229, 192, 123, 0.02) 0%,
+    rgba(0, 0, 0, 0.22) 100%
+  );
+  pointer-events: none;
+  z-index: 14;
+  opacity: 0.85;
+  animation: stage-phosphor-flicker 4s infinite ease-in-out;
+}
+
+@keyframes stage-phosphor-flicker {
+  0% { opacity: 0.75; }
+  50% { opacity: 0.92; }
+  100% { opacity: 0.75; }
+}
+
+/* Crosshair Reticle Pulse During Synthesis */
+.stage-canvas-area.is-synthesizing .placeholder-crosshair-box,
+.stage-viewport-box.is-synthesizing .placeholder-crosshair-box {
+  border: 1px solid rgba(229, 192, 123, 0.45) !important;
+  box-shadow: 0 0 24px rgba(229, 192, 123, 0.12), inset 0 0 16px rgba(229, 192, 123, 0.06) !important;
+  animation: reticle-box-breathe 2s infinite ease-in-out;
+}
+
+@keyframes reticle-box-breathe {
+  0% { border-color: rgba(229, 192, 123, 0.25); box-shadow: 0 0 16px rgba(229, 192, 123, 0.08); }
+  50% { border-color: rgba(229, 192, 123, 0.65); box-shadow: 0 0 28px rgba(229, 192, 123, 0.22); }
+  100% { border-color: rgba(229, 192, 123, 0.25); box-shadow: 0 0 16px rgba(229, 192, 123, 0.08); }
+}
+
+.stage-canvas-area.is-synthesizing .corner-mark,
+.stage-viewport-box.is-synthesizing .corner-mark {
+  color: #E5C07B !important;
+  text-shadow: 0 0 8px rgba(229, 192, 123, 0.7);
+  animation: corner-mark-pulse 2s infinite ease-in-out;
+}
+
+@keyframes corner-mark-pulse {
+  0% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.18); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.6; }
+}
+
+.stage-canvas-area.is-synthesizing .placeholder-glyph,
+.stage-viewport-box.is-synthesizing .placeholder-glyph {
+  color: #FFF2CC !important;
+  animation: glyph-neon-pulse 1.8s infinite alternate ease-in-out;
+}
+
+@keyframes glyph-neon-pulse {
+  0% { transform: scale(0.92); filter: drop-shadow(0 0 2px rgba(229, 192, 123, 0.4)); }
+  100% { transform: scale(1.08); filter: drop-shadow(0 0 10px rgba(229, 192, 123, 0.85)); }
+}
+
+/* Latent Canvas Image Pulse */
+.stage-canvas-area.is-synthesizing .stage-active-image,
+.stage-viewport-box.is-synthesizing #videoStageLivePreview {
+  border: 1px solid rgba(229, 192, 123, 0.65) !important;
+  box-shadow: 0 0 24px rgba(229, 192, 123, 0.3), 0 16px 48px rgba(0, 0, 0, 0.85) !important;
+  animation: latent-frame-pulse 1.6s infinite alternate ease-in-out;
+}
+
+@keyframes latent-frame-pulse {
+  0% { box-shadow: 0 0 14px rgba(229, 192, 123, 0.2), 0 16px 48px rgba(0, 0, 0, 0.85); }
+  100% { box-shadow: 0 0 32px rgba(229, 192, 123, 0.45), 0 16px 48px rgba(0, 0, 0, 0.85); }
+}
+
+/* Active Radar Beacon Indicator */
+.stage-live-indicator.busy,
+.video-stage-live-dot.busy {
+  color: #E5C07B !important;
+  animation: radar-beacon-pulse 1s infinite alternate ease-in-out;
+}
+
+@keyframes radar-beacon-pulse {
+  0% { transform: scale(0.85); opacity: 0.4; filter: drop-shadow(0 0 2px #E5C07B); }
+  100% { transform: scale(1.25); opacity: 1; filter: drop-shadow(0 0 7px #E5C07B); }
+}
+
+/* Video Frame Multi-Segment Pipeline Ticks */
+.video-frame-ticks-track {
+  display: flex;
+  gap: 3px;
+  height: 4px;
+  width: 100%;
+  margin-top: 3px;
+  box-sizing: border-box;
+}
+.video-frame-tick {
+  flex: 1;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 1px;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+.video-frame-tick.done {
+  background: #E5C07B;
+}
+.video-frame-tick.active {
+  background: #FFF8E7;
+  box-shadow: 0 0 6px #E5C07B;
+  animation: frame-tick-pulse 0.8s infinite alternate ease-in-out;
+}
+@keyframes frame-tick-pulse {
+  0% { opacity: 0.6; transform: scaleY(0.9); }
+  100% { opacity: 1; transform: scaleY(1.3); }
+}
+
+/* Eco Mode Reduction */
+body.eco-mode .stage-canvas-area.is-synthesizing::before,
+body.eco-mode .stage-viewport-box.is-synthesizing::before,
+body.eco-mode .stage-canvas-area.is-synthesizing::after,
+body.eco-mode .stage-viewport-box.is-synthesizing::after {
+  display: none !important;
+}
+body.eco-mode .progress-bar-fill.active,
+body.eco-mode .stage-canvas-progress-fill.active,
+body.eco-mode .video-stage-progress-fill.active {
+  animation: none !important;
+}
+
 .progress-text-row {
   display: flex;
   justify-content: space-between;
@@ -8481,6 +8671,7 @@ select option:checked {
           <div class="video-stage-progress-rail">
             <div class="video-stage-progress-fill" id="videoStageProgressFill" style="width:0%;"></div>
           </div>
+          <div class="video-frame-ticks-track" id="videoFrameTicksTrack" style="display:none;"></div>
           <div class="video-stage-telemetry-row">
             <span id="videoStageTelemetrySub" class="video-stage-telemetry-sub">Connecting to SD WebUI :7860...</span>
             <span id="videoStageStepCounter" class="video-stage-step-counter">Step 0/0</span>
@@ -17513,9 +17704,20 @@ select option:checked {
       const placeholderSub = document.getElementById('videoStageSub');
       const genBtn = document.getElementById('generateVideoBtn');
 
+      const videoViewport = document.getElementById('videoViewportBox');
+      if (videoViewport) videoViewport.classList.add('is-synthesizing');
       if (genBtn) genBtn.disabled = true;
-      if (stageProgressBar) stageProgressBar.style.display = 'flex';
-      if (inspectorProgressBar) inspectorProgressBar.style.display = 'flex';
+      if (stageProgressBar) {
+        stageProgressBar.style.display = 'flex';
+        stageProgressBar.classList.add('active');
+      }
+      if (stageProgressFill) stageProgressFill.classList.add('active');
+      if (inspectorProgressBar) {
+        inspectorProgressBar.style.display = 'flex';
+        inspectorProgressBar.classList.add('active');
+      }
+      if (inspectorProgressFill) inspectorProgressFill.classList.add('active');
+      if (stageDot) stageDot.className = 'stage-live-indicator busy';
 
       const poll = async () => {
         if (!_videoPollActive) return;
@@ -17560,6 +17762,33 @@ select option:checked {
                 updateCountDisplay(vidProg, `Frame ${frameCur}/${frameTot} · Step ${stepCur}/${stepTot} (${pctStr})`);
               }
 
+              const ticksTrack = document.getElementById('videoFrameTicksTrack');
+              if (ticksTrack) {
+                ticksTrack.style.display = 'flex';
+                if (ticksTrack.children.length !== frameTot) {
+                  ticksTrack.innerHTML = '';
+                  for (let i = 1; i <= frameTot; i++) {
+                    const tick = document.createElement('div');
+                    tick.className = 'video-frame-tick';
+                    tick.id = `videoTickFrame_${i}`;
+                    tick.title = `Frame ${i}/${frameTot}`;
+                    ticksTrack.appendChild(tick);
+                  }
+                }
+                for (let i = 1; i <= frameTot; i++) {
+                  const tick = document.getElementById(`videoTickFrame_${i}`);
+                  if (tick) {
+                    if (i < frameCur) {
+                      tick.className = 'video-frame-tick done';
+                    } else if (i === frameCur) {
+                      tick.className = 'video-frame-tick active';
+                    } else {
+                      tick.className = 'video-frame-tick';
+                    }
+                  }
+                }
+              }
+
               if (pData.preview_image) {
                 const livePrev = document.getElementById('videoStageLivePreview');
                 const glyph = document.getElementById('videoStageGlyph');
@@ -17575,6 +17804,16 @@ select option:checked {
             } else if (pData.stage === 'complete' && pData.result_item) {
               _videoPollActive = false;
               WorkstationAudio.play('completeChirp');
+              if (videoViewport) videoViewport.classList.remove('is-synthesizing');
+              if (stageProgressBar) stageProgressBar.classList.remove('active');
+              if (stageProgressFill) stageProgressFill.classList.remove('active');
+              if (inspectorProgressBar) inspectorProgressBar.classList.remove('active');
+              if (inspectorProgressFill) inspectorProgressFill.classList.remove('active');
+              const ticksTrack = document.getElementById('videoFrameTicksTrack');
+              if (ticksTrack) {
+                ticksTrack.style.display = 'none';
+                ticksTrack.innerHTML = '';
+              }
               const bottomStatus = document.getElementById('metricStreamStatus');
               const vidProg = document.getElementById('metricVideoProgress');
               if (bottomStatus) {
@@ -17628,6 +17867,16 @@ select option:checked {
             } else if (pData.stage === 'error') {
               _videoPollActive = false;
               WorkstationAudio.play('systemWarningBuzz');
+              if (videoViewport) videoViewport.classList.remove('is-synthesizing');
+              if (stageProgressBar) stageProgressBar.classList.remove('active');
+              if (stageProgressFill) stageProgressFill.classList.remove('active');
+              if (inspectorProgressBar) inspectorProgressBar.classList.remove('active');
+              if (inspectorProgressFill) inspectorProgressFill.classList.remove('active');
+              const ticksTrack = document.getElementById('videoFrameTicksTrack');
+              if (ticksTrack) {
+                ticksTrack.style.display = 'none';
+                ticksTrack.innerHTML = '';
+              }
               const bottomStatus = document.getElementById('metricStreamStatus');
               const vidProg = document.getElementById('metricVideoProgress');
               if (bottomStatus) {
@@ -17779,9 +18028,20 @@ select option:checked {
       const inspectorProgressText = document.getElementById('videoGenProgressText');
       const inspectorProgressEta = document.getElementById('videoGenProgressEta');
 
+      const videoViewport = document.getElementById('videoViewportBox');
+      if (videoViewport) videoViewport.classList.add('is-synthesizing');
       if (genBtn) genBtn.disabled = true;
-      if (stageProgressBar) stageProgressBar.style.display = 'flex';
-      if (inspectorProgressBar) inspectorProgressBar.style.display = 'flex';
+      if (stageProgressBar) {
+        stageProgressBar.style.display = 'flex';
+        stageProgressBar.classList.add('active');
+      }
+      if (stageProgressFill) stageProgressFill.classList.add('active');
+      if (inspectorProgressBar) {
+        inspectorProgressBar.style.display = 'flex';
+        inspectorProgressBar.classList.add('active');
+      }
+      if (inspectorProgressFill) inspectorProgressFill.classList.add('active');
+      if (stageDot) stageDot.className = 'stage-live-indicator busy';
 
       if (stageProgressFill) stageProgressFill.style.width = '2%';
       if (inspectorProgressFill) inspectorProgressFill.style.width = '2%';
@@ -17832,6 +18092,17 @@ select option:checked {
         }
       } catch (err) {
         if (genBtn) genBtn.disabled = false;
+        const videoViewport = document.getElementById('videoViewportBox');
+        if (videoViewport) videoViewport.classList.remove('is-synthesizing');
+        if (stageProgressBar) stageProgressBar.classList.remove('active');
+        if (stageProgressFill) stageProgressFill.classList.remove('active');
+        if (inspectorProgressBar) inspectorProgressBar.classList.remove('active');
+        if (inspectorProgressFill) inspectorProgressFill.classList.remove('active');
+        const ticksTrack = document.getElementById('videoFrameTicksTrack');
+        if (ticksTrack) {
+          ticksTrack.style.display = 'none';
+          ticksTrack.innerHTML = '';
+        }
         const livePrevErr = document.getElementById('videoStageLivePreview');
         const glyphErr = document.getElementById('videoStageGlyph');
         if (livePrevErr) livePrevErr.style.display = 'none';
@@ -18405,11 +18676,27 @@ select option:checked {
     }
     if (intBtn) intBtn.style.display = 'inline-flex';
     if (stageStopBtn) stageStopBtn.style.display = 'inline-flex';
-    if (progressBox) progressBox.style.display = 'block';
-    if (stageBar) stageBar.style.display = 'block';
+    const stageArea = document.getElementById('stageCanvasArea');
+    if (stageArea) stageArea.classList.add('is-synthesizing');
+    if (progressBox) {
+      progressBox.style.display = 'block';
+      progressBox.classList.add('active');
+    }
+    if (progressFill) progressFill.classList.add('active');
+    if (stageBar) {
+      stageBar.style.display = 'block';
+      stageBar.classList.add('active');
+    }
+    if (stageFill) stageFill.classList.add('active');
     if (stageDot) stageDot.className = 'stage-live-indicator busy';
 
     function resetImageControls() {
+      if (stageArea) stageArea.classList.remove('is-synthesizing');
+      if (progressBox) progressBox.classList.remove('active');
+      if (progressFill) progressFill.classList.remove('active');
+      if (stageBar) stageBar.classList.remove('active');
+      if (stageFill) stageFill.classList.remove('active');
+      if (stageDot) stageDot.className = 'stage-live-indicator standby';
       if (genBtn) {
         genBtn.disabled = false;
         genBtn.textContent = '⚡ GENERATE IMAGE';
@@ -18468,6 +18755,9 @@ select option:checked {
             _imagePollActive = false;
             WorkstationAudio.play('completeChirp');
             localStorage.removeItem('liw_active_image_job');
+            if (stageArea) stageArea.classList.remove('is-synthesizing');
+            if (progressFill) progressFill.classList.remove('active');
+            if (stageFill) stageFill.classList.remove('active');
 
             if (progressFill) progressFill.style.width = '100%';
             if (stageFill) stageFill.style.width = '100%';
