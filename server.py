@@ -523,6 +523,109 @@ _cache = {}
 _cache_lock = threading.Lock()
 CACHE_TTL = 300  # 5 minutes
 
+# Image Generation Background Job & Real-time Telemetry State
+_image_gen_lock = threading.Lock()
+_image_gen_state = {
+    "active": False,
+    "job_id": None,
+    "stage": "idle",
+    "prompt": "",
+    "params": {},
+    "sampling_step": 0,
+    "sampling_steps": 25,
+    "progress": 0.0,
+    "eta_relative": 0.0,
+    "preview_image": None,
+    "started_at": 0,
+    "completed_at": 0,
+    "result_item": None,
+    "last_error": None
+}
+
+
+def _run_image_generation_worker(job_id, payload, sd_url):
+    try:
+        is_img2img = bool(payload.get("init_images"))
+        target = f"{sd_url}/sdapi/v1/img2img" if is_img2img else f"{sd_url}/sdapi/v1/txt2img"
+        req = urllib.request.Request(
+            target,
+            data=json.dumps(payload).encode("utf-8"),
+            headers={"Content-Type": "application/json", "User-Agent": "LIW-Gateway/1.0"},
+            method="POST"
+        )
+        with urllib.request.urlopen(req, timeout=300) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            images = data.get("images", [])
+            if not images:
+                raise RuntimeError("No images returned by diffusion backend")
+
+            b64 = images[0]
+            with _image_gen_lock:
+                start_t = _image_gen_state.get("started_at") or time.time()
+            elapsed = round(max(time.time() - start_t, 0.1), 1)
+
+            result_item = {
+                "id": job_id,
+                "prompt": payload.get("prompt", ""),
+                "image": b64,
+                "parameters": payload,
+                "info": data.get("info", ""),
+                "elapsed": elapsed,
+                "timestamp": int(time.time() * 1000)
+            }
+
+            with _image_gen_lock:
+                if _image_gen_state.get("job_id") == job_id:
+                    _image_gen_state["active"] = False
+                    _image_gen_state["stage"] = "complete"
+                    _image_gen_state["progress"] = 1.0
+                    _image_gen_state["preview_image"] = None
+                    _image_gen_state["completed_at"] = time.time()
+                    _image_gen_state["result_item"] = result_item
+    except Exception as e:
+        with _image_gen_lock:
+            if _image_gen_state.get("job_id") == job_id:
+                _image_gen_state["active"] = False
+                _image_gen_state["stage"] = "error"
+                _image_gen_state["last_error"] = str(e)
+
+
+# Chat Streaming Session Buffer State (resilient to client disconnects)
+_chat_stream_lock = threading.Lock()
+_chat_stream_buffers = {}  # stream_id -> { "chunks": [bytes], "done": bool, "error": str, "created_at": float }
+
+
+def _cleanup_old_chat_streams():
+    now = time.time()
+    with _chat_stream_lock:
+        to_del = [sid for sid, s in list(_chat_stream_buffers.items()) if now - s.get("created_at", 0) > 900]
+        for sid in to_del:
+            del _chat_stream_buffers[sid]
+
+
+def _run_ollama_chat_stream_worker(stream_id, req):
+    try:
+        with urllib.request.urlopen(req, timeout=600) as resp:
+            while True:
+                line = resp.readline()
+                if not line:
+                    break
+                with _chat_stream_lock:
+                    buf = _chat_stream_buffers.get(stream_id)
+                    if buf:
+                        buf["chunks"].append(line)
+        with _chat_stream_lock:
+            buf = _chat_stream_buffers.get(stream_id)
+            if buf:
+                buf["done"] = True
+    except Exception as e:
+        with _chat_stream_lock:
+            buf = _chat_stream_buffers.get(stream_id)
+            if buf:
+                buf["done"] = True
+                buf["error"] = str(e)
+
+
 # Video Generation Real-time Telemetry State
 _video_gen_lock = threading.Lock()
 _video_gen_state = {
@@ -1640,6 +1743,8 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
             self.handle_audio_request()
         elif self.path.startswith("/api/system/"):
             self.handle_system_request()
+        elif self.path.startswith("/api/chat/resume"):
+            self.handle_chat_resume()
         elif self.path.startswith("/api/"):
             self.proxy_request("GET")
         elif self.path.startswith("/hub/"):
@@ -1796,74 +1901,116 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
                     return
 
             elif path == "/api/image/progress":
-                target = f"{sd_url}/sdapi/v1/progress?skip_current_image=false"
-                try:
-                    req = urllib.request.Request(target, headers={"User-Agent": "LIW-Gateway/1.0"})
-                    with urllib.request.urlopen(req, timeout=3) as resp:
-                        data = json.loads(resp.read().decode("utf-8"))
-                        self.send_json_response(data)
-                        return
-                except Exception:
-                    self.send_json_response({"progress": 0, "eta_relative": 0, "state": {}})
+                with _image_gen_lock:
+                    is_active = _image_gen_state["active"]
+                    job_id = _image_gen_state.get("job_id")
+                    stage = _image_gen_state["stage"]
+                    sampling_steps = _image_gen_state["sampling_steps"]
+                    last_err = _image_gen_state["last_error"]
+                    result_item = _image_gen_state.get("result_item")
+
+                if not is_active:
+                    self.send_json_response({
+                        "active": False,
+                        "job_id": job_id,
+                        "stage": stage,
+                        "progress": 1.0 if stage == "complete" else 0.0,
+                        "sampling_step": sampling_steps if stage == "complete" else 0,
+                        "sampling_steps": sampling_steps,
+                        "detail": "✓ Image synthesis complete!" if stage == "complete" else ("Standby · Ready to synthesize" if stage != "error" else f"Generation error: {last_err}"),
+                        "eta_str": "Complete" if stage == "complete" else ("Standby" if stage != "error" else "Error"),
+                        "result_item": result_item if stage == "complete" else None,
+                        "error": last_err
+                    })
                     return
+
+                # Probe SD WebUI progress
+                sd_progress = 0.0
+                sampling_step = 0
+                eta_relative = 0.0
+                preview_b64 = None
+
+                try:
+                    sd_req = urllib.request.Request(
+                        f"{sd_url}/sdapi/v1/progress?skip_current_image=false",
+                        headers={"User-Agent": "LIW-Gateway/1.0"}
+                    )
+                    with urllib.request.urlopen(sd_req, timeout=1.5) as resp:
+                        sd_data = json.loads(resp.read().decode("utf-8"))
+                        sd_progress = float(sd_data.get("progress") or 0.0)
+                        eta_relative = float(sd_data.get("eta_relative") or 0.0)
+                        sd_state = sd_data.get("state") or {}
+                        sampling_step = int(sd_state.get("sampling_step") or 0)
+                        if sd_state.get("sampling_steps"):
+                            sampling_steps = int(sd_state["sampling_steps"])
+                        if sd_data.get("current_image"):
+                            preview_b64 = sd_data["current_image"]
+                except Exception:
+                    pass
+
+                pct = round(sd_progress * 100)
+                detail = f"Sampling step {sampling_step}/{sampling_steps} ({pct}%)" if sampling_step > 0 else "Initializing diffusion latents..."
+                eta_str = f"ETA: {round(eta_relative, 1)}s" if eta_relative > 0 else "Synthesizing"
+
+                self.send_json_response({
+                    "active": True,
+                    "job_id": job_id,
+                    "stage": stage,
+                    "progress": sd_progress,
+                    "sampling_step": sampling_step,
+                    "sampling_steps": sampling_steps,
+                    "eta_relative": eta_relative,
+                    "eta_str": eta_str,
+                    "detail": detail,
+                    "preview_image": preview_b64
+                })
+                return
 
         elif self.command == "POST":
             content_length = int(self.headers.get("Content-Length", 0))
             body = self.rfile.read(content_length) if content_length > 0 else b"{}"
+            payload = json.loads(body.decode("utf-8")) if body else {}
 
-            if path == "/api/image/generate":
-                target = f"{sd_url}/sdapi/v1/txt2img"
-                try:
-                    req = urllib.request.Request(
-                        target,
-                        data=body,
-                        headers={"Content-Type": "application/json", "User-Agent": "LIW-Gateway/1.0"},
-                        method="POST"
-                    )
-                    with urllib.request.urlopen(req, timeout=300) as resp:
-                        data = json.loads(resp.read().decode("utf-8"))
+            if path in ("/api/image/generate", "/api/image/img2img"):
+                with _image_gen_lock:
+                    if _image_gen_state["active"]:
                         self.send_json_response({
-                            "status": "success",
-                            "images": data.get("images", []),
-                            "parameters": data.get("parameters", {}),
-                            "info": data.get("info", "")
+                            "status": "already_active",
+                            "job_id": _image_gen_state.get("job_id"),
+                            "message": "Image generation is already running in background"
                         })
                         return
-                except urllib.error.HTTPError as e:
-                    self.send_json_response({"error": f"SD WebUI returned HTTP {e.code}: {e.read().decode('utf-8', errors='ignore')}"}, status=e.code)
-                    return
-                except Exception as e:
-                    self.send_json_response({
-                        "error": f"Image generation backend unavailable on {sd_url}. Launch Stable Diffusion WebUI with '--api' or configure backend endpoint in Settings > Backends.",
-                        "backend_url": sd_url,
-                        "status": "standby"
-                    }, status=503)
-                    return
 
-            elif path == "/api/image/img2img":
-                target = f"{sd_url}/sdapi/v1/img2img"
-                try:
-                    req = urllib.request.Request(
-                        target,
-                        data=body,
-                        headers={"Content-Type": "application/json", "User-Agent": "LIW-Gateway/1.0"},
-                        method="POST"
-                    )
-                    with urllib.request.urlopen(req, timeout=300) as resp:
-                        data = json.loads(resp.read().decode("utf-8"))
-                        self.send_json_response({
-                            "status": "success",
-                            "images": data.get("images", []),
-                            "parameters": data.get("parameters", {}),
-                            "info": data.get("info", "")
-                        })
-                        return
-                except Exception as e:
-                    self.send_json_response({
-                        "error": f"SD img2img failed: {str(e)}. Ensure SD WebUI is running on {sd_url} with '--api'.",
-                        "status": "standby"
-                    }, status=503)
-                    return
+                    job_id = f"ijob_{int(time.time() * 1000)}_{random.randint(100, 999)}"
+                    _image_gen_state["active"] = True
+                    _image_gen_state["job_id"] = job_id
+                    _image_gen_state["stage"] = "sampling"
+                    _image_gen_state["prompt"] = payload.get("prompt", "")
+                    _image_gen_state["params"] = payload
+                    _image_gen_state["sampling_step"] = 0
+                    _image_gen_state["sampling_steps"] = int(payload.get("steps", 25))
+                    _image_gen_state["progress"] = 0.0
+                    _image_gen_state["eta_relative"] = 0.0
+                    _image_gen_state["preview_image"] = None
+                    _image_gen_state["started_at"] = time.time()
+                    _image_gen_state["completed_at"] = 0
+                    _image_gen_state["result_item"] = None
+                    _image_gen_state["last_error"] = None
+
+                # Spawn background synthesis worker thread - returns immediately!
+                worker = threading.Thread(
+                    target=_run_image_generation_worker,
+                    args=(job_id, payload, sd_url),
+                    daemon=True
+                )
+                worker.start()
+
+                self.send_json_response({
+                    "status": "started",
+                    "job_id": job_id,
+                    "message": "Image synthesis started in background"
+                })
+                return
 
         self.send_error(404, f"Image endpoint not found: {path}")
 
@@ -2426,6 +2573,54 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def handle_chat_resume(self):
+        """Resume an active or completed Ollama chat stream after connection drop."""
+        parsed = urllib.parse.urlparse(self.path)
+        qs = urllib.parse.parse_qs(parsed.query)
+        stream_id = qs.get("stream_id", [None])[0]
+        try:
+            chunk_offset = int(qs.get("chunk_offset", [0])[0])
+        except Exception:
+            chunk_offset = 0
+
+        _cleanup_old_chat_streams()
+
+        with _chat_stream_lock:
+            buf = _chat_stream_buffers.get(stream_id)
+
+        if not buf:
+            self.send_json_response({"error": "Chat stream not found or expired", "expired": True}, status=404)
+            return
+
+        self.send_response(200)
+        self.send_header("Content-Type", "application/x-ndjson")
+        self.send_header("X-Stream-Id", stream_id)
+        self.send_header("Cache-Control", "no-cache")
+        self.end_headers()
+
+        chunk_idx = chunk_offset
+        while True:
+            chunk = None
+            done = False
+            with _chat_stream_lock:
+                buf = _chat_stream_buffers.get(stream_id)
+                if buf:
+                    if chunk_idx < len(buf["chunks"]):
+                        chunk = buf["chunks"][chunk_idx]
+                        chunk_idx += 1
+                    done = buf["done"]
+
+            if chunk:
+                try:
+                    self.wfile.write(chunk)
+                    self.wfile.flush()
+                except Exception:
+                    break
+            elif done:
+                break
+            else:
+                time.sleep(0.02)
+
     def proxy_request(self, method):
         target_url = f"{get_backend_url('ollama')}{self.path}"
         content_length = int(self.headers.get("Content-Length", 0))
@@ -2435,6 +2630,59 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
         for h, v in self.headers.items():
             if h.lower() not in ["host", "content-length"]:
                 req.add_header(h, v)
+
+        # Resilient background token buffering for chat streaming
+        if method == "POST" and self.path in ("/api/chat", "/api/generate"):
+            _cleanup_old_chat_streams()
+            stream_id = self.headers.get("X-Stream-Id") or f"cstream_{int(time.time()*1000)}_{random.randint(100, 999)}"
+
+            with _chat_stream_lock:
+                _chat_stream_buffers[stream_id] = {
+                    "chunks": [],
+                    "done": False,
+                    "error": None,
+                    "created_at": time.time()
+                }
+
+            # Worker thread reads from Ollama continuously regardless of client socket drops
+            reader = threading.Thread(
+                target=_run_ollama_chat_stream_worker,
+                args=(stream_id, req),
+                daemon=True
+            )
+            reader.start()
+
+            self.send_response(200)
+            self.send_header("Content-Type", "application/x-ndjson")
+            self.send_header("X-Stream-Id", stream_id)
+            self.send_header("Cache-Control", "no-cache")
+            self.end_headers()
+
+            chunk_idx = 0
+            while True:
+                chunk = None
+                done = False
+                with _chat_stream_lock:
+                    buf = _chat_stream_buffers.get(stream_id)
+                    if buf:
+                        if chunk_idx < len(buf["chunks"]):
+                            chunk = buf["chunks"][chunk_idx]
+                            chunk_idx += 1
+                        done = buf["done"]
+
+                if chunk:
+                    try:
+                        self.wfile.write(chunk)
+                        self.wfile.flush()
+                    except Exception:
+                        # Client disconnected (browser closed / phone locked) - exit handler cleanly
+                        # Background worker continues buffering tokens from Ollama!
+                        break
+                elif done:
+                    break
+                else:
+                    time.sleep(0.02)
+            return
 
         try:
             with urllib.request.urlopen(req, timeout=600) as resp:

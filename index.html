@@ -4329,13 +4329,14 @@ select option:checked {
     transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
     background: var(--bg-parchment);
     border-right: 2px solid var(--border-dark);
-    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.45) !important;
+    box-shadow: none !important;
     display: flex;
     flex-direction: column;
   }
 
   .session-ledger-pane.mobile-open {
     transform: translateX(0);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.45) !important;
   }
 
   .sidebar-backdrop {
@@ -5372,6 +5373,16 @@ select option:checked {
 
 .stage-live-indicator.standby {
   color: #8C877B;
+}
+
+.stage-live-indicator.busy {
+  color: var(--accent-rubric, #E5C07B);
+  animation: stagePulseBeacon 1.2s infinite ease-in-out;
+}
+
+@keyframes stagePulseBeacon {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
 }
 
 .stage-actions-group {
@@ -6733,6 +6744,7 @@ select option:checked {
 
   /* ─── Image Generation Studio Mobile Architecture ─── */
   .image-studio-grid {
+    display: flex !important;
     flex-direction: column !important;
     height: 100% !important;
     width: 100% !important;
@@ -7634,9 +7646,9 @@ select option:checked {
       <section class="image-studio-stage">
         <div class="stage-toolbar">
           <div class="stage-meta-info" id="stageMetaInfo">
-            <span class="stage-status-dot">●</span>
-            <span class="desktop-text">Diffusion Standby · 512×512 · Euler a</span>
-            <span class="mobile-text">Standby · 512²</span>
+            <span class="stage-live-indicator standby" id="imgStageDot">●</span>
+            <span id="imgStageMetaText" class="desktop-text">Diffusion Standby · 512×512 · Euler a</span>
+            <span class="mobile-text" id="imgStageMetaMobileText">Standby · 512²</span>
           </div>
           <div class="stage-actions">
             <button type="button" class="top-btn" id="stageZoomBtn" title="Lightbox Zoom Fullscreen">
@@ -12030,6 +12042,7 @@ select option:checked {
       });
     }
 
+    let isReconnecting = false;
     try {
       const chatPayload = {
         model: modelSelect.value,
@@ -12047,9 +12060,21 @@ select option:checked {
         currentMode.applyPayload(chatPayload);
       }
 
+      const chatStreamId = 'cstream_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+      try {
+        localStorage.setItem('liw_active_chat_stream', JSON.stringify({
+          streamId: chatStreamId,
+          sessionId: currentSessionId,
+          startedAt: Date.now()
+        }));
+      } catch (_) {}
+
       const response = await fetch(`${config.host}/api/chat`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Stream-Id': chatStreamId
+        },
         body: JSON.stringify(chatPayload),
         signal: chatAbortController.signal
       });
@@ -12363,23 +12388,46 @@ select option:checked {
           showToast('Generation stopped', 'info');
         }
       } else {
-        metricStreamStatus.innerText = 'Error';
-        metricStreamStatus.style.color = 'var(--danger)';
-        const errorHtml = `
-          <div style="background:var(--accent-subtle); border:1px solid var(--danger); border-radius:2px; padding:12px; margin-top:8px;">
-            <div style="font-weight:700; color:var(--danger); font-family:var(--font-heading); letter-spacing:0.04em; font-size:0.85rem;">✦ Connection Error</div>
-            <div style="font-size:0.8rem; margin-top:4px; color:var(--text-secondary);">${escapeHtml(err.message)}</div>
-            <button class="btn-key" onclick="regenerateLastAssistant()" style="margin-top:8px; font-size:0.75rem; border-color:var(--danger);">↺ Retry Generation</button>
-          </div>
-        `;
-        botBubble.innerHTML = errorHtml;
-        showToast(`Connection Error: ${err.message}`, 'error');
+        const streamInfoRaw = localStorage.getItem('liw_active_chat_stream');
+        if (streamInfoRaw) {
+          isReconnecting = true;
+          metricStreamStatus.innerText = 'Buffering in background...';
+          metricStreamStatus.style.color = 'var(--accent)';
+          if (!botBubble.querySelector('.reconnect-badge')) {
+            const badge = document.createElement('div');
+            badge.className = 'reconnect-badge';
+            badge.style.cssText = 'display:inline-flex; align-items:center; gap:6px; font-size:0.75rem; color:var(--accent); font-family:var(--font-mono); margin-top:8px; padding:3px 8px; border:1px solid var(--accent); border-radius:2px; background:rgba(0,0,0,0.2);';
+            badge.innerHTML = '<span class="stage-live-indicator busy" style="display:inline-block; width:6px; height:6px;"></span> Background buffering active · Reconnecting...';
+            botBubble.appendChild(badge);
+          }
+          showToast('Connection dropped · Background worker continuing generation...', 'info');
+          setTimeout(() => {
+            if (typeof window.checkAndResumeChatStream === 'function') {
+              window.checkAndResumeChatStream();
+            }
+          }, 600);
+        } else {
+          metricStreamStatus.innerText = 'Error';
+          metricStreamStatus.style.color = 'var(--danger)';
+          const errorHtml = `
+            <div style="background:var(--accent-subtle); border:1px solid var(--danger); border-radius:2px; padding:12px; margin-top:8px;">
+              <div style="font-weight:700; color:var(--danger); font-family:var(--font-heading); letter-spacing:0.04em; font-size:0.85rem;">✦ Connection Error</div>
+              <div style="font-size:0.8rem; margin-top:4px; color:var(--text-secondary);">${escapeHtml(err.message)}</div>
+              <button class="btn-key" onclick="regenerateLastAssistant()" style="margin-top:8px; font-size:0.75rem; border-color:var(--danger);">↺ Retry Generation</button>
+            </div>
+          `;
+          botBubble.innerHTML = errorHtml;
+          showToast(`Connection Error: ${err.message}`, 'error');
+        }
       }
     } finally {
       clearInterval(stopwatchInterval);
       isGenerating = false;
       activeStreamReader = null;
       chatAbortController = null;
+      if (!isReconnecting) {
+        try { localStorage.removeItem('liw_active_chat_stream'); } catch (_) {}
+      }
       sendBtn.innerText = 'Send';
       sendBtn.style.background = 'var(--bg-btn)';
       sendBtn.style.color = 'var(--text-main)';
@@ -12391,6 +12439,88 @@ select option:checked {
       updateHeapTelemetry();
     }
   }
+
+  window.checkAndResumeChatStream = async function() {
+    const raw = localStorage.getItem('liw_active_chat_stream');
+    if (!raw || isGenerating) return;
+    try {
+      const info = JSON.parse(raw);
+      if (!info.streamId || info.sessionId !== currentSessionId) return;
+
+      const res = await fetch(`/api/chat/resume?stream_id=${encodeURIComponent(info.streamId)}&chunk_offset=0`);
+      if (!res.ok) {
+        localStorage.removeItem('liw_active_chat_stream');
+        const botBubble = document.querySelector('#chatContainer .msg-row:last-child .msg-bubble');
+        if (botBubble && botBubble.querySelector('.reconnect-badge')) {
+          botBubble.innerHTML = `
+            <div style="background:var(--accent-subtle); border:1px solid var(--danger); border-radius:2px; padding:12px; margin-top:8px;">
+              <div style="font-weight:700; color:var(--danger); font-family:var(--font-heading); letter-spacing:0.04em; font-size:0.85rem;">✦ Stream Session Expired</div>
+              <div style="font-size:0.8rem; margin-top:4px; color:var(--text-secondary);">The background generation stream could not be re-attached.</div>
+              <button class="btn-key" onclick="regenerateLastAssistant()" style="margin-top:8px; font-size:0.75rem; border-color:var(--danger);">↺ Retry Generation</button>
+            </div>
+          `;
+        }
+        return;
+      }
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+      let buffer = '';
+      let resumedThought = '';
+      let resumedAnswer = '';
+
+      const lastBubble = document.querySelector('#chatContainer .msg-row:last-child .msg-bubble');
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          try {
+            const chunk = JSON.parse(line);
+            if (chunk.message?.thinking) resumedThought += chunk.message.thinking;
+            if (chunk.message?.content) resumedAnswer += chunk.message.content;
+            if (chunk.thinking) resumedThought += chunk.thinking;
+            if (chunk.response) resumedAnswer += chunk.response;
+          } catch (_) {}
+        }
+
+        // Live streaming update to DOM bubble while retrieving from background
+        if (lastBubble) {
+          const liveText = (resumedThought ? `<think>${resumedThought}</think>` : '') + resumedAnswer;
+          if (liveText) {
+            lastBubble.innerHTML = formatMessageContent(liveText);
+            smartScrollToBottom();
+          }
+        }
+      }
+
+      localStorage.removeItem('liw_active_chat_stream');
+
+      if (resumedAnswer || resumedThought) {
+        const currentSess = getActiveSession();
+        if (currentSess && currentSess.messages) {
+          const lastMsg = currentSess.messages[currentSess.messages.length - 1];
+          const fullContent = (resumedThought ? `<think>${resumedThought}</think>` : '') + resumedAnswer;
+          if (lastMsg && lastMsg.role === 'assistant') {
+            lastMsg.content = fullContent;
+          } else {
+            currentSess.messages.push({ role: 'assistant', content: fullContent, timestamp: Date.now() });
+          }
+          saveSessions();
+          renderActiveSession();
+          showToast('✓ Resumed: full response retrieved from background worker!', 'success');
+        }
+      }
+    } catch (err) {
+      console.warn('Chat resume check error:', err);
+      localStorage.removeItem('liw_active_chat_stream');
+    }
+  };
 
   
   function attachAssistantActions(rowEl, content, role = 'assistant') {
@@ -15184,11 +15314,11 @@ select option:checked {
       btn.classList.toggle('active', btn.getAttribute('data-view') === view);
     });
 
-    if (chatWs) chatWs.style.setProperty('display', view === 'chat' ? 'flex' : 'none', 'important');
-    if (sidebar) sidebar.style.setProperty('display', view === 'chat' ? 'flex' : 'none');
-    if (imgWs) imgWs.style.setProperty('display', view === 'image' ? (window.innerWidth <= 768 ? 'flex' : 'grid') : 'none', 'important');
-    if (videoWs) videoWs.style.setProperty('display', view === 'video' ? (window.innerWidth <= 768 ? 'flex' : 'grid') : 'none', 'important');
-    if (audioWs) audioWs.style.setProperty('display', view === 'audio' ? (window.innerWidth <= 768 ? 'flex' : 'grid') : 'none', 'important');
+    if (chatWs) chatWs.style.display = view === 'chat' ? '' : 'none';
+    if (sidebar) sidebar.style.display = view === 'chat' ? '' : 'none';
+    if (imgWs) imgWs.style.display = view === 'image' ? '' : 'none';
+    if (videoWs) videoWs.style.display = view === 'video' ? '' : 'none';
+    if (audioWs) audioWs.style.display = view === 'audio' ? '' : 'none';
 
     if (view === 'hub') {
       const hubBtn = document.getElementById('modelHubBtn');
@@ -15197,6 +15327,9 @@ select option:checked {
       loadSdModels();
       loadSdSamplers();
       renderImageFilmstrip();
+      if (typeof window.checkAndResumeImageProgress === 'function') {
+        window.checkAndResumeImageProgress();
+      }
     } else if (view === 'video') {
       loadVideoModels();
       renderVideoFilmstrip();
@@ -16051,8 +16184,10 @@ select option:checked {
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
         if (typeof stopVideoPlayback === 'function') stopVideoPlayback();
-      } else if (currentStudioView === 'video' || window.currentStudioView === 'video') {
-        window.checkAndResumeVideoProgress();
+      } else {
+        if (typeof window.checkAndResumeVideoProgress === 'function') window.checkAndResumeVideoProgress();
+        if (typeof window.checkAndResumeImageProgress === 'function') window.checkAndResumeImageProgress();
+        if (typeof window.checkAndResumeChatStream === 'function') window.checkAndResumeChatStream();
         if (window.currentVideoItem && _videoIsPlaying && typeof startVideoPlayback === 'function') {
           startVideoPlayback();
         }
@@ -16060,11 +16195,11 @@ select option:checked {
     });
 
     window.addEventListener('focus', () => {
-      if (currentStudioView === 'video' || window.currentStudioView === 'video') {
-        window.checkAndResumeVideoProgress();
-        if (window.currentVideoItem && _videoIsPlaying && typeof startVideoPlayback === 'function') {
-          startVideoPlayback();
-        }
+      if (typeof window.checkAndResumeVideoProgress === 'function') window.checkAndResumeVideoProgress();
+      if (typeof window.checkAndResumeImageProgress === 'function') window.checkAndResumeImageProgress();
+      if (typeof window.checkAndResumeChatStream === 'function') window.checkAndResumeChatStream();
+      if (window.currentVideoItem && _videoIsPlaying && typeof startVideoPlayback === 'function') {
+        startVideoPlayback();
       }
     });
 
@@ -16260,6 +16395,12 @@ select option:checked {
   setTimeout(() => {
     if (typeof window.checkAndResumeVideoProgress === 'function') {
       window.checkAndResumeVideoProgress();
+    }
+    if (typeof window.checkAndResumeImageProgress === 'function') {
+      window.checkAndResumeImageProgress();
+    }
+    if (typeof window.checkAndResumeChatStream === 'function') {
+      window.checkAndResumeChatStream();
     }
   }, 400);
 
@@ -16682,6 +16823,227 @@ select option:checked {
     showToast('Appended technical styling modifiers and randomized seed.', 'info');
   });
 
+  // ─── Image Studio Background Progress Polling & Resumption ───
+  let _imagePollActive = false;
+  let _imagePollTimer = null;
+
+  function startImageProgressPolling() {
+    if (_imagePollActive) return;
+    _imagePollActive = true;
+
+    const genBtn = document.getElementById('imgGenerateBtn');
+    const progressBox = document.getElementById('imgGenerationProgress');
+    const progressFill = document.getElementById('imgProgressBarFill');
+    const progressText = document.getElementById('imgProgressText');
+    const progressEta = document.getElementById('imgProgressEta');
+    const stageBar = document.getElementById('stageCanvasProgressBar');
+    const stageFill = document.getElementById('stageCanvasProgressFill');
+    const stageDot = document.getElementById('imgStageDot');
+    const stageMetaText = document.getElementById('imgStageMetaText');
+    const stageMetaMobileText = document.getElementById('imgStageMetaMobileText');
+    const stageImg = document.getElementById('stageImage');
+    const placeholder = document.getElementById('stagePlaceholder');
+    const streamStatusEl = document.getElementById('metricStreamStatus');
+    const imgProgEl = document.getElementById('metricImgCurrentStep');
+
+    if (genBtn) {
+      genBtn.disabled = true;
+      genBtn.textContent = '⏳ SYNTHESIZING...';
+    }
+    if (progressBox) progressBox.style.display = 'block';
+    if (stageBar) stageBar.style.display = 'block';
+    if (stageDot) stageDot.className = 'stage-live-indicator busy';
+
+    const poll = async () => {
+      if (!_imagePollActive) return;
+      try {
+        const pRes = await fetch('/api/image/progress');
+        if (pRes.ok) {
+          const pData = await pRes.json();
+          if (pData.active) {
+            const pct = Math.round((pData.progress || 0) * 100);
+            const pctVal = Math.max(pct, 2);
+
+            if (progressFill) progressFill.style.width = `${pctVal}%`;
+            if (stageFill) stageFill.style.width = `${pctVal}%`;
+
+            if (progressText && pData.detail) progressText.textContent = pData.detail;
+            if (progressEta && pData.eta_str) progressEta.textContent = pData.eta_str;
+
+            if (stageMetaText && pData.detail) {
+              stageMetaText.textContent = `${pData.detail} · ${pData.eta_str || ''}`;
+            }
+            if (stageMetaMobileText && pData.detail) {
+              stageMetaMobileText.textContent = `${pData.detail}`;
+            }
+
+            // LIVE DENOISING LATENT PREVIEW ON STAGE CANVAS!
+            if (pData.preview_image) {
+              if (stageImg) {
+                const prevSrc = pData.preview_image.startsWith('data:') ? pData.preview_image : `data:image/png;base64,${pData.preview_image}`;
+                stageImg.src = prevSrc;
+                stageImg.style.display = 'block';
+                stageImg.style.filter = 'blur(1px)';
+              }
+              if (placeholder) placeholder.style.display = 'none';
+            }
+
+            if (streamStatusEl) {
+              streamStatusEl.innerText = pData.detail ? `Synthesizing... ${pData.detail}` : `Synthesizing... (${pct}%)`;
+              streamStatusEl.style.color = 'var(--accent-rubric)';
+            }
+            if (imgProgEl) {
+              imgProgEl.textContent = `Step ${pData.sampling_step}/${pData.sampling_steps} (${pct}%)`;
+            }
+          } else if (pData.stage === 'complete' && pData.result_item) {
+            _imagePollActive = false;
+            localStorage.removeItem('liw_active_image_job');
+
+            if (progressFill) progressFill.style.width = '100%';
+            if (stageFill) stageFill.style.width = '100%';
+            if (progressText) progressText.textContent = '✓ Image synthesis complete!';
+            if (progressEta) progressEta.textContent = '100%';
+
+            if (stageDot) stageDot.className = 'stage-live-indicator';
+            const elapsedStr = pData.result_item.elapsed ? `${pData.result_item.elapsed}s` : 'Done';
+            const params = pData.result_item.parameters || {};
+            const metaStr = `${params.width || 512}×${params.height || 512} · ${params.sampler_name || 'Euler a'} · ${params.steps || 25} steps · ${elapsedStr}`;
+            if (stageMetaText) stageMetaText.textContent = `Ready · ${metaStr}`;
+            if (stageMetaMobileText) stageMetaMobileText.textContent = `Ready · ${elapsedStr}`;
+
+            // Render Final Crisp Image on Canvas
+            const finalB64 = pData.result_item.image;
+            const imgSrc = finalB64.startsWith('data:') ? finalB64 : `data:image/png;base64,${finalB64}`;
+            if (stageImg) {
+              stageImg.src = imgSrc;
+              stageImg.style.display = 'block';
+              stageImg.style.filter = 'none';
+              stageImg.onclick = () => openLightbox(imgSrc, `Generated Image: ${escapeHtml(pData.result_item.prompt)}`);
+            }
+            if (placeholder) placeholder.style.display = 'none';
+
+            // Save to Session History
+            const exists = imageHistory.some(h => (h.id && h.id === pData.result_item.id) || h.image === finalB64);
+            if (!exists) {
+              const histItem = {
+                id: pData.result_item.id || Date.now(),
+                prompt: pData.result_item.prompt,
+                image: finalB64,
+                params: params,
+                time: new Date().toLocaleTimeString()
+              };
+              imageHistory.unshift(histItem);
+              if (imageHistory.length > 30) imageHistory = imageHistory.slice(0, 30);
+              localStorage.setItem('liw_image_history', JSON.stringify(imageHistory));
+              renderImageFilmstrip();
+            }
+
+            if (streamStatusEl) {
+              streamStatusEl.innerText = `Ready (${elapsedStr})`;
+              streamStatusEl.style.color = 'var(--success)';
+            }
+            if (imgProgEl) {
+              imgProgEl.textContent = `Done (${elapsedStr})`;
+            }
+
+            showToast(`✓ Image generated in ${elapsedStr}!`, 'success');
+
+            if (genBtn) {
+              genBtn.disabled = false;
+              genBtn.textContent = '⚡ GENERATE IMAGE';
+            }
+
+            setTimeout(() => {
+              if (progressBox) progressBox.style.display = 'none';
+              if (stageBar) stageBar.style.display = 'none';
+            }, 1200);
+            return;
+          } else if (pData.stage === 'error') {
+            _imagePollActive = false;
+            localStorage.removeItem('liw_active_image_job');
+
+            if (stageDot) stageDot.className = 'stage-live-indicator standby';
+            if (stageMetaText) stageMetaText.textContent = 'Image Synthesis Failed';
+            if (progressText) progressText.textContent = `Error: ${pData.error || 'Synthesis error'}`;
+
+            if (streamStatusEl) {
+              streamStatusEl.innerText = 'Diffusion Error';
+              streamStatusEl.style.color = 'var(--danger)';
+            }
+            if (imgProgEl) {
+              imgProgEl.textContent = 'Failed';
+            }
+
+            showToast(`Image generation error: ${pData.error || 'Synthesis error'}`, 'error');
+
+            if (genBtn) {
+              genBtn.disabled = false;
+              genBtn.textContent = '⚡ GENERATE IMAGE';
+            }
+
+            setTimeout(() => {
+              if (progressBox) progressBox.style.display = 'none';
+              if (stageBar) stageBar.style.display = 'none';
+            }, 1500);
+            return;
+          }
+        }
+      } catch (e) {
+        // Quiet fail on network hiccup
+      }
+
+      if (_imagePollActive) {
+        _imagePollTimer = setTimeout(poll, 500);
+      }
+    };
+
+    poll();
+  }
+
+  window.checkAndResumeImageProgress = async function() {
+    try {
+      const pRes = await fetch('/api/image/progress');
+      if (!pRes.ok) return;
+      const pData = await pRes.json();
+
+      if (pData.active) {
+        if (window.innerWidth <= 768 && typeof setStudioSubTab === 'function') {
+          setStudioSubTab('image', 'stage');
+        }
+        startImageProgressPolling();
+      } else if (pData.stage === 'complete' && pData.result_item) {
+        const stageImg = document.getElementById('stageImage');
+        const finalB64 = pData.result_item.image;
+        const imgSrc = finalB64.startsWith('data:') ? finalB64 : `data:image/png;base64,${finalB64}`;
+        if (stageImg && (!stageImg.src || stageImg.style.display === 'none')) {
+          stageImg.src = imgSrc;
+          stageImg.style.display = 'block';
+          stageImg.style.filter = 'none';
+          stageImg.onclick = () => openLightbox(imgSrc, `Generated Image: ${escapeHtml(pData.result_item.prompt)}`);
+          const placeholder = document.getElementById('stagePlaceholder');
+          if (placeholder) placeholder.style.display = 'none';
+        }
+
+        const exists = imageHistory.some(h => (h.id && h.id === pData.result_item.id) || h.image === finalB64);
+        if (!exists) {
+          const histItem = {
+            id: pData.result_item.id || Date.now(),
+            prompt: pData.result_item.prompt,
+            image: finalB64,
+            params: pData.result_item.parameters || {},
+            time: new Date().toLocaleTimeString()
+          };
+          imageHistory.unshift(histItem);
+          if (imageHistory.length > 30) imageHistory = imageHistory.slice(0, 30);
+          localStorage.setItem('liw_image_history', JSON.stringify(imageHistory));
+          renderImageFilmstrip();
+        }
+      }
+    } catch (err) {
+      console.warn('Image progress resume check error:', err);
+    }
+  };
+
   // Generate Image
   document.getElementById('imgGenerateBtn')?.addEventListener('click', async () => {
     const promptInput = document.getElementById('imgPromptInput');
@@ -16713,62 +17075,13 @@ select option:checked {
     };
 
     const genBtn = document.getElementById('imgGenerateBtn');
-    const progressBox = document.getElementById('imgGenerationProgress');
-    const progressFill = document.getElementById('imgProgressBarFill');
-    const progressText = document.getElementById('imgProgressText');
-    const metaInfo = document.getElementById('stageMetaInfo');
-    const stageBar = document.getElementById('stageCanvasProgressBar');
-    const stageFill = document.getElementById('stageCanvasProgressFill');
-
-    // Auto-switch to canvas viewport tab on mobile so user sees generation immediately
     if (window.innerWidth <= 768) {
       setStudioSubTab('image', 'stage');
     }
-
     if (genBtn) {
       genBtn.disabled = true;
       genBtn.textContent = '⏳ SYNTHESIZING...';
     }
-    const streamStatusEl = document.getElementById('metricStreamStatus');
-    const imgProgEl = document.getElementById('metricImgCurrentStep');
-    if (streamStatusEl) {
-      streamStatusEl.innerText = 'Synthesizing...';
-      streamStatusEl.style.color = 'var(--accent-rubric)';
-    }
-    if (imgProgEl) imgProgEl.textContent = '0%';
-
-    if (progressBox) progressBox.style.display = 'block';
-    if (progressFill) progressFill.style.width = '15%';
-    if (progressText) progressText.textContent = 'Submitting prompt to diffusion engine...';
-    if (stageBar) stageBar.style.display = 'block';
-    if (stageFill) stageFill.style.width = '15%';
-
-    // Start progress polling
-    const pollInterval = setInterval(async () => {
-      try {
-        const pRes = await fetch('/api/image/progress');
-        if (pRes.ok) {
-          const pData = await pRes.json();
-          const pct = Math.round((pData.progress || 0) * 100);
-          const currentStep = (pData.state && pData.state.sampling_step) || Math.round(payload.steps * (pData.progress || 0));
-          if (progressFill && pct > 0) progressFill.style.width = `${pct}%`;
-          if (stageBar && pct > 0) stageBar.style.display = 'block';
-          if (stageFill && pct > 0) stageFill.style.width = `${pct}%`;
-          if (progressText && pData.eta_relative) {
-            progressText.textContent = `Sampling step... ${pct}% (ETA: ${pData.eta_relative.toFixed(1)}s)`;
-          }
-          if (streamStatusEl) {
-            streamStatusEl.innerText = `Synthesizing... Step ${currentStep}/${payload.steps} (${pct}%)`;
-            streamStatusEl.style.color = 'var(--accent-rubric)';
-          }
-          if (imgProgEl) {
-            imgProgEl.textContent = `Step ${currentStep}/${payload.steps} (${pct}%)`;
-          }
-        }
-      } catch (e) {}
-    }, 600);
-
-    const startTime = Date.now();
 
     try {
       const res = await fetch('/api/image/generate', {
@@ -16776,78 +17089,21 @@ select option:checked {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-
-      clearInterval(pollInterval);
-
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || `HTTP ${res.status}`);
-      }
-
       const data = await res.json();
-      if (!data.images || data.images.length === 0) {
-        throw new Error('No images returned by diffusion backend');
+      if (data.status === 'started' || data.status === 'already_active') {
+        if (data.job_id) {
+          localStorage.setItem('liw_active_image_job', data.job_id);
+        }
+        startImageProgressPolling();
+      } else {
+        throw new Error(data.error || 'Failed to start image synthesis in background');
       }
-
-      const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-      const b64 = data.images[0];
-      const imgSrc = `data:image/png;base64,${b64}`;
-
-      if (streamStatusEl) {
-        streamStatusEl.innerText = `Ready (${elapsed}s)`;
-        streamStatusEl.style.color = 'var(--success)';
-      }
-      if (imgProgEl) {
-        imgProgEl.textContent = `Done (${elapsed}s)`;
-      }
-
-      // Update Stage Canvas
-      const stageImg = document.getElementById('stageImage');
-      const placeholder = document.getElementById('stagePlaceholder');
-      if (stageImg) {
-        stageImg.src = imgSrc;
-        stageImg.style.display = 'block';
-        stageImg.onclick = () => openLightbox(imgSrc, `Generated Image: ${escapeHtml(prompt)}`);
-      }
-      if (placeholder) placeholder.style.display = 'none';
-
-      if (metaInfo) {
-        metaInfo.innerHTML = `<span class="stage-status-dot" style="color:#73C991;">●</span> <span>${payload.width}×${payload.height} · ${payload.sampler_name} · ${payload.steps} steps · CFG ${payload.cfg_scale} · ${elapsed}s</span>`;
-      }
-
-      // Save to History
-      const histItem = {
-        id: Date.now(),
-        prompt: prompt,
-        image: b64,
-        params: payload,
-        time: new Date().toLocaleTimeString()
-      };
-      imageHistory.unshift(histItem);
-      if (imageHistory.length > 30) imageHistory = imageHistory.slice(0, 30);
-      localStorage.setItem('liw_image_history', JSON.stringify(imageHistory));
-      renderImageFilmstrip();
-
-      showToast(`Image generated in ${elapsed}s!`, 'success');
-
     } catch (err) {
-      clearInterval(pollInterval);
-      if (streamStatusEl) {
-        streamStatusEl.innerText = 'Diffusion Error';
-        streamStatusEl.style.color = 'var(--danger)';
-      }
-      if (imgProgEl) {
-        imgProgEl.textContent = 'Failed';
-      }
-      showToast(`Generation Error: ${err.message}`, 'error');
-    } finally {
       if (genBtn) {
         genBtn.disabled = false;
         genBtn.textContent = '⚡ GENERATE IMAGE';
       }
-      if (progressBox) progressBox.style.display = 'none';
-      const stageBar = document.getElementById('stageCanvasProgressBar');
-      if (stageBar) stageBar.style.display = 'none';
+      showToast(`Generation Error: ${err.message}`, 'error');
     }
   });
 
