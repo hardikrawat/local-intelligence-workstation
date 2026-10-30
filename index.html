@@ -7317,9 +7317,329 @@ select option:checked {
   }
 }
 
+/* ==========================================================================
+   MINIMALIST WORKSTATION STARTUP SPLASH SCREEN & BOOTLOADER
+   Fullscreen initialization banner with classic 12-blade spinner & dev stamp
+   ========================================================================== */
+.app-splash-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  background-color: var(--bg-parchment);
+  z-index: 1000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1), transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.32s ease;
+  pointer-events: auto;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.app-splash-screen.splash-hidden {
+  opacity: 0;
+  transform: scale(0.985);
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.splash-card {
+  width: 440px;
+  max-width: calc(100vw - 32px);
+  background: var(--bg-transcript);
+  border: 2px solid var(--border-dark);
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.16);
+  display: flex;
+  flex-direction: column;
+  padding: 22px 26px;
+  box-sizing: border-box;
+  font-family: var(--font-mono);
+  position: relative;
+}
+
+.splash-header-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-dark);
+  padding-bottom: 10px;
+  margin-bottom: 14px;
+}
+
+.splash-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.splash-glyph {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1;
+}
+
+.splash-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--text-main);
+  text-transform: uppercase;
+}
+
+.splash-build-tag {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--text-muted);
+  border: 1px solid var(--border-frame);
+  padding: 1px 6px;
+  background: var(--bg-top-bar);
+  letter-spacing: 0.06em;
+}
+
+.splash-subtitle {
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+.splash-developer-badge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--bg-top-bar);
+  border: 1px solid var(--border-frame);
+  margin-bottom: 16px;
+  font-size: 11px;
+  box-sizing: border-box;
+}
+
+.splash-dev-label {
+  color: var(--text-muted);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.splash-dev-name {
+  color: var(--text-main);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.splash-status-pane {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--bg-parchment);
+  border: 1px dashed var(--border-transcript);
+  box-sizing: border-box;
+}
+
+.splash-spinner-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.splash-status-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.splash-status-text {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.splash-status-sub {
+  font-size: 9px;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.splash-footer-bar {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 9px;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border-frame);
+  padding-top: 8px;
+  letter-spacing: 0.06em;
+}
+
+/* Dark Theme Overrides */
+[data-theme="dark"] .app-splash-screen {
+  background-color: #0E0D0B;
+}
+
+[data-theme="dark"] .splash-card {
+  background: #181614;
+  border-color: #44403C;
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="dark"] .splash-header-strip {
+  border-bottom-color: #44403C;
+}
+
+[data-theme="dark"] .splash-glyph,
+[data-theme="dark"] .splash-title,
+[data-theme="dark"] .splash-dev-name,
+[data-theme="dark"] .splash-status-text {
+  color: #ECEBE5;
+}
+
+[data-theme="dark"] .splash-developer-badge {
+  background: #221F1C;
+  border-color: #3A3530;
+}
+
+[data-theme="dark"] .splash-status-pane {
+  background: #121110;
+  border-color: #44403C;
+}
+
+[data-theme="dark"] .splash-build-tag {
+  background: #221F1C;
+  border-color: #3A3530;
+  color: #8E8A7E;
+}
+
+[data-theme="dark"] .splash-footer-bar {
+  border-top-color: #3A3530;
+  color: #8E8A7E;
+}
+
+@media (max-width: 480px) {
+  .splash-card {
+    width: calc(100vw - 24px);
+    padding: 16px 14px;
+  }
+  .splash-header-strip {
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+  }
+  .splash-title {
+    font-size: 11px;
+    letter-spacing: 0.06em;
+  }
+  .splash-build-tag {
+    font-size: 8.5px;
+    padding: 1px 4px;
+  }
+  .splash-subtitle {
+    font-size: 9px;
+    margin-bottom: 10px;
+  }
+  .splash-developer-badge {
+    padding: 6px 10px;
+    margin-bottom: 12px;
+  }
+  .splash-dev-label {
+    font-size: 8.5px;
+  }
+  .splash-dev-name {
+    font-size: 10px;
+  }
+  .splash-status-pane {
+    padding: 8px 10px;
+    gap: 10px;
+  }
+  .splash-status-text {
+    font-size: 10px;
+  }
+  .splash-status-sub {
+    font-size: 8.5px;
+  }
+  .splash-footer-bar {
+    font-size: 8.5px;
+    margin-top: 10px;
+    padding-top: 6px;
+  }
+}
+
 </style>
 </head>
 <body data-studio-view="chat">
+
+<!-- Minimalist Workstation Startup Splash Screen & Bootloader -->
+<div id="appSplashScreen" class="app-splash-screen" role="dialog" aria-modal="true" aria-label="Workstation Startup">
+  <div class="splash-card">
+    <div class="splash-header-strip">
+      <div class="splash-brand">
+        <span class="splash-glyph">◈</span>
+        <span class="splash-title">LOCAL INTELLIGENCE WORKSTATION</span>
+      </div>
+      <span class="splash-build-tag">v2.4.0</span>
+    </div>
+
+    <div class="splash-subtitle">VINTAGE WORKSTATION EDITION // MULTI-BACKEND ENGINE</div>
+
+    <div class="splash-developer-badge">
+      <span class="splash-dev-label">ENGINEERED BY</span>
+      <span class="splash-dev-name">HARDIK RAWAT</span>
+    </div>
+
+    <div class="splash-status-pane">
+      <div class="splash-spinner-wrap">
+        <svg class="ios-spinner splash-spinner" viewBox="0 0 100 100" width="22" height="22" aria-hidden="true">
+          <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(0 50 50)"/>
+          <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(30 50 50)"/>
+          <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(60 50 50)"/>
+          <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(90 50 50)"/>
+          <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(120 50 50)"/>
+          <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(150 50 50)"/>
+          <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(180 50 50)"/>
+          <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(210 50 50)"/>
+          <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(240 50 50)"/>
+          <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(270 50 50)"/>
+          <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(300 50 50)"/>
+          <rect x="46.5" y="8" width="7" height="23" rx="3.5" ry="3.5" transform="rotate(330 50 50)"/>
+        </svg>
+      </div>
+      <div class="splash-status-info">
+        <span id="splashStatusText" class="splash-status-text">INITIALIZING INFERENCE GATEWAY...</span>
+        <span id="splashStatusSub" class="splash-status-sub">PROBING BACKENDS & HARDWARE ACCELERATION</span>
+      </div>
+    </div>
+
+    <div class="splash-footer-bar">
+      <span>HARDIK RAWAT · OLLAMA STUDIO</span>
+      <span id="splashBootTimer">BOOT SEQUENCE ACTIVE</span>
+    </div>
+  </div>
+</div>
 
 <div class="window-frame">
   <!-- Slim Left Workstation Rail (Level 1 Global Application Scope) -->
@@ -9044,6 +9364,11 @@ select option:checked {
 <span id="tempPresetLabel" style="display:none;"></span>
 
 <script>
+  // Immediate theme synchronization before paint
+  try {
+    const earlyTheme = localStorage.getItem('ollama_studio_theme') || 'light';
+    document.documentElement.setAttribute('data-theme', earlyTheme);
+  } catch (e) {}
 
 
 
@@ -9712,9 +10037,68 @@ select option:checked {
     }, 2500);
   }
 
-  
+  // ─── Minimalist Workstation Startup Splash Screen & Bootloader Controller ───
+  function initSplashScreen() {
+    const splash = document.getElementById('appSplashScreen');
+    if (!splash) return;
+
+    const statusText = document.getElementById('splashStatusText');
+    const statusSub = document.getElementById('splashStatusSub');
+    const bootTimer = document.getElementById('splashBootTimer');
+    const startTime = performance.now();
+    let isDismissed = false;
+
+    function updateSplashStatus(main, sub) {
+      if (isDismissed) return;
+      if (statusText && main) statusText.textContent = main;
+      if (statusSub && sub) statusSub.textContent = sub;
+    }
+
+    function dismissSplash() {
+      if (isDismissed) return;
+      isDismissed = true;
+      const elapsedMs = Math.round(performance.now() - startTime);
+      if (bootTimer) bootTimer.textContent = `READY // ${elapsedMs}ms`;
+      splash.classList.add('splash-hidden');
+      setTimeout(() => {
+        splash.style.display = 'none';
+      }, 350);
+    }
+
+    // Dismiss instantly on user click or touch
+    splash.addEventListener('click', dismissSplash);
+
+    // Dismiss on any keyboard interaction
+    const onKeyDismiss = () => {
+      if (!isDismissed) {
+        dismissSplash();
+        window.removeEventListener('keydown', onKeyDismiss);
+      }
+    };
+    window.addEventListener('keydown', onKeyDismiss);
+
+    // Step 1: DOM parsed & initializing
+    setTimeout(() => {
+      updateSplashStatus('PROBING INFERENCE FLEET...', 'CHECKING OLLAMA, SD WEBUI, COMFYUI & VRAM');
+    }, 280);
+
+    // Step 2: Health probes completed
+    setTimeout(() => {
+      updateSplashStatus('SYSTEMS OPERATIONAL ◈', 'ALL COGNITIVE ENGINES ONLINE');
+    }, 750);
+
+    // Step 3: Graceful fade-out dismissal at 1.25s
+    setTimeout(() => {
+      dismissSplash();
+    }, 1250);
+
+    window.dismissSplashScreen = dismissSplash;
+    window.updateSplashStatus = updateSplashStatus;
+  }
+
   window.addEventListener('DOMContentLoaded', async () => {
     initTheme();
+    initSplashScreen();
     applyEcoMode(ecoModeActive);
     setupDiacritics();
     setupTextarea();
@@ -9727,6 +10111,7 @@ select option:checked {
     updatePersonaLabel();
     await checkOllamaHealthAndModels();
     await checkVramStatus();
+    if (window.updateSplashStatus) window.updateSplashStatus('SYSTEMS OPERATIONAL ◈', 'FLEET ONLINE & HARDWARE READY');
     startVramPolling();
     setTimeout(() => {
       if (typeof loadSdModels === 'function') loadSdModels();
