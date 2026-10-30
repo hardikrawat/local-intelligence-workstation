@@ -5857,13 +5857,15 @@ select option:checked {
 .stage-toolbar {
   background: var(--bg-top-bar);
   border-bottom: 1px solid var(--border-dark);
-  padding: 0 12px;
+  padding: 0 10px;
   height: 34px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-shrink: 0;
   box-sizing: border-box;
+  gap: 8px;
+  overflow: hidden;
 }
 
 .stage-meta-info {
@@ -5872,18 +5874,41 @@ select option:checked {
   color: var(--text-main);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .stage-status-dot {
   color: #73C991;
   font-size: 10px;
+  flex-shrink: 0;
 }
 
-.stage-actions {
-  display: flex;
-  gap: 6px;
+.stage-actions,
+.stage-actions-group {
+  display: inline-flex;
+  gap: 4px;
   align-items: center;
+  flex-shrink: 0;
+}
+
+.stage-action-icon-btn {
+  padding: 0 7px !important;
+  min-width: 28px !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 13px !important;
+  line-height: 1 !important;
+  border-radius: 0 !important;
+  box-sizing: border-box !important;
+  flex-shrink: 0 !important;
 }
 
 .stage-canvas-area {
@@ -6801,8 +6826,9 @@ select option:checked {
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
-    max-width: 135px !important;
-    flex-shrink: 1 !important;
+    max-width: none !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
   }
 
   .image-studio-stage .stage-actions {
@@ -8217,26 +8243,11 @@ select option:checked {
             <span class="mobile-text" id="imgStageMetaMobileText">Standby · 512²</span>
           </div>
           <div class="stage-actions">
-            <button type="button" class="top-btn" id="imgStageStopBtn" style="display:none; color:var(--danger); border-color:var(--danger); font-weight:700;" title="Stop ongoing diffusion synthesis">
-              <span class="desktop-text">■ Stop</span>
-              <span class="mobile-text">■ Stop</span>
-            </button>
-            <button type="button" class="top-btn" id="stageZoomBtn" title="Lightbox Zoom Fullscreen">
-              <span class="desktop-text">🔍 Lightbox</span>
-              <span class="mobile-text">🔍 View</span>
-            </button>
-            <button type="button" class="top-btn" id="stageDownloadBtn" title="Download PNG">
-              <span class="desktop-text">⬇ Download</span>
-              <span class="mobile-text">⬇ Save</span>
-            </button>
-            <button type="button" class="top-btn" id="stageCopyBtn" title="Copy Base64 / Image">
-              <span class="desktop-text">📋 Copy</span>
-              <span class="mobile-text">📋</span>
-            </button>
-            <button type="button" class="top-btn" id="stageSendToChatBtn" title="Inject into Chat transcript">
-              <span class="desktop-text">💬 Send to Chat</span>
-              <span class="mobile-text">💬 Chat</span>
-            </button>
+            <button type="button" class="top-btn stage-action-icon-btn" id="imgStageStopBtn" style="display:none; color:var(--danger); border-color:var(--danger); font-weight:700;" title="Stop Synthesis (■)">■</button>
+            <button type="button" class="top-btn stage-action-icon-btn" id="stageZoomBtn" title="Lightbox Fullscreen (⤢)">⤢</button>
+            <button type="button" class="top-btn stage-action-icon-btn" id="stageDownloadBtn" title="Download Image (↓)">↓</button>
+            <button type="button" class="top-btn stage-action-icon-btn" id="stageCopyBtn" title="Copy Base64 / Prompt (📋)">📋</button>
+            <button type="button" class="top-btn stage-action-icon-btn" id="stageSendToChatBtn" title="Send to Chat Studio (💬)">💬</button>
           </div>
         </div>
 
@@ -8421,9 +8432,9 @@ select option:checked {
             <span id="videoStageMetaText">Video Standby · 16 frames · 12 fps · SVD-XT</span>
           </div>
           <div class="stage-actions-group">
-            <button type="button" class="top-btn" id="downloadVideoBtn" title="Download video clip" disabled>⬇ <span class="btn-lbl-full">Download</span><span class="btn-lbl-mobile">Save</span></button>
-            <button type="button" class="top-btn" id="copyVideoBtn" title="Copy clip" disabled>📋 <span class="btn-lbl-full">Copy</span><span class="btn-lbl-mobile">Copy</span></button>
-            <button type="button" class="top-btn" id="sendVideoToChatBtn" title="Send video to chat" disabled>💬 <span class="btn-lbl-full">Send to Chat</span><span class="btn-lbl-mobile">Chat</span></button>
+            <button type="button" class="top-btn stage-action-icon-btn" id="downloadVideoBtn" title="Download Video Clip (↓)" disabled>↓</button>
+            <button type="button" class="top-btn stage-action-icon-btn" id="copyVideoBtn" title="Copy Clip / URL (📋)" disabled>📋</button>
+            <button type="button" class="top-btn stage-action-icon-btn" id="sendVideoToChatBtn" title="Send to Chat Studio (💬)" disabled>💬</button>
           </div>
         </div>
 
@@ -8561,18 +8572,9 @@ select option:checked {
             <span class="mobile-text">📄 Transcript</span>
           </div>
           <div class="stage-actions">
-            <button type="button" class="top-btn" id="copyAudioTranscriptBtn" title="Copy Transcript">
-              <span class="desktop-text">📋 Copy</span>
-              <span class="mobile-text">📋 Copy</span>
-            </button>
-            <button type="button" class="top-btn" id="sendAudioToChatBtn" title="Send Transcript to Chat Composer">
-              <span class="desktop-text">💬 To Chat</span>
-              <span class="mobile-text">💬 Chat</span>
-            </button>
-            <button type="button" class="top-btn" id="downloadAudioTranscriptBtn" title="Export as Text File">
-              <span class="desktop-text">⬇ Export</span>
-              <span class="mobile-text">⬇ Export</span>
-            </button>
+            <button type="button" class="top-btn stage-action-icon-btn" id="copyAudioTranscriptBtn" title="Copy Transcript (📋)">📋</button>
+            <button type="button" class="top-btn stage-action-icon-btn" id="sendAudioToChatBtn" title="Send Transcript to Chat Composer (💬)">💬</button>
+            <button type="button" class="top-btn stage-action-icon-btn" id="downloadAudioTranscriptBtn" title="Export as Text File (↓)">↓</button>
           </div>
         </div>
 
@@ -8647,6 +8649,8 @@ select option:checked {
         <span>SPEED: <span id="metricTps">0.0 t/s</span></span>
         <span>|</span>
         <span>TTFT: <span id="metricTtft">— ms</span></span>
+        <span>|</span>
+        <span>TIME: <span id="metricStreamTimeVisible">0.0s</span></span>
         <span>|</span>
         <span>VRAM: <span id="metricVram">Standby</span></span>
       </span>
@@ -9861,7 +9865,7 @@ select option:checked {
   // then gracefully transitions back to resting tone after a quiet delay.
   // ==========================================================================
   const COUNT_UPDATE_LINGER_MS = 1400;
-  const COUNT_NUMBER_REGEX = /(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?/g;
+  const COUNT_NUMBER_REGEX = /(?:\d{1,2}:(?:\d{2}:)?\d{2}|\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?/g;
 
   function escapeCountHtml(str) {
     if (str === null || str === undefined) return '';
@@ -10012,9 +10016,17 @@ select option:checked {
       metricEvalTokens,
       metricTps,
       metricStreamTime,
+      document.getElementById('metricStreamTimeVisible'),
       metricTtft,
       metricCtxLabel,
-      promptTokenCounter
+      promptTokenCounter,
+      document.getElementById('metricHostRam'),
+      document.getElementById('metricImgRes'),
+      document.getElementById('metricImgSteps'),
+      document.getElementById('metricImgCurrentStep'),
+      document.getElementById('metricVideoFrames'),
+      document.getElementById('metricVideoFps'),
+      document.getElementById('metricVideoProgress')
     ];
 
     initTargets.forEach(el => {
@@ -12624,6 +12636,8 @@ select option:checked {
       if (!isGenerating) return;
       const totalElapsedSec = ((performance.now() - requestStartTime) / 1000).toFixed(1);
       updateCountDisplay(metricStreamTime, `${totalElapsedSec}s`);
+      const timeVis = document.getElementById('metricStreamTimeVisible');
+      if (timeVis) updateCountDisplay(timeVis, `${totalElapsedSec}s`);
 
       updateLiveThoughtTimer();
 
@@ -12639,21 +12653,22 @@ select option:checked {
           const stageText = `Loading Model (${totalElapsedSec}s)...`;
           metricStreamStatus.innerText = stageText;
           metricStreamStatus.style.color = 'var(--warning)';
-          if (streamStageLabel) streamStageLabel.innerText = stageText;
+          if (streamStageLabel) updateCountDisplay(streamStageLabel, stageText);
         } else {
           const evalSec = modelLoadedTimestamp ? ((performance.now() - modelLoadedTimestamp) / 1000).toFixed(1) : totalElapsedSec;
           const stageText = `Evaluating Prompt (${evalSec}s)...`;
           metricStreamStatus.innerText = stageText;
           metricStreamStatus.style.color = 'var(--accent-rubric)';
-          if (streamStageLabel) streamStageLabel.innerText = stageText;
+          if (streamStageLabel) updateCountDisplay(streamStageLabel, stageText);
         }
       } else {
-        
+        if (streamStageLabel) updateCountDisplay(streamStageLabel, `Generating (${totalElapsedSec}s)...`);
         const genElapsed = (performance.now() - firstTokenTime) / 1000;
         if (genElapsed > 0.1 && liveGeneratedTokens > 0) {
           const currentTps = (liveGeneratedTokens / genElapsed).toFixed(1);
           updateCountDisplay(metricTps, `${currentTps} t/s`);
           updateCountDisplay(metricEvalTokens, liveGeneratedTokens.toLocaleString());
+          if (streamMeta) updateCountDisplay(streamMeta, `${liveGeneratedTokens.toLocaleString()} tokens · ${currentTps} t/s · ${totalElapsedSec}s`);
         }
       }
     }, 100);
@@ -12680,11 +12695,12 @@ select option:checked {
 
       if (firstTokenTime) {
         const streamElapsed = (performance.now() - firstTokenTime) / 1000;
+        const totalElapsedSec = ((performance.now() - requestStartTime) / 1000).toFixed(1);
         if (streamElapsed > 0.05) {
           const currentTps = parseFloat((liveGeneratedTokens / streamElapsed).toFixed(1));
           if (currentTps > peakTps) peakTps = currentTps;
           updateCountDisplay(metricTps, `${currentTps} t/s`);
-          if (streamMeta) updateCountDisplay(streamMeta, `${liveGeneratedTokens.toLocaleString()} tokens · ${currentTps} t/s`);
+          if (streamMeta) updateCountDisplay(streamMeta, `${liveGeneratedTokens.toLocaleString()} tokens · ${currentTps} t/s · ${totalElapsedSec}s`);
         }
       }
 
@@ -12950,9 +12966,12 @@ select option:checked {
           totalSec = (finalChunkData.total_duration / 1e9).toFixed(1);
         }
         updateCountDisplay(metricStreamTime, `${totalSec}s`);
+        const timeVisEnd = document.getElementById('metricStreamTimeVisible');
+        if (timeVisEnd) updateCountDisplay(timeVisEnd, `${totalSec}s`);
         metricStreamStatus.innerText = 'Completed';
         metricStreamStatus.style.color = 'var(--success)';
-        if (streamMeta) updateCountDisplay(streamMeta, `${(finalChunkData.eval_count || liveGeneratedTokens).toLocaleString()} tokens · ${finalTps} t/s`);
+        if (streamMeta) updateCountDisplay(streamMeta, `${(finalChunkData.eval_count || liveGeneratedTokens).toLocaleString()} tokens · ${finalTps} t/s · ${totalSec}s`);
+        if (streamStageLabel) updateCountDisplay(streamStageLabel, `Completed (${totalSec}s)`);
 
         
         lastBenchmarkProfile = {
@@ -13006,6 +13025,9 @@ select option:checked {
       if (err.name === 'AbortError') {
         const elapsedSec = ((performance.now() - requestStartTime) / 1000).toFixed(1);
         updateCountDisplay(metricStreamTime, `${elapsedSec}s`);
+        const timeVisAbort = document.getElementById('metricStreamTimeVisible');
+        if (timeVisAbort) updateCountDisplay(timeVisAbort, `${elapsedSec}s`);
+        if (streamStageLabel) updateCountDisplay(streamStageLabel, `Stopped (${elapsedSec}s)`);
         const statusLabel = wasHardPurged ? 'Evicted' : 'Stopped';
         metricStreamStatus.innerText = statusLabel;
         metricStreamStatus.style.color = 'var(--danger)';
@@ -15925,9 +15947,9 @@ select option:checked {
       const resEl = document.getElementById('metricImgRes');
       const samplerEl = document.getElementById('metricImgSampler');
       const stepsEl = document.getElementById('metricImgSteps');
-      if (resEl) resEl.textContent = `${w}×${h}`;
+      if (resEl) updateCountDisplay(resEl, `${w}×${h}`);
       if (samplerEl) samplerEl.textContent = s;
-      if (stepsEl) stepsEl.textContent = steps;
+      if (stepsEl) updateCountDisplay(stepsEl, steps);
     } else if (view === 'video') {
       if (vidCluster) vidCluster.style.display = 'inline-flex';
       const vid = document.getElementById('videoModelSelect')?.value || 'svd-xt';
@@ -15941,8 +15963,8 @@ select option:checked {
 
       const framesEl = document.getElementById('metricVideoFrames');
       const fpsEl = document.getElementById('metricVideoFps');
-      if (framesEl) framesEl.textContent = frames;
-      if (fpsEl) fpsEl.textContent = fps;
+      if (framesEl) updateCountDisplay(framesEl, frames);
+      if (fpsEl) updateCountDisplay(fpsEl, fps);
     } else if (view === 'audio') {
       if (audCluster) audCluster.style.display = 'inline-flex';
       if (hostPrefix) hostPrefix.textContent = 'ASR:';
@@ -16516,7 +16538,7 @@ select option:checked {
         const w = btn.getAttribute('data-vw');
         const h = btn.getAttribute('data-vh');
         const hint = document.getElementById('videoResHint');
-        if (hint) hint.textContent = `${w}×${h}`;
+        if (hint) updateCountDisplay(hint, `${w}×${h}`);
         updateVideoSpecPill();
       });
     });
@@ -16601,7 +16623,7 @@ select option:checked {
     // Motion bucket slider label
     document.getElementById('videoMotionBucketInput')?.addEventListener('input', (e) => {
       const lbl = document.getElementById('videoMotionBucketLabel');
-      if (lbl) lbl.textContent = e.target.value;
+      if (lbl) updateCountDisplay(lbl, e.target.value);
     });
 
     // Video Frame Scrubber Range Slider
@@ -16684,20 +16706,20 @@ select option:checked {
               if (stageProgressFill) stageProgressFill.style.width = `${Math.max(pct, 2)}%`;
               if (inspectorProgressFill) inspectorProgressFill.style.width = `${Math.max(pct, 2)}%`;
 
-              if (stageProgressText && pData.detail) stageProgressText.textContent = pData.detail;
-              if (inspectorProgressText && pData.detail) inspectorProgressText.textContent = pData.detail;
+              if (stageProgressText && pData.detail) updateCountDisplay(stageProgressText, pData.detail);
+              if (inspectorProgressText && pData.detail) updateCountDisplay(inspectorProgressText, pData.detail);
 
-              if (stageProgressEta) stageProgressEta.textContent = pctStr;
-              if (inspectorProgressEta) inspectorProgressEta.textContent = pData.eta_str ? `${pData.eta_str} (${pctStr})` : pctStr;
+              if (stageProgressEta) updateCountDisplay(stageProgressEta, pctStr);
+              if (inspectorProgressEta) updateCountDisplay(inspectorProgressEta, pData.eta_str ? `${pData.eta_str} (${pctStr})` : pctStr);
 
               const liveSubText = pData.telemetry ? (pData.eta_str && pData.eta_str !== 'Standby' ? `${pData.telemetry} · ${pData.eta_str}` : pData.telemetry) : '';
-              if (stageTelemetrySub && liveSubText) stageTelemetrySub.textContent = liveSubText;
+              if (stageTelemetrySub && liveSubText) updateCountDisplay(stageTelemetrySub, liveSubText);
               if (stageStepCounter && pData.global_step !== undefined) {
-                stageStepCounter.textContent = `Step ${pData.global_step}/${pData.total_global_steps}`;
+                updateCountDisplay(stageStepCounter, `Step ${pData.global_step}/${pData.total_global_steps}`);
               }
 
-              if (placeholderDesc && pData.detail) placeholderDesc.textContent = pData.detail;
-              if (placeholderSub && liveSubText) placeholderSub.textContent = liveSubText;
+              if (placeholderDesc && pData.detail) updateCountDisplay(placeholderDesc, pData.detail);
+              if (placeholderSub && liveSubText) updateCountDisplay(placeholderSub, liveSubText);
 
               const bottomStatus = document.getElementById('metricStreamStatus');
               const vidProg = document.getElementById('metricVideoProgress');
@@ -16710,7 +16732,7 @@ select option:checked {
                 bottomStatus.style.color = 'var(--accent-rubric)';
               }
               if (vidProg) {
-                vidProg.innerText = `Frame ${frameCur}/${frameTot} · Step ${stepCur}/${stepTot} (${pctStr})`;
+                updateCountDisplay(vidProg, `Frame ${frameCur}/${frameTot} · Step ${stepCur}/${stepTot} (${pctStr})`);
               }
 
               if (pData.preview_image) {
@@ -16734,18 +16756,18 @@ select option:checked {
                 bottomStatus.style.color = 'var(--success)';
               }
               if (vidProg) {
-                vidProg.innerText = `Done (${pData.result_item.frames}f · ${pData.result_item.duration}s)`;
+                updateCountDisplay(vidProg, `Done (${pData.result_item.frames}f · ${pData.result_item.duration}s)`);
               }
 
               if (stageProgressFill) stageProgressFill.style.width = '100%';
               if (inspectorProgressFill) inspectorProgressFill.style.width = '100%';
               if (stageProgressText) stageProgressText.textContent = '✓ Video synthesis complete!';
               if (inspectorProgressText) inspectorProgressText.textContent = '✓ Complete!';
-              if (stageProgressEta) stageProgressEta.textContent = '100%';
-              if (inspectorProgressEta) inspectorProgressEta.textContent = '100%';
-              if (stageTelemetrySub) stageTelemetrySub.textContent = `Rendered ${pData.result_item.frames} frames @ ${pData.result_item.fps} fps · Duration ${pData.result_item.duration}s`;
+              if (stageProgressEta) updateCountDisplay(stageProgressEta, '100%');
+              if (inspectorProgressEta) updateCountDisplay(inspectorProgressEta, '100%');
+              if (stageTelemetrySub) updateCountDisplay(stageTelemetrySub, `Rendered ${pData.result_item.frames} frames @ ${pData.result_item.fps} fps · Duration ${pData.result_item.duration}s`);
               if (stageDot) stageDot.className = 'stage-live-indicator standby';
-              if (stageMeta) stageMeta.textContent = `Video Ready · ${pData.result_item.frames} frames · ${pData.result_item.fps} fps · ${pData.result_item.duration}s`;
+              if (stageMeta) updateCountDisplay(stageMeta, `Video Ready · ${pData.result_item.frames} frames · ${pData.result_item.fps} fps · ${pData.result_item.duration}s`);
 
               const item = {
                 id: pData.result_item.job_id || ('vid_' + Date.now()),
@@ -17405,7 +17427,7 @@ select option:checked {
         estInfo = ` · ~${estSec}s`;
         hint.style.color = 'var(--text-muted)';
       }
-      hint.textContent = `${w}×${h} (${mp} MP${estInfo})`;
+      updateCountDisplay(hint, `${w}×${h} (${mp} MP${estInfo})`);
     }
   }
 
@@ -17430,12 +17452,12 @@ select option:checked {
   // Sliders
   document.getElementById('imgStepsInput')?.addEventListener('input', (e) => {
     const lbl = document.getElementById('imgStepsLabel');
-    if (lbl) lbl.textContent = e.target.value;
+    if (lbl) updateCountDisplay(lbl, e.target.value);
     updateResolutionHint();
   });
   document.getElementById('imgCfgInput')?.addEventListener('input', (e) => {
     const lbl = document.getElementById('imgCfgLabel');
-    if (lbl) lbl.textContent = parseFloat(e.target.value).toFixed(1);
+    if (lbl) updateCountDisplay(lbl, parseFloat(e.target.value).toFixed(1));
   });
 
   // Fetch Checkpoints
@@ -17586,14 +17608,14 @@ select option:checked {
             if (progressFill) progressFill.style.width = `${pctVal}%`;
             if (stageFill) stageFill.style.width = `${pctVal}%`;
 
-            if (progressText && pData.detail) progressText.textContent = pData.detail;
-            if (progressEta && pData.eta_str) progressEta.textContent = pData.eta_str;
+            if (progressText && pData.detail) updateCountDisplay(progressText, pData.detail);
+            if (progressEta && pData.eta_str) updateCountDisplay(progressEta, pData.eta_str);
 
             if (stageMetaText && pData.detail) {
-              stageMetaText.textContent = `${pData.detail} · ${pData.eta_str || ''}`;
+              updateCountDisplay(stageMetaText, `${pData.detail} · ${pData.eta_str || ''}`);
             }
             if (stageMetaMobileText && pData.detail) {
-              stageMetaMobileText.textContent = `${pData.detail}`;
+              updateCountDisplay(stageMetaMobileText, pData.detail);
             }
 
             // LIVE DENOISING LATENT PREVIEW ON STAGE CANVAS!
@@ -17612,7 +17634,7 @@ select option:checked {
               streamStatusEl.style.color = 'var(--accent-rubric)';
             }
             if (imgProgEl) {
-              imgProgEl.textContent = `Step ${pData.sampling_step}/${pData.sampling_steps} (${pct}%)`;
+              updateCountDisplay(imgProgEl, `Step ${pData.sampling_step}/${pData.sampling_steps} (${pct}%)`);
             }
           } else if (pData.stage === 'complete' && pData.result_item) {
             _imagePollActive = false;
@@ -17621,14 +17643,14 @@ select option:checked {
             if (progressFill) progressFill.style.width = '100%';
             if (stageFill) stageFill.style.width = '100%';
             if (progressText) progressText.textContent = '✓ Image synthesis complete!';
-            if (progressEta) progressEta.textContent = '100%';
+            if (progressEta) updateCountDisplay(progressEta, '100%');
 
             if (stageDot) stageDot.className = 'stage-live-indicator';
             const elapsedStr = pData.result_item.elapsed ? `${pData.result_item.elapsed}s` : 'Done';
             const params = pData.result_item.parameters || {};
             const metaStr = `${params.width || 512}×${params.height || 512} · ${params.sampler_name || 'Euler a'} · ${params.steps || 25} steps · ${elapsedStr}`;
-            if (stageMetaText) stageMetaText.textContent = `Ready · ${metaStr}`;
-            if (stageMetaMobileText) stageMetaMobileText.textContent = `Ready · ${elapsedStr}`;
+            if (stageMetaText) updateCountDisplay(stageMetaText, `Ready · ${metaStr}`);
+            if (stageMetaMobileText) updateCountDisplay(stageMetaMobileText, `Ready · ${elapsedStr}`);
 
             // Render Final Crisp Image on Canvas
             const finalB64 = pData.result_item.image;
@@ -17946,7 +17968,12 @@ select option:checked {
         }
         if (placeholder) placeholder.style.display = 'none';
         if (promptInput) promptInput.value = item.prompt || '';
-        if (metaInfo) metaInfo.innerHTML = `<span class="stage-status-dot" style="color:#73C991;">●</span> <span>Historical: ${item.time} · ${item.params ? `${item.params.width}×${item.params.height}` : ''}</span>`;
+        if (metaInfo) {
+          const detailStr = `Historical: ${item.time} · ${item.params ? `${item.params.width}×${item.params.height}` : ''}`;
+          metaInfo.innerHTML = `<span class="stage-status-dot" style="color:#73C991;">●</span> <span id="imgHistoricalMetaText">${escapeHtml(detailStr)}</span>`;
+          const histEl = document.getElementById('imgHistoricalMetaText');
+          if (histEl) updateCountDisplay(histEl, detailStr);
+        }
 
         if (window.innerWidth <= 768) {
           setStudioSubTab('image', 'stage');
