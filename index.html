@@ -7453,10 +7453,10 @@ select option:checked {
         <div class="composer-row">
           <textarea id="promptInput" class="composer-input" placeholder="Type prompt (/imagine for image)..." rows="1"></textarea>
           <span id="promptTokenCounter" class="composer-token-counter" title="Prompt token estimate">0 tok</span>
-          <input type="file" id="imageInput" accept="image/*,.txt,.md,.json,.csv,.py,.js,.ts,.html,.css,.yaml,.yml,.sh,.log,.sql,.xml" style="display:none;">
+          <input type="file" id="imageInput" accept="image/*,.heic,.heif,.txt,.md,.json,.csv,.py,.js,.ts,.html,.css,.yaml,.yml,.sh,.log,.sql,.xml" style="display:none;">
           <button type="button" class="composer-btn secondary mic-dictate-btn" id="chatDictateBtn" title="Voice Dictation (Click to Speak, Click again to Transcribe)">🎙️</button>
-          <button class="composer-btn secondary" id="triggerImageBtn" title="Attach Image or Document">Attach</button>
-          <button class="composer-btn" id="sendBtn">Send</button>
+          <button type="button" class="composer-btn secondary" id="triggerImageBtn" title="Attach Image or Document">Attach</button>
+          <button type="button" class="composer-btn" id="sendBtn">Send</button>
           <button class="composer-btn stream-stop-btn" id="streamInlineStopBtn" style="display:none;">Abort</button>
           <button class="composer-btn stream-purge-btn" id="streamInlinePurgeBtn" style="display:none;">Evict</button>
         </div>
@@ -10187,11 +10187,22 @@ select option:checked {
     function updatePromptTokens() {
       if (!promptTokenCounter) return;
       const text = promptInput.value.trim();
+      if (!text) {
+        updateCountDisplay(promptTokenCounter, '0 tok');
+        return;
+      }
+      if (text.length > 50000) {
+        updateCountDisplay(promptTokenCounter, '>10k tok');
+        return;
+      }
       const est = estimateTokens(text);
       updateCountDisplay(promptTokenCounter, `${est} tok`);
     }
 
     promptInput.addEventListener('input', () => {
+      if (promptInput.value.includes('\uFFFC') || promptInput.value.includes('\uFFFD')) {
+        promptInput.value = promptInput.value.replace(/[\uFFFC\uFFFD]/g, '');
+      }
       adjustHeight();
       updatePromptTokens();
     });
@@ -10381,23 +10392,54 @@ select option:checked {
       }
     });
 
-    
-    window.addEventListener('paste', (e) => {
-      if (e.clipboardData && e.clipboardData.items) {
-        for (let item of e.clipboardData.items) {
-          if (item.type.startsWith('image/')) {
-            const file = item.getAsFile();
-            if (file) {
-              processImageFile(file);
-              showToast('Image pasted from clipboard', 'info');
-              break;
-            }
+    // Unified clipboard paste handler for window and composer input
+    function handleClipboardPaste(e) {
+      if (!e.clipboardData) return;
+
+      let imageFile = null;
+
+      // 1. Check clipboardData.items for image
+      if (e.clipboardData.items) {
+        for (let i = 0; i < e.clipboardData.items.length; i++) {
+          const item = e.clipboardData.items[i];
+          if (item.type && item.type.startsWith('image/')) {
+            imageFile = item.getAsFile();
+            if (imageFile) break;
           }
         }
       }
-    });
 
-    
+      // 2. Check clipboardData.files fallback (iOS Safari / WebKit)
+      if (!imageFile && e.clipboardData.files && e.clipboardData.files.length > 0) {
+        for (let i = 0; i < e.clipboardData.files.length; i++) {
+          const f = e.clipboardData.files[i];
+          if ((f.type && f.type.startsWith('image/')) || /\.(jpe?g|png|webp|gif|bmp|heic|heif)$/i.test(f.name || '')) {
+            imageFile = f;
+            break;
+          }
+        }
+      }
+
+      if (imageFile) {
+        // Critical: PREVENT default paste so Safari does NOT inject \uFFFC or data URIs into textarea
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Strip any accidental stray non-text characters from prompt input
+        if (promptInput) {
+          promptInput.value = promptInput.value.replace(/[\uFFFC\uFFFD]/g, '');
+        }
+
+        processImageFile(imageFile);
+        showToast('Image attached from clipboard', 'info');
+      }
+    }
+
+    window.addEventListener('paste', handleClipboardPaste);
+    if (promptInput) {
+      promptInput.addEventListener('paste', handleClipboardPaste);
+    }
+
     window.addEventListener('dragenter', (e) => {
       if (e.dataTransfer && Array.from(e.dataTransfer.types).includes('Files')) {
         dropzone.classList.add('active');
@@ -10415,14 +10457,18 @@ select option:checked {
       dropzone.classList.remove('active');
       if (e.dataTransfer.files && e.dataTransfer.files[0]) {
         const file = e.dataTransfer.files[0];
-        if (file.type.startsWith('image/')) {
+        const isImg = (file.type && file.type.startsWith('image/')) || 
+                      /\.(jpe?g|png|webp|gif|bmp|heic|heif)$/i.test(file.name || '');
+        const isDoc = (file.type && file.type.startsWith('text/')) || 
+                      /\.(md|txt|json|csv|py|js|ts|html|css|yaml|yml|sh|log|sql|xml)$/i.test(file.name || '');
+        if (isImg) {
           processImageFile(file);
           showToast(`Image attached: ${file.name}`, 'info');
-        } else if (file.type.startsWith('text/') || /\.(md|txt|json|csv|py|js|ts|html|css|yaml|yml|sh|log|sql|xml)$/i.test(file.name)) {
+        } else if (isDoc) {
           processImageFile(file);
           showToast(`Document attached: ${file.name}`, 'info');
         } else {
-          showToast('Please attach an image or text document (PNG, JPG, WebP, TXT, MD, CSV, Code).', 'warning');
+          showToast('Please attach an image or text document (PNG, JPG, WebP, HEIC, TXT, MD, Code).', 'warning');
         }
       }
     });
@@ -10432,30 +10478,101 @@ select option:checked {
 
   function processImageFile(file) {
     if (!file) return;
-    if (file.type.startsWith('image/')) {
+
+    const fileName = file.name || 'image.jpg';
+    const isImage = (file.type && file.type.startsWith('image/')) || 
+                    /\.(jpe?g|png|webp|gif|bmp|heic|heif|tiff?)$/i.test(fileName);
+    const isDoc = (file.type && file.type.startsWith('text/')) || 
+                  /\.(md|txt|json|csv|py|js|ts|html|css|yaml|yml|sh|log|sql|xml)$/i.test(fileName);
+
+    if (isImage) {
+      const chip = document.getElementById('imageAttachmentChip');
+      const thumb = document.getElementById('attachedThumbnail');
+      const nameEl = document.getElementById('attachedFileName');
+      const sizeEl = document.getElementById('attachedFileSize');
+
+      if (chip) chip.style.display = 'inline-flex';
+      if (nameEl) nameEl.innerText = fileName;
+      if (sizeEl) sizeEl.innerText = 'Optimizing...';
+      if (thumb) {
+        thumb.style.display = 'block';
+        thumb.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="%23E5C07B" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>';
+      }
+
       const reader = new FileReader();
+      reader.onerror = () => {
+        showToast('Could not read image file.', 'error');
+        removeAttachment();
+      };
       reader.onload = (event) => {
-        const result = event.target.result;
-        attachedBase64Image = result.split(',')[1];
-        attachedDocPayload = null;
-        const thumb = document.getElementById('attachedThumbnail');
-        if (thumb) {
-          thumb.style.display = 'block';
-          thumb.src = result;
-        }
-        const nameEl = document.getElementById('attachedFileName');
-        if (nameEl) nameEl.innerText = file.name;
-        const sizeEl = document.getElementById('attachedFileSize');
-        if (sizeEl) sizeEl.innerText = `(${(file.size/1024).toFixed(0)} KB)`;
-        const chip = document.getElementById('imageAttachmentChip');
-        if (chip) chip.style.display = 'inline-flex';
+        const rawDataUrl = event.target.result;
+        const img = new Image();
+
+        img.onload = () => {
+          try {
+            // Downscale to max 1280px maintaining aspect ratio
+            const maxDim = 1280;
+            let width = img.naturalWidth || img.width || 800;
+            let height = img.naturalHeight || img.height || 600;
+
+            if (width > maxDim || height > maxDim) {
+              if (width > height) {
+                height = Math.round((height * maxDim) / width);
+                width = maxDim;
+              } else {
+                width = Math.round((width * maxDim) / height);
+                height = maxDim;
+              }
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.max(width, 1);
+            canvas.height = Math.max(height, 1);
+            const ctx = canvas.getContext('2d');
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.drawImage(img, 0, 0, width, height);
+
+            // Export to standard JPEG (quality 0.85) for universal VLM compatibility
+            const optimizedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+            const base64Data = optimizedDataUrl.split(',')[1];
+
+            attachedBase64Image = base64Data;
+            window.attachedBase64Image = base64Data;
+            attachedDocPayload = null;
+
+            if (thumb) thumb.src = optimizedDataUrl;
+            if (sizeEl) {
+              const approxKb = Math.round((base64Data.length * 3) / 4 / 1024);
+              sizeEl.innerText = `(${approxKb} KB · ${width}×${height})`;
+            }
+          } catch (canvasErr) {
+            console.warn('Canvas optimization fallback:', canvasErr);
+            attachedBase64Image = rawDataUrl.split(',')[1];
+            window.attachedBase64Image = attachedBase64Image;
+            attachedDocPayload = null;
+            if (thumb) thumb.src = rawDataUrl;
+            if (sizeEl) sizeEl.innerText = `(${(file.size / 1024).toFixed(0)} KB)`;
+          }
+        };
+
+        img.onerror = () => {
+          console.warn('Image decoder fallback for file:', fileName);
+          attachedBase64Image = rawDataUrl.split(',')[1];
+          window.attachedBase64Image = attachedBase64Image;
+          attachedDocPayload = null;
+          if (thumb) thumb.src = rawDataUrl;
+          if (sizeEl) sizeEl.innerText = `(${(file.size / 1024).toFixed(0)} KB)`;
+        };
+
+        img.src = rawDataUrl;
       };
       reader.readAsDataURL(file);
-    } else if (file.type.startsWith('text/') || /\.(md|txt|json|csv|py|js|ts|html|css|yaml|yml|sh|log|sql|xml)$/i.test(file.name)) {
+    } else if (isDoc) {
       const reader = new FileReader();
       reader.onload = (event) => {
         attachedDocPayload = {
-          name: file.name,
+          name: fileName,
           size: file.size,
           content: event.target.result
         };
@@ -10466,7 +10583,7 @@ select option:checked {
           thumb.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="%231A1816" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>';
         }
         const nameEl = document.getElementById('attachedFileName');
-        if (nameEl) nameEl.innerText = file.name;
+        if (nameEl) nameEl.innerText = fileName;
         const sizeEl = document.getElementById('attachedFileSize');
         if (sizeEl) sizeEl.innerText = `(${(file.size/1024).toFixed(0)} KB)`;
         const chip = document.getElementById('imageAttachmentChip');
@@ -10474,12 +10591,17 @@ select option:checked {
       };
       reader.readAsText(file);
     } else {
-      showToast('Supported files: Images (PNG, JPG, WebP) and Text Documents (TXT, MD, CSV, Code).', 'warning');
+      showToast('Supported files: Images (PNG, JPG, WebP, HEIC) and Text Documents (TXT, MD, CSV, Code).', 'warning');
     }
+
+    // Reset input so selecting the same file again triggers change event
+    const input = document.getElementById('imageInput');
+    if (input) input.value = '';
   }
 
   function removeAttachment() {
     attachedBase64Image = null;
+    window.attachedBase64Image = null;
     attachedDocPayload = null;
     const input = document.getElementById('imageInput');
     if (input) input.value = '';
@@ -10685,9 +10807,40 @@ select option:checked {
   }
 
   function saveSessions() {
-    localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions));
-    localStorage.setItem(ACTIVE_SESS_KEY, currentSessionId);
-    renderSessionList();
+    try {
+      localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions));
+      localStorage.setItem(ACTIVE_SESS_KEY, currentSessionId);
+      renderSessionList();
+    } catch (err) {
+      console.warn('LocalStorage save error (likely quota exceeded), auto-pruning historical images:', err);
+      try {
+        // Prune heavy base64 images from older historical sessions to fit within mobile localStorage limits
+        const pruned = {};
+        for (const id in sessions) {
+          pruned[id] = {
+            id: sessions[id].id,
+            title: sessions[id].title,
+            timestamp: sessions[id].timestamp,
+            messages: (sessions[id].messages || []).map((m, idx) => {
+              // Keep images only on the last 2 messages of the current active session
+              if (id === currentSessionId && idx >= (sessions[id].messages || []).length - 2) {
+                return m;
+              }
+              if (m.images && m.images.length > 0) {
+                const { images, ...rest } = m;
+                return { ...rest, hasPrunedImages: true };
+              }
+              return m;
+            })
+          };
+        }
+        localStorage.setItem(SESSIONS_KEY, JSON.stringify(pruned));
+        localStorage.setItem(ACTIVE_SESS_KEY, currentSessionId);
+        renderSessionList();
+      } catch (err2) {
+        console.warn('Critical localStorage quota exceeded; session state preserved in memory:', err2);
+      }
+    }
   }
 
   function loadSessions() {
@@ -11025,7 +11178,7 @@ select option:checked {
         wrap.className = 'msg-attached-img-wrap';
         const img = document.createElement('img');
         img.className = 'msg-attached-img';
-        img.src = `data:image/png;base64,${imgBase64}`;
+        img.src = imgBase64.startsWith('data:') ? imgBase64 : `data:image/jpeg;base64,${imgBase64}`;
         img.alt = 'User Attached Image';
         img.title = 'Click to inspect in fullscreen lightbox';
         img.addEventListener('click', () => openLightbox(img.src, 'User Attached Image'));
@@ -11104,6 +11257,7 @@ select option:checked {
   
   function estimateTokens(text) {
     if (!text) return 0;
+    if (text.length > 50000) return Math.round(text.length / 4);
     const matches = text.trim().match(/[\w]+|[^\s\w]/g);
     if (!matches) return 0;
     let count = 0;
@@ -11275,7 +11429,19 @@ select option:checked {
   });
 
   
-  sendBtn.addEventListener('click', handleSend);
+  let _lastSendTimestamp = 0;
+  function triggerSend(e) {
+    if (e && (e.type === 'touchend' || e.type === 'pointerdown')) {
+      e.preventDefault();
+    }
+    const now = performance.now();
+    if (now - _lastSendTimestamp < 350) return;
+    _lastSendTimestamp = now;
+    handleSend();
+  }
+
+  sendBtn.addEventListener('click', triggerSend);
+  sendBtn.addEventListener('touchend', triggerSend);
 
   async function handleSend() {
     if (isGenerating) {
@@ -11283,7 +11449,7 @@ select option:checked {
       return;
     }
 
-    const text = promptInput.value.trim();
+    let text = (promptInput.value || '').replace(/[\uFFFC\uFFFD]/g, '').trim();
     if (!text && !attachedBase64Image && !attachedDocPayload) return;
 
     // Check for inline slash command (/imagine <prompt> or /image <prompt>)
@@ -11308,6 +11474,8 @@ select option:checked {
     if (attachedDocPayload) {
       const docHeader = `\n\n--- Document Attached: ${attachedDocPayload.name} ---\n${attachedDocPayload.content}\n--- End Document ---`;
       finalPromptContent = text ? `${text}\n${docHeader}` : `Please analyze this attached document:\n${docHeader}`;
+    } else if (attachedBase64Image && !text) {
+      finalPromptContent = 'Describe this image in detail.';
     }
 
     const userMessage = { role: 'user', content: finalPromptContent };
