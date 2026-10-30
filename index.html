@@ -7628,6 +7628,7 @@ select option:checked {
 
         <div class="inspector-actions">
           <button type="button" class="generate-btn" id="imgGenerateBtn">⚡ GENERATE IMAGE</button>
+          <button type="button" class="inspector-sub-btn" id="imgInterruptBtn" style="display:none; color:var(--danger); border-color:var(--danger); font-weight:700;" title="Interrupt ongoing image generation">■ STOP</button>
           <button type="button" class="inspector-sub-btn" id="imgRandomizePromptBtn" title="Randomize Seed & Add Quality Modifiers">🎲 Random</button>
         </div>
 
@@ -7651,6 +7652,10 @@ select option:checked {
             <span class="mobile-text" id="imgStageMetaMobileText">Standby · 512²</span>
           </div>
           <div class="stage-actions">
+            <button type="button" class="top-btn" id="imgStageStopBtn" style="display:none; color:var(--danger); border-color:var(--danger); font-weight:700;" title="Stop ongoing diffusion synthesis">
+              <span class="desktop-text">■ Stop</span>
+              <span class="mobile-text">■ Stop</span>
+            </button>
             <button type="button" class="top-btn" id="stageZoomBtn" title="Lightbox Zoom Fullscreen">
               <span class="desktop-text">🔍 Lightbox</span>
               <span class="mobile-text">🔍 View</span>
@@ -16473,6 +16478,15 @@ select option:checked {
     if (sdBadge && b.sd_webui) {
       sdBadge.textContent = b.sd_webui.online ? `● ONLINE (${b.sd_webui.latency_ms || 0}ms)` : '○ STANDBY';
       sdBadge.classList.toggle('online', b.sd_webui.online);
+
+      // Auto-populate SD models when backend is online and dropdown is unpopulated
+      if (b.sd_webui.online) {
+        const select = document.getElementById('imgModelSelect');
+        if (select && (!select.value || select.options.length === 0 || select.options[0]?.value === '')) {
+          loadSdModels();
+          loadSdSamplers();
+        }
+      }
     }
     const whisperBadge = document.getElementById('whisperBackendStatusBadge');
     if (whisperBadge && b.whisper) {
@@ -16701,10 +16715,24 @@ select option:checked {
   function updateResolutionHint() {
     const w = parseInt(document.getElementById('imgWidthInput')?.value) || 512;
     const h = parseInt(document.getElementById('imgHeightInput')?.value) || 512;
+    const steps = parseInt(document.getElementById('imgStepsInput')?.value) || 25;
     const hint = document.getElementById('imgResTotalPx');
     if (hint) {
       const mp = ((w * h) / 1000000).toFixed(2);
-      hint.textContent = `${w}×${h} (${mp} MP)`;
+      const pxRatio = (w * h) / 262144;
+      const stepRatio = steps / 20;
+      const computeFactor = pxRatio * stepRatio;
+      let estInfo = '';
+      if (computeFactor >= 2.5) {
+        const estMin = Math.max(1, Math.round((computeFactor * 16) / 60));
+        estInfo = ` · High Compute ~${estMin}m on Apple Silicon`;
+        hint.style.color = 'var(--warning)';
+      } else {
+        const estSec = Math.max(3, Math.round(computeFactor * 16));
+        estInfo = ` · ~${estSec}s`;
+        hint.style.color = 'var(--text-muted)';
+      }
+      hint.textContent = `${w}×${h} (${mp} MP${estInfo})`;
     }
   }
 
@@ -16730,6 +16758,7 @@ select option:checked {
   document.getElementById('imgStepsInput')?.addEventListener('input', (e) => {
     const lbl = document.getElementById('imgStepsLabel');
     if (lbl) lbl.textContent = e.target.value;
+    updateResolutionHint();
   });
   document.getElementById('imgCfgInput')?.addEventListener('input', (e) => {
     const lbl = document.getElementById('imgCfgLabel');
@@ -16832,6 +16861,8 @@ select option:checked {
     _imagePollActive = true;
 
     const genBtn = document.getElementById('imgGenerateBtn');
+    const intBtn = document.getElementById('imgInterruptBtn');
+    const stageStopBtn = document.getElementById('imgStageStopBtn');
     const progressBox = document.getElementById('imgGenerationProgress');
     const progressFill = document.getElementById('imgProgressBarFill');
     const progressText = document.getElementById('imgProgressText');
@@ -16850,9 +16881,24 @@ select option:checked {
       genBtn.disabled = true;
       genBtn.textContent = '⏳ SYNTHESIZING...';
     }
+    if (intBtn) intBtn.style.display = 'inline-flex';
+    if (stageStopBtn) stageStopBtn.style.display = 'inline-flex';
     if (progressBox) progressBox.style.display = 'block';
     if (stageBar) stageBar.style.display = 'block';
     if (stageDot) stageDot.className = 'stage-live-indicator busy';
+
+    function resetImageControls() {
+      if (genBtn) {
+        genBtn.disabled = false;
+        genBtn.textContent = '⚡ GENERATE IMAGE';
+      }
+      if (intBtn) intBtn.style.display = 'none';
+      if (stageStopBtn) stageStopBtn.style.display = 'none';
+      setTimeout(() => {
+        if (progressBox) progressBox.style.display = 'none';
+        if (stageBar) stageBar.style.display = 'none';
+      }, 1200);
+    }
 
     const poll = async () => {
       if (!_imagePollActive) return;
@@ -16947,16 +16993,26 @@ select option:checked {
             }
 
             showToast(`✓ Image generated in ${elapsedStr}!`, 'success');
+            resetImageControls();
+            return;
+          } else if (pData.stage === 'interrupted') {
+            _imagePollActive = false;
+            localStorage.removeItem('liw_active_image_job');
 
-            if (genBtn) {
-              genBtn.disabled = false;
-              genBtn.textContent = '⚡ GENERATE IMAGE';
+            if (stageDot) stageDot.className = 'stage-live-indicator standby';
+            if (stageMetaText) stageMetaText.textContent = 'Diffusion Synthesis Interrupted';
+            if (progressText) progressText.textContent = 'Synthesis stopped';
+
+            if (streamStatusEl) {
+              streamStatusEl.innerText = 'Synthesis Stopped';
+              streamStatusEl.style.color = 'var(--text-muted)';
+            }
+            if (imgProgEl) {
+              imgProgEl.textContent = 'Stopped';
             }
 
-            setTimeout(() => {
-              if (progressBox) progressBox.style.display = 'none';
-              if (stageBar) stageBar.style.display = 'none';
-            }, 1200);
+            showToast('Diffusion synthesis interrupted.', 'info');
+            resetImageControls();
             return;
           } else if (pData.stage === 'error') {
             _imagePollActive = false;
@@ -16974,17 +17030,12 @@ select option:checked {
               imgProgEl.textContent = 'Failed';
             }
 
-            showToast(`Image generation error: ${pData.error || 'Synthesis error'}`, 'error');
-
-            if (genBtn) {
-              genBtn.disabled = false;
-              genBtn.textContent = '⚡ GENERATE IMAGE';
+            let errMsg = pData.error || 'Synthesis error';
+            if (errMsg.includes('timed out')) {
+              errMsg = 'Diffusion backend timed out. Try reducing resolution or steps on Apple Silicon.';
             }
-
-            setTimeout(() => {
-              if (progressBox) progressBox.style.display = 'none';
-              if (stageBar) stageBar.style.display = 'none';
-            }, 1500);
+            showToast(`Image generation error: ${errMsg}`, 'error');
+            resetImageControls();
             return;
           }
         }
@@ -17106,6 +17157,19 @@ select option:checked {
       showToast(`Generation Error: ${err.message}`, 'error');
     }
   });
+
+  // Interrupt Diffusion Generation
+  async function interruptImageGeneration() {
+    try {
+      showToast('Interrupting diffusion synthesis...', 'info');
+      await fetch('/api/image/interrupt', { method: 'POST' });
+    } catch (e) {
+      console.warn('Interrupt error:', e);
+    }
+  }
+
+  document.getElementById('imgInterruptBtn')?.addEventListener('click', interruptImageGeneration);
+  document.getElementById('imgStageStopBtn')?.addEventListener('click', interruptImageGeneration);
 
   // Stage Action Toolbar Buttons
   document.getElementById('stageZoomBtn')?.addEventListener('click', () => {

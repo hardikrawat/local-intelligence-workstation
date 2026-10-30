@@ -553,7 +553,8 @@ def _run_image_generation_worker(job_id, payload, sd_url):
             headers={"Content-Type": "application/json", "User-Agent": "LIW-Gateway/1.0"},
             method="POST"
         )
-        with urllib.request.urlopen(req, timeout=300) as resp:
+        # 1800s (30m) timeout to accommodate high-res (768x1024 / 1024x1024) and high step diffusion on Apple Silicon / CPU
+        with urllib.request.urlopen(req, timeout=1800) as resp:
             data = json.loads(resp.read().decode("utf-8"))
             images = data.get("images", [])
             if not images:
@@ -585,9 +586,10 @@ def _run_image_generation_worker(job_id, payload, sd_url):
     except Exception as e:
         with _image_gen_lock:
             if _image_gen_state.get("job_id") == job_id:
-                _image_gen_state["active"] = False
-                _image_gen_state["stage"] = "error"
-                _image_gen_state["last_error"] = str(e)
+                if _image_gen_state.get("stage") != "interrupted":
+                    _image_gen_state["active"] = False
+                    _image_gen_state["stage"] = "error"
+                    _image_gen_state["last_error"] = str(e)
 
 
 # Chat Streaming Session Buffer State (resilient to client disconnects)
@@ -1917,8 +1919,8 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
                         "progress": 1.0 if stage == "complete" else 0.0,
                         "sampling_step": sampling_steps if stage == "complete" else 0,
                         "sampling_steps": sampling_steps,
-                        "detail": "✓ Image synthesis complete!" if stage == "complete" else ("Standby · Ready to synthesize" if stage != "error" else f"Generation error: {last_err}"),
-                        "eta_str": "Complete" if stage == "complete" else ("Standby" if stage != "error" else "Error"),
+                        "detail": "✓ Image synthesis complete!" if stage == "complete" else ("Synthesis stopped by user" if stage == "interrupted" else ("Standby · Ready to synthesize" if stage != "error" else f"Generation error: {last_err}")),
+                        "eta_str": "Complete" if stage == "complete" else ("Stopped" if stage == "interrupted" else ("Standby" if stage != "error" else "Error")),
                         "result_item": result_item if stage == "complete" else None,
                         "error": last_err
                     })
@@ -2010,6 +2012,27 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
                     "job_id": job_id,
                     "message": "Image synthesis started in background"
                 })
+                return
+
+            elif path == "/api/image/interrupt":
+                try:
+                    int_req = urllib.request.Request(
+                        f"{sd_url}/sdapi/v1/interrupt",
+                        data=b"{}",
+                        headers={"Content-Type": "application/json", "User-Agent": "LIW-Gateway/1.0"},
+                        method="POST"
+                    )
+                    with urllib.request.urlopen(int_req, timeout=5) as _:
+                        pass
+                except Exception:
+                    pass
+
+                with _image_gen_lock:
+                    _image_gen_state["active"] = False
+                    _image_gen_state["stage"] = "interrupted"
+                    _image_gen_state["last_error"] = "Synthesis stopped by user"
+
+                self.send_json_response({"success": True, "message": "Image synthesis interrupted"})
                 return
 
         self.send_error(404, f"Image endpoint not found: {path}")
