@@ -621,11 +621,21 @@ def _run_ollama_chat_stream_worker(stream_id, req):
             if buf:
                 buf["done"] = True
     except Exception as e:
+        err_msg = str(e)
+        if isinstance(e, urllib.error.HTTPError):
+            try:
+                err_detail = e.read().decode("utf-8", errors="replace").strip()
+                if err_detail:
+                    err_msg = f"{e.code} {e.reason}: {err_detail}"
+            except Exception:
+                pass
+        err_chunk = json.dumps({"error": f"Ollama error: {err_msg}"}).encode("utf-8") + b"\n"
         with _chat_stream_lock:
             buf = _chat_stream_buffers.get(stream_id)
             if buf:
+                buf["chunks"].append(err_chunk)
                 buf["done"] = True
-                buf["error"] = str(e)
+                buf["error"] = err_msg
 
 
 # Video Generation Real-time Telemetry State
@@ -2650,8 +2660,15 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
         body = self.rfile.read(content_length) if content_length > 0 else None
 
         req = urllib.request.Request(target_url, data=body, method=method)
+        # Strip external CORS, browser routing, and proxy forwarding headers so Ollama
+        # treats loopback calls as trusted local server-to-server requests
+        excluded_headers = {
+            "host", "content-length", "origin", "referer", "cookie",
+            "sec-fetch-dest", "sec-fetch-mode", "sec-fetch-site", "priority",
+            "x-forwarded-for", "x-forwarded-host", "x-forwarded-proto"
+        }
         for h, v in self.headers.items():
-            if h.lower() not in ["host", "content-length"]:
+            if h.lower() not in excluded_headers:
                 req.add_header(h, v)
 
         # Resilient background token buffering for chat streaming
@@ -2743,6 +2760,7 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
 def run():
     port = int(sys.argv[1]) if len(sys.argv) > 1 else DEFAULT_PORT
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    os.environ["OLLAMA_ORIGINS"] = "*"
     ThreadingHTTPServer.allow_reuse_address = True
     server = ThreadingHTTPServer(("0.0.0.0", port), OllamaProxyHandler)
     print(f"Local Intelligence Workstation Gateway running on http://0.0.0.0:{port}")

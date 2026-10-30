@@ -12830,7 +12830,10 @@ select option:checked {
                 isInsideThink = true;
                 if (!thoughtStartTime) thoughtStartTime = performance.now();
                 if (thoughtPulse) thoughtPulse.style.display = 'inline-block';
-                if (reasoningBox) reasoningBox.style.display = 'block';
+                if (reasoningBox) {
+                  reasoningBox.style.display = 'block';
+                  reasoningBox.setAttribute('open', '');
+                }
                 const stageText = 'Reasoning...';
                 metricStreamStatus.innerText = stageText;
                 metricStreamStatus.style.color = 'var(--accent-rubric)';
@@ -12889,7 +12892,10 @@ select option:checked {
                 isInsideThink = true;
                 thoughtStartTime = performance.now();
                 if (thoughtPulse) thoughtPulse.style.display = 'inline-block';
-                if (reasoningBox) reasoningBox.style.display = 'block';
+                if (reasoningBox) {
+                  reasoningBox.style.display = 'block';
+                  reasoningBox.setAttribute('open', '');
+                }
                 const stageText = 'Reasoning...';
                 metricStreamStatus.innerText = stageText;
                 metricStreamStatus.style.color = 'var(--accent-rubric)';
@@ -12942,6 +12948,8 @@ select option:checked {
           accumulatedAnswer = '\n\n*(Context limit reached during reasoning. You can increase Context Window in Settings)*';
         } else if (accumulatedThought) {
           accumulatedAnswer = '\n\n*(Reasoning completed)*';
+        } else if (!finalChunkData) {
+          throw new Error('No response received from model. Backend stream closed without tokens.');
         }
       }
 
