@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.1.0] - 2026-11-01
+
+### Security & Hardening
+- **Cross-Origin Resource Sharing (CORS) Protection**:
+  - Replaced wildcard `*` CORS policy with context-aware origin validation restricting access to loopback (`localhost`, `127.0.0.1`), RFC 1918 private subnets, Tailscale mesh domains, and user-configured origins.
+  - Implemented Private Network Access (PNA) compatibility headers.
+- **Frontend XSS Elimination & DOMPurify Integration**:
+  - Embedded DOMPurify sanitization in streaming and static markdown renderers (`renderSafeMarkdown`), completely preventing DOM-based and stored cross-site scripting via model responses or prompt injection.
+  - Hardened HTML entity escaping to sanitize single quotes and Model Hub attributes (`types`, `sizes`, URLs).
+- **Server-Side Request Forgery (SSRF) & Credential Protection**:
+  - Hardened `/api/backends/probe` to enforce `http`/`https` protocols and reject cloud metadata addresses (`169.254.169.254`).
+  - Added domain verification before transmitting Hugging Face authorization tokens, preventing credential interception by unverified endpoints.
+- **Static File & Repository Isolation**:
+  - Restricted static file server to explicitly allowed web assets (`.html`, `.js`, `.css`, media/fonts).
+  - Blocked access to directory traversal (`..`), hidden dotfiles (`.git/`, `.env`, `.DS_Store`), source code (`server.py`), and backend configurations (`backends.json`).
+- **Safe Subprocess Management & Information Leakage Cleanup**:
+  - Eliminated `shell=True` and string-interpolated shell pipelines (`lsof | xargs kill`) in favor of direct argument lists and safe POSIX signal termination (`signal.SIGTERM`).
+  - Enforced strict service name whitelist on service lifecycle actions.
+  - Removed host developer task directory log scanning from SD WebUI status diagnostics.
+- **Defense-in-Depth HTTP Headers & Payload Caps**:
+  - Appended `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, and `Referrer-Policy: strict-origin-when-cross-origin`.
+  - Added request payload ceiling (50MB) and streaming buffer allocation limits.
+  - Supported `--host` and `--local` flags along with `HOST` environment variable for granular network binding.
+
+---
+
 ## [2.0.0] - 2026-10-31
 
 ### Major Overhaul: Renamed to Local Intelligence Workstation (LIW)
