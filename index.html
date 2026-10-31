@@ -5861,6 +5861,13 @@ select option:checked {
   transition: background 0.1s ease, color 0.1s ease, border-color 0.1s ease;
 }
 
+.inspector-sub-btn[style*="none"],
+.inspector-actions .top-btn[style*="none"],
+.recorder-controls .top-btn[style*="none"],
+.stage-action-icon-btn[style*="none"] {
+  display: none !important;
+}
+
 .inspector-sub-btn:hover,
 .inspector-actions .top-btn:hover,
 .recorder-controls .top-btn:hover {
@@ -8201,7 +8208,7 @@ body.eco-mode .video-stage-progress-fill.active {
       <div class="splash-engineer-plate">
         <div class="splash-eng-tag">SYSTEM & HARDWARE ARCHITECTURE</div>
         <div class="splash-eng-name">ENGINEERED BY <span class="splash-highlight">HARDIK RAWAT</span></div>
-        <div class="splash-eng-edition">VINTAGE WORKSTATION EDITION · OLLAMA STUDIO</div>
+        <div class="splash-eng-edition">VINTAGE WORKSTATION EDITION · LOCAL INTELLIGENCE WORKSTATION</div>
       </div>
 
       <!-- Status & Activity Console with iconic 12-blade spinner -->
@@ -8789,6 +8796,7 @@ body.eco-mode .video-stage-progress-fill.active {
 
         <div class="inspector-actions">
           <button type="button" class="generate-btn" id="generateVideoBtn">⚡ GENERATE VIDEO</button>
+          <button type="button" class="inspector-sub-btn" id="videoInterruptBtn" style="display:none; color:var(--danger); border-color:var(--danger); font-weight:700;" title="Interrupt ongoing video generation">■ STOP</button>
           <button type="button" class="inspector-sub-btn" id="randomVideoPromptBtn" title="Random Motion Prompt &amp; Seed">🎲 Prompt</button>
         </div>
 
@@ -8811,6 +8819,7 @@ body.eco-mode .video-stage-progress-fill.active {
             <span id="videoStageMetaText">Video Standby · 16 frames · 12 fps · SVD-XT</span>
           </div>
           <div class="stage-actions-group">
+            <button type="button" class="top-btn stage-action-icon-btn" id="videoStageStopBtn" style="display:none; color:var(--danger); border-color:var(--danger); font-weight:700;" title="Stop Motion Synthesis (■)">■</button>
             <button type="button" class="top-btn stage-action-icon-btn" id="downloadVideoBtn" title="Download Video Clip (↓)" disabled>↓</button>
             <button type="button" class="top-btn stage-action-icon-btn" id="copyVideoBtn" title="Copy Clip / URL (📋)" disabled>📋</button>
             <button type="button" class="top-btn stage-action-icon-btn" id="sendVideoToChatBtn" title="Send to Chat Studio (💬)" disabled>💬</button>
@@ -8855,6 +8864,9 @@ body.eco-mode .video-stage-progress-fill.active {
             <div class="video-stage-telemetry-row">
               <span id="videoStageCenteredTelemetry" class="video-stage-telemetry-sub">Connecting to SD WebUI :7860...</span>
               <span id="videoStageCenteredCounter" class="video-stage-step-counter">Step 0/0</span>
+            </div>
+            <div style="display:flex; justify-content:center; margin-top:8px;">
+              <button type="button" class="top-btn" id="videoCenterStopBtn" style="color:var(--danger); border-color:var(--danger); font-weight:700; height:24px; padding:0 12px; font-size:11px; display:inline-flex; align-items:center; gap:4px; background:var(--bg-panel);" title="Stop Motion Synthesis">■ STOP SYNTHESIS</button>
             </div>
           </div>
 
@@ -10675,7 +10687,7 @@ body.eco-mode .video-stage-progress-fill.active {
       return;
     }
 
-    if (interactive.id === 'vramPurgeQuickBtn' || interactive.id === 'imgInterruptBtn' || interactive.id === 'streamInlineStopBtn' || (interactive.id === 'sendBtn' && typeof isGenerating !== 'undefined' && isGenerating)) {
+    if (interactive.id === 'vramPurgeQuickBtn' || interactive.id === 'imgInterruptBtn' || interactive.id === 'imgStageStopBtn' || interactive.id === 'videoInterruptBtn' || interactive.id === 'videoStageStopBtn' || interactive.id === 'videoCenterStopBtn' || interactive.id === 'streamInlineStopBtn' || (interactive.id === 'sendBtn' && typeof isGenerating !== 'undefined' && isGenerating)) {
       WorkstationAudio.play('abortThud');
     } else if (interactive.classList.contains('rail-btn') || interactive.classList.contains('modal-tab-btn')) {
       WorkstationAudio.play('modeSwitchChirp');
@@ -18089,12 +18101,22 @@ body.eco-mode .video-stage-progress-fill.active {
       const placeholderDesc = document.getElementById('videoStageDesc');
       const placeholderSub = document.getElementById('videoStageSub');
       const genBtn = document.getElementById('generateVideoBtn');
+      const intBtn = document.getElementById('videoInterruptBtn');
+      const stageStopBtn = document.getElementById('videoStageStopBtn');
+      const centerStopBtn = document.getElementById('videoCenterStopBtn');
 
       const videoViewport = document.getElementById('videoViewportBox');
       if (videoViewport) videoViewport.classList.add('is-synthesizing');
       WorkstationMeshGrid.startVideo();
 
-      if (genBtn) genBtn.disabled = true;
+      if (genBtn) {
+        genBtn.disabled = true;
+        genBtn.textContent = '⏳ SYNTHESIZING...';
+      }
+      if (intBtn) intBtn.style.display = 'inline-flex';
+      if (stageStopBtn) stageStopBtn.style.display = 'inline-flex';
+      if (centerStopBtn) centerStopBtn.style.display = 'inline-flex';
+
       if (stageProgressBar) {
         stageProgressBar.style.display = 'flex';
         stageProgressBar.classList.add('active');
@@ -18110,6 +18132,37 @@ body.eco-mode .video-stage-progress-fill.active {
       }
       if (inspectorProgressFill) inspectorProgressFill.classList.add('active');
       if (stageDot) stageDot.className = 'stage-live-indicator busy';
+
+      function resetVideoControls() {
+        WorkstationMeshGrid.stopVideo();
+        if (videoViewport) {
+          videoViewport.classList.remove('is-synthesizing');
+          videoViewport.classList.remove('has-preview');
+        }
+        if (stageProgressBar) stageProgressBar.classList.remove('active');
+        if (stageProgressFill) stageProgressFill.classList.remove('active');
+        if (centerFill) centerFill.classList.remove('active');
+        if (inspectorProgressBar) inspectorProgressBar.classList.remove('active');
+        if (inspectorProgressFill) inspectorProgressFill.classList.remove('active');
+        const ticksTrack = document.getElementById('videoFrameTicksTrack');
+        if (ticksTrack) {
+          ticksTrack.style.display = 'none';
+          ticksTrack.innerHTML = '';
+        }
+        if (stageDot) stageDot.className = 'stage-live-indicator standby';
+        if (genBtn) {
+          genBtn.disabled = false;
+          genBtn.textContent = '⚡ GENERATE VIDEO';
+        }
+        if (intBtn) intBtn.style.display = 'none';
+        if (stageStopBtn) stageStopBtn.style.display = 'none';
+        if (centerStopBtn) centerStopBtn.style.display = 'none';
+        setTimeout(() => {
+          if (stageProgressBar) stageProgressBar.style.display = 'none';
+          if (centerBox) centerBox.style.display = 'none';
+          if (inspectorProgressBar) inspectorProgressBar.style.display = 'none';
+        }, 1500);
+      }
 
       const poll = async () => {
         if (!_videoPollActive) return;
@@ -18266,32 +18319,41 @@ body.eco-mode .video-stage-progress-fill.active {
               loadVideoIntoPlayer(item);
               showToast('✓ Video generated successfully!', 'success');
               localStorage.removeItem('liw_active_video_job');
+              resetVideoControls();
+              return;
+            } else if (pData.stage === 'interrupted') {
+              _videoPollActive = false;
+              WorkstationAudio.play('abortThud');
+              localStorage.removeItem('liw_active_video_job');
 
-              if (genBtn) genBtn.disabled = false;
-              setTimeout(() => {
-                if (stageProgressBar) stageProgressBar.style.display = 'none';
-                if (centerBox) centerBox.style.display = 'none';
-                if (inspectorProgressBar) inspectorProgressBar.style.display = 'none';
-              }, 1500);
+              const bottomStatus = document.getElementById('metricStreamStatus');
+              const vidProg = document.getElementById('metricVideoProgress');
+              if (bottomStatus) {
+                bottomStatus.innerText = 'Video Stopped';
+                bottomStatus.style.color = 'var(--text-muted)';
+              }
+              if (vidProg) {
+                vidProg.innerText = 'Halted';
+              }
+
+              if (stageMeta) stageMeta.textContent = 'Motion Synthesis Interrupted';
+              if (stageProgressText) stageProgressText.textContent = 'Synthesis stopped by user';
+              if (centerText) centerText.textContent = 'Synthesis stopped by user';
+              if (stageTelemetrySub) stageTelemetrySub.textContent = 'Video generation halted by user';
+              if (centerTelemetry) centerTelemetry.textContent = 'Video generation halted by user';
+              if (placeholderTitle) placeholderTitle.textContent = 'VIDEO SYNTHESIS HALTED';
+              if (placeholderDesc) placeholderDesc.textContent = 'Process was forcefully terminated by user.';
+              const livePrevErr = document.getElementById('videoStageLivePreview');
+              const glyphErr = document.getElementById('videoStageGlyph');
+              if (livePrevErr) livePrevErr.style.display = 'none';
+              if (glyphErr) glyphErr.style.display = 'block';
+
+              showToast('Video synthesis interrupted.', 'info');
+              resetVideoControls();
               return;
             } else if (pData.stage === 'error') {
               _videoPollActive = false;
               WorkstationAudio.play('systemWarningBuzz');
-              WorkstationMeshGrid.stopVideo();
-              if (videoViewport) {
-                videoViewport.classList.remove('is-synthesizing');
-                videoViewport.classList.remove('has-preview');
-              }
-              if (stageProgressBar) stageProgressBar.classList.remove('active');
-              if (stageProgressFill) stageProgressFill.classList.remove('active');
-              if (centerFill) centerFill.classList.remove('active');
-              if (inspectorProgressBar) inspectorProgressBar.classList.remove('active');
-              if (inspectorProgressFill) inspectorProgressFill.classList.remove('active');
-              const ticksTrack = document.getElementById('videoFrameTicksTrack');
-              if (ticksTrack) {
-                ticksTrack.style.display = 'none';
-                ticksTrack.innerHTML = '';
-              }
               const bottomStatus = document.getElementById('metricStreamStatus');
               const vidProg = document.getElementById('metricVideoProgress');
               if (bottomStatus) {
@@ -18302,7 +18364,6 @@ body.eco-mode .video-stage-progress-fill.active {
                 vidProg.innerText = 'Failed';
               }
 
-              if (stageDot) stageDot.className = 'stage-live-indicator standby';
               if (stageMeta) stageMeta.textContent = 'Video Synthesis Failed';
               if (stageProgressText) stageProgressText.textContent = `Error: ${pData.error || 'Synthesis error'}`;
               if (centerText) centerText.textContent = `Error: ${pData.error || 'Synthesis error'}`;
@@ -18316,12 +18377,7 @@ body.eco-mode .video-stage-progress-fill.active {
               if (glyphErr) glyphErr.style.display = 'block';
               showToast(`Video synthesis error: ${pData.error || 'Synthesis error'}`, 'error');
               localStorage.removeItem('liw_active_video_job');
-              if (genBtn) genBtn.disabled = false;
-              setTimeout(() => {
-                if (stageProgressBar) stageProgressBar.style.display = 'none';
-                if (centerBox) centerBox.style.display = 'none';
-                if (inspectorProgressBar) inspectorProgressBar.style.display = 'none';
-              }, 2000);
+              resetVideoControls();
               return;
             }
           }
@@ -18459,7 +18515,18 @@ body.eco-mode .video-stage-progress-fill.active {
       if (centerBox) centerBox.style.display = 'flex';
       if (centerFill) centerFill.classList.add('active');
 
-      if (genBtn) genBtn.disabled = true;
+      const intBtn = document.getElementById('videoInterruptBtn');
+      const stageStopBtn = document.getElementById('videoStageStopBtn');
+      const centerStopBtn = document.getElementById('videoCenterStopBtn');
+
+      if (genBtn) {
+        genBtn.disabled = true;
+        genBtn.textContent = '⏳ SYNTHESIZING...';
+      }
+      if (intBtn) intBtn.style.display = 'inline-flex';
+      if (stageStopBtn) stageStopBtn.style.display = 'inline-flex';
+      if (centerStopBtn) centerStopBtn.style.display = 'inline-flex';
+
       if (stageProgressBar) {
         stageProgressBar.style.display = 'flex';
         stageProgressBar.classList.add('active');
@@ -18525,7 +18592,13 @@ body.eco-mode .video-stage-progress-fill.active {
           throw new Error(data.error || 'Failed to start video synthesis in background');
         }
       } catch (err) {
-        if (genBtn) genBtn.disabled = false;
+        if (genBtn) {
+          genBtn.disabled = false;
+          genBtn.textContent = '⚡ GENERATE VIDEO';
+        }
+        if (intBtn) intBtn.style.display = 'none';
+        if (stageStopBtn) stageStopBtn.style.display = 'none';
+        if (centerStopBtn) centerStopBtn.style.display = 'none';
         WorkstationMeshGrid.stopVideo();
         const videoViewport = document.getElementById('videoViewportBox');
         if (videoViewport) {
@@ -18561,6 +18634,103 @@ body.eco-mode .video-stage-progress-fill.active {
         }, 2000);
       }
     });
+
+    // ─── Forceful Video Interrupt Controller ───
+    async function interruptVideoGeneration() {
+      try {
+        WorkstationAudio.play('abortThud');
+        showToast('Interrupting video synthesis...', 'info');
+
+        _videoPollActive = false;
+        if (_videoPollTimer) clearTimeout(_videoPollTimer);
+        WorkstationMeshGrid.stopVideo();
+
+        const genBtn = document.getElementById('generateVideoBtn');
+        const intBtn = document.getElementById('videoInterruptBtn');
+        const stageStopBtn = document.getElementById('videoStageStopBtn');
+        const centerStopBtn = document.getElementById('videoCenterStopBtn');
+        const videoViewport = document.getElementById('videoViewportBox');
+        const stageProgressBar = document.getElementById('videoStageProgressBarBox');
+        const stageProgressFill = document.getElementById('videoStageProgressFill');
+        const inspectorProgressBar = document.getElementById('videoGenProgressBar');
+        const inspectorProgressFill = document.getElementById('videoGenProgressFill');
+        const centerBox = document.getElementById('videoStageCenteredProgressBox');
+        const centerFill = document.getElementById('videoStageCenteredFill');
+        const stageDot = document.getElementById('videoStageDot');
+        const stageMeta = document.getElementById('videoStageMetaText');
+        const stageProgressText = document.getElementById('videoStageProgressText');
+        const centerText = document.getElementById('videoStageCenteredText');
+        const stageTelemetrySub = document.getElementById('videoStageTelemetrySub');
+        const centerTelemetry = document.getElementById('videoStageCenteredTelemetry');
+        const placeholderTitle = document.getElementById('videoStageTitle');
+        const placeholderDesc = document.getElementById('videoStageDesc');
+        const bottomStatus = document.getElementById('metricStreamStatus');
+        const vidProg = document.getElementById('metricVideoProgress');
+
+        if (genBtn) {
+          genBtn.disabled = false;
+          genBtn.textContent = '⚡ GENERATE VIDEO';
+        }
+        if (intBtn) intBtn.style.display = 'none';
+        if (stageStopBtn) stageStopBtn.style.display = 'none';
+        if (centerStopBtn) centerStopBtn.style.display = 'none';
+
+        if (videoViewport) {
+          videoViewport.classList.remove('is-synthesizing');
+          videoViewport.classList.remove('has-preview');
+        }
+        if (stageProgressBar) stageProgressBar.classList.remove('active');
+        if (stageProgressFill) stageProgressFill.classList.remove('active');
+        if (centerFill) centerFill.classList.remove('active');
+        if (inspectorProgressBar) inspectorProgressBar.classList.remove('active');
+        if (inspectorProgressFill) inspectorProgressFill.classList.remove('active');
+        const ticksTrack = document.getElementById('videoFrameTicksTrack');
+        if (ticksTrack) {
+          ticksTrack.style.display = 'none';
+          ticksTrack.innerHTML = '';
+        }
+
+        if (stageDot) stageDot.className = 'stage-live-indicator standby';
+        if (stageMeta) stageMeta.textContent = 'Motion Synthesis Interrupted';
+        if (stageProgressText) stageProgressText.textContent = 'Synthesis stopped by user';
+        if (centerText) centerText.textContent = 'Synthesis stopped by user';
+        if (stageTelemetrySub) stageTelemetrySub.textContent = 'Video generation halted by user';
+        if (centerTelemetry) centerTelemetry.textContent = 'Video generation halted by user';
+        if (placeholderTitle) placeholderTitle.textContent = 'VIDEO SYNTHESIS HALTED';
+        if (placeholderDesc) placeholderDesc.textContent = 'Process was forcefully terminated by user.';
+        const livePrevErr = document.getElementById('videoStageLivePreview');
+        const glyphErr = document.getElementById('videoStageGlyph');
+        if (livePrevErr) livePrevErr.style.display = 'none';
+        if (glyphErr) glyphErr.style.display = 'block';
+
+        if (bottomStatus) {
+          bottomStatus.innerText = 'Video Stopped';
+          bottomStatus.style.color = 'var(--text-muted)';
+        }
+        if (vidProg) {
+          vidProg.innerText = 'Halted';
+        }
+
+        localStorage.removeItem('liw_active_video_job');
+
+        setTimeout(() => {
+          if (stageProgressBar) stageProgressBar.style.display = 'none';
+          if (centerBox) centerBox.style.display = 'none';
+          if (inspectorProgressBar) inspectorProgressBar.style.display = 'none';
+        }, 1500);
+
+        await fetch('/api/video/interrupt', { method: 'POST' });
+      } catch (e) {
+        console.warn('Video interrupt error:', e);
+      }
+    }
+
+    window.startVideoProgressPolling = startVideoProgressPolling;
+    window.interruptVideoGeneration = interruptVideoGeneration;
+
+    document.getElementById('videoInterruptBtn')?.addEventListener('click', interruptVideoGeneration);
+    document.getElementById('videoStageStopBtn')?.addEventListener('click', interruptVideoGeneration);
+    document.getElementById('videoCenterStopBtn')?.addEventListener('click', interruptVideoGeneration);
 
     // Download Video Clip
     document.getElementById('downloadVideoBtn')?.addEventListener('click', () => {

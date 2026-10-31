@@ -662,7 +662,7 @@ def _run_video_generation_worker(job_id, prompt, neg_prompt, num_gen_frames, ste
         frames_b64 = []
         for i in range(num_gen_frames):
             with _video_gen_lock:
-                if _video_gen_state.get("job_id") != job_id:
+                if _video_gen_state.get("job_id") != job_id or _video_gen_state.get("stage") == "interrupted":
                     return
                 _video_gen_state["frame_current"] = i + 1
                 _video_gen_state["stage"] = "generating_frames"
@@ -690,9 +690,13 @@ def _run_video_generation_worker(job_id, prompt, neg_prompt, num_gen_frames, ste
                 if res_data.get("images") and len(res_data["images"]) > 0:
                     frames_b64.append(res_data["images"][0])
 
+            with _video_gen_lock:
+                if _video_gen_state.get("job_id") != job_id or _video_gen_state.get("stage") == "interrupted":
+                    return
+
         if frames_b64:
             with _video_gen_lock:
-                if _video_gen_state.get("job_id") != job_id:
+                if _video_gen_state.get("job_id") != job_id or _video_gen_state.get("stage") == "interrupted":
                     return
                 _video_gen_state["stage"] = "assembling_webp"
 
@@ -733,15 +737,20 @@ def _run_video_generation_worker(job_id, prompt, neg_prompt, num_gen_frames, ste
             }
 
             with _video_gen_lock:
-                if _video_gen_state.get("job_id") == job_id:
+                if _video_gen_state.get("job_id") == job_id and _video_gen_state.get("stage") != "interrupted":
                     _video_gen_state["active"] = False
                     _video_gen_state["stage"] = "complete"
                     _video_gen_state["completed_at"] = time.time()
                     _video_gen_state["result_item"] = result_item
         else:
+            with _video_gen_lock:
+                if _video_gen_state.get("stage") == "interrupted":
+                    return
             raise RuntimeError("No frames generated from SD WebUI sampler")
     except Exception as e:
         with _video_gen_lock:
+            if _video_gen_state.get("stage") == "interrupted":
+                return
             if _video_gen_state.get("job_id") == job_id:
                 _video_gen_state["active"] = False
                 _video_gen_state["stage"] = "error"
@@ -2080,14 +2089,31 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
                     result_item = _video_gen_state.get("result_item")
 
                 if not is_active:
+                    if stage == "interrupted":
+                        detail_msg = "Synthesis stopped by user"
+                        eta_val = "Stopped"
+                        telemetry_msg = "Video generation halted by user"
+                    elif stage == "complete":
+                        detail_msg = "✓ Video synthesis complete!"
+                        eta_val = "Complete"
+                        telemetry_msg = f"Rendered {frame_tot} frames @ {fps} fps"
+                    elif stage == "error":
+                        detail_msg = f"Generation error: {last_err}"
+                        eta_val = "Error"
+                        telemetry_msg = f"Failed: {last_err}"
+                    else:
+                        detail_msg = "Standby · Ready to generate video"
+                        eta_val = "Standby"
+                        telemetry_msg = f"Engine: SD WebUI :7860 ({model})"
+
                     self.send_json_response({
                         "active": False,
                         "job_id": job_id,
                         "stage": stage,
                         "progress": 100.0 if stage == "complete" else 0.0,
-                        "detail": "✓ Video synthesis complete!" if stage == "complete" else ("Standby · Ready to generate video" if stage != "error" else f"Generation error: {last_err}"),
-                        "eta_str": "Complete" if stage == "complete" else ("Standby" if stage != "error" else "Error"),
-                        "telemetry": f"Rendered {frame_tot} frames @ {fps} fps" if stage == "complete" else (f"Engine: SD WebUI :7860 ({model})" if stage != "error" else f"Failed: {last_err}"),
+                        "detail": detail_msg,
+                        "eta_str": eta_val,
+                        "telemetry": telemetry_msg,
                         "frame_current": frame_curr,
                         "frame_total": frame_tot,
                         "sampling_step": steps_per_frame if stage == "complete" else 0,
@@ -2232,6 +2258,28 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
                     "model": video_model,
                     "message": "Video synthesis started in background"
                 })
+                return
+
+            elif path == "/api/video/interrupt":
+                try:
+                    int_req = urllib.request.Request(
+                        f"{sd_url}/sdapi/v1/interrupt",
+                        data=b"{}",
+                        headers={"Content-Type": "application/json", "User-Agent": "LIW-Gateway/1.0"},
+                        method="POST"
+                    )
+                    with urllib.request.urlopen(int_req, timeout=5) as _:
+                        pass
+                except Exception:
+                    pass
+
+                with _video_gen_lock:
+                    _video_gen_state["active"] = False
+                    _video_gen_state["stage"] = "interrupted"
+                    _video_gen_state["job_id"] = None
+                    _video_gen_state["last_error"] = "Synthesis stopped by user"
+
+                self.send_json_response({"success": True, "message": "Video synthesis interrupted"})
                 return
         self.send_error(404, f"Video endpoint not found: {path}")
 
