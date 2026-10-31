@@ -35,11 +35,116 @@ import socket
 import concurrent.futures
 import io
 import random
+import signal
 from PIL import Image
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 
 DEFAULT_PORT = 3300
 BACKENDS_FILE = "backends.json"
+MAX_PAYLOAD_BYTES = 50 * 1024 * 1024  # 50 MB payload guard
+
+ALLOWED_PRIVATE_NETWORKS = (
+    "127.", "10.", "192.168.", "172.16.", "172.17.", "172.18.", "172.19.",
+    "172.20.", "172.21.", "172.22.", "172.23.", "172.24.", "172.25.",
+    "172.26.", "172.27.", "172.28.", "172.29.", "172.30.", "172.31."
+)
+TRUSTED_HF_HOSTS = ("huggingface.co", "hf-mirror.com")
+BLOCKED_STATIC_FILES = {
+    "server.py", "backends.json", "docker-compose.yml", "start.sh",
+    "start.bat", "start.command", "changelog.md", "readme.md", "license",
+    "package.json", "requirements.txt"
+}
+
+
+def is_allowed_origin(origin, host_header=None):
+    """Validate cross-origin request against loopback, local LAN, Tailscale, or explicit allowed list."""
+    if not origin:
+        return True
+    try:
+        parsed = urllib.parse.urlparse(origin)
+        hostname = (parsed.hostname or "").lower()
+        netloc = (parsed.netloc or "").lower()
+
+        # Same host / same origin
+        if host_header:
+            clean_host = host_header.lower()
+            if netloc == clean_host or hostname == clean_host.split(":")[0]:
+                return True
+
+        # Localhost / loopback
+        if hostname in ("localhost", "127.0.0.1", "::1", "0.0.0.0"):
+            return True
+
+        # Local mDNS, LAN, Tailscale mesh
+        if hostname.endswith(".local") or hostname.endswith(".lan") or hostname.endswith(".ts.net"):
+            return True
+
+        # RFC 1918 private subnets
+        for prefix in ALLOWED_PRIVATE_NETWORKS:
+            if hostname.startswith(prefix):
+                return True
+
+        # Explicit user-configured allowed origins
+        env_origins = os.environ.get("ALLOWED_ORIGINS", "")
+        if env_origins:
+            allowed_list = [o.strip().rstrip("/") for o in env_origins.split(",") if o.strip()]
+            if origin.rstrip("/") in allowed_list:
+                return True
+
+        return False
+    except Exception:
+        return False
+
+
+def is_safe_url(url):
+    """Validate backend or target URL scheme and block SSRF against cloud metadata."""
+    if not url:
+        return False
+    try:
+        parsed = urllib.parse.urlparse(url)
+        if parsed.scheme not in ("http", "https"):
+            return False
+        hostname = (parsed.hostname or "").lower()
+        if not hostname:
+            return False
+        # Block cloud instance metadata and link-local services
+        if hostname in ("169.254.169.254", "metadata.google.internal", "metadata", "instance-data"):
+            return False
+        if hostname.startswith("169.254."):
+            return False
+        return True
+    except Exception:
+        return False
+
+
+def is_trusted_hf_endpoint(endpoint):
+    """Verify endpoint belongs to official Hugging Face domains or mirrors before forwarding credentials."""
+    if not endpoint:
+        return True
+    try:
+        parsed = urllib.parse.urlparse(endpoint)
+        hostname = (parsed.hostname or "").lower()
+        return any(hostname == h or hostname.endswith("." + h) for h in TRUSTED_HF_HOSTS)
+    except Exception:
+        return False
+
+
+def is_safe_static_path(path):
+    """Sanitize static file path and block hidden files, parent traversal, and sensitive project files."""
+    clean_path = urllib.parse.urlparse(path).path
+    normalized = os.path.normpath(clean_path).lstrip("/")
+    parts = normalized.split(os.sep)
+    for part in parts:
+        if part.startswith(".") or part == "..":
+            return False
+    if normalized.lower() in BLOCKED_STATIC_FILES or normalized.lower().endswith(".bak"):
+        return False
+    allowed_extensions = {".html", ".js", ".css", ".png", ".jpg", ".jpeg", ".webp", ".svg", ".ico", ".woff", ".woff2", ".ttf"}
+    _, ext = os.path.splitext(normalized.lower())
+    if ext and ext not in allowed_extensions:
+        return False
+    return True
+
 
 DEFAULT_BACKENDS = {
     "ollama": {
@@ -118,11 +223,25 @@ def save_backends_config(updated_dict):
     global _backends_cache
     with _backends_lock:
         current = load_backends_config()
-        for k, v in updated_dict.items():
-            if k in current and isinstance(v, dict):
-                current[k].update(v)
-            elif isinstance(v, dict):
-                current[k] = v
+        if isinstance(updated_dict, dict):
+            for k, v in updated_dict.items():
+                if k in DEFAULT_BACKENDS and isinstance(v, dict):
+                    clean_v = {}
+                    if "url" in v:
+                        u = str(v["url"]).strip()
+                        if is_safe_url(u):
+                            clean_v["url"] = u
+                    if "health_path" in v:
+                        hp = str(v["health_path"]).strip()
+                        if hp.startswith("/"):
+                            clean_v["health_path"] = hp
+                    if "enabled" in v:
+                        clean_v["enabled"] = bool(v["enabled"])
+                    if clean_v:
+                        if k in current:
+                            current[k].update(clean_v)
+                        else:
+                            current[k] = clean_v
         _backends_cache = current
         try:
             with open(BACKENDS_FILE, "w", encoding="utf-8") as f:
@@ -155,6 +274,15 @@ def probe_single_backend(backend_info):
         }
 
     target = f"{url}{hpath}"
+    if not is_safe_url(target):
+        return {
+            "id": bid,
+            "status": "offline",
+            "online": False,
+            "latency_ms": None,
+            "error": "Disallowed or invalid URL scheme"
+        }
+
     start = time.time()
     try:
         req = urllib.request.Request(target, headers={"User-Agent": "LIW-Gateway/1.0"})
@@ -265,10 +393,10 @@ class BackendProcessManager:
         external_pid = None
         if not is_managed_running and is_open and port:
             try:
-                res = subprocess.check_output(f"lsof -ti :{port}", shell=True, text=True).strip()
+                res = subprocess.check_output(["lsof", "-ti", f":{port}"], text=True).strip()
                 if res:
                     first_pid = int(res.split()[0])
-                    proc_comm = subprocess.check_output(f"ps -p {first_pid} -o comm=", shell=True, text=True).strip().lower()
+                    proc_comm = subprocess.check_output(["ps", "-p", str(first_pid), "-o", "comm="], text=True).strip().lower()
                     if name == "piper" and ("controlcenter" in proc_comm or "airplay" in proc_comm):
                         is_open = False
                     else:
@@ -278,15 +406,15 @@ class BackendProcessManager:
         elif not is_managed_running and not is_open:
             try:
                 if name == "sd_webui":
-                    res = subprocess.check_output("pgrep -f 'launch.py|webui.py'", shell=True, text=True).strip()
+                    res = subprocess.check_output(["pgrep", "-f", "launch.py|webui.py"], text=True).strip()
                     if res:
                         external_pid = int(res.split()[0])
                 elif name == "comfyui":
-                    res = subprocess.check_output("pgrep -f 'main.py.*8188'", shell=True, text=True).strip()
+                    res = subprocess.check_output(["pgrep", "-f", "main.py.*8188"], text=True).strip()
                     if res:
                         external_pid = int(res.split()[0])
                 elif name == "ollama":
-                    res = subprocess.check_output("pgrep -f 'ollama serve'", shell=True, text=True).strip()
+                    res = subprocess.check_output(["pgrep", "-f", "ollama serve"], text=True).strip()
                     if res:
                         external_pid = int(res.split()[0])
             except Exception:
@@ -337,6 +465,8 @@ class BackendProcessManager:
                 self.states[name] = "error" if code != 0 else "stopped"
 
     def start_service(self, name):
+        if name not in self.PORT_MAP:
+            return {"success": False, "error": f"Invalid service: {name}"}
         path = self.get_known_path(name)
         if not path and name != "ollama":
             return {"success": False, "error": f"{name} is not installed locally. Run installation first."}
@@ -400,6 +530,8 @@ class BackendProcessManager:
             return {"success": False, "error": str(e)}
 
     def stop_service(self, name):
+        if name not in self.PORT_MAP:
+            return {"success": False, "error": f"Invalid service: {name}"}
         self._append_log(name, f"=== Stopping {name} ===")
         proc = self.processes.get(name)
         if proc and proc.poll() is None:
@@ -415,7 +547,15 @@ class BackendProcessManager:
         port = self.PORT_MAP.get(name)
         if port:
             try:
-                subprocess.run(f"lsof -ti :{port} | xargs kill -9 2>/dev/null", shell=True, timeout=2)
+                res = subprocess.check_output(["lsof", "-ti", f":{port}"], text=True, timeout=2).strip()
+                if res:
+                    for pid_str in res.split():
+                        pid = int(pid_str)
+                        if pid > 1:
+                            try:
+                                os.kill(pid, signal.SIGTERM)
+                            except ProcessLookupError:
+                                pass
             except Exception:
                 pass
         with self.lock:
@@ -476,23 +616,6 @@ class BackendProcessManager:
     def get_logs(self, name, since=0):
         with self.lock:
             all_logs = list(self.logs[name])
-            if not all_logs and name == "sd_webui":
-                import glob
-                task_dir = os.path.expanduser("~/.gemini/antigravity/brain")
-                try:
-                    candidates = glob.glob(f"{task_dir}/*/.system_generated/tasks/task-*.log")
-                    if candidates:
-                        candidates.sort(key=os.path.getmtime, reverse=True)
-                        for c in candidates[:3]:
-                            with open(c, "r", encoding="utf-8", errors="ignore") as f:
-                                head = f.read(2048)
-                                if "launch.py" in head or "stable-diffusion" in head or "Downloading:" in head:
-                                    f.seek(0)
-                                    lines = f.readlines()
-                                    all_logs = [line.strip() for line in lines[-150:] if line.strip()]
-                                    break
-                except Exception:
-                    pass
 
             progress_summary = None
             for line in reversed(all_logs):
@@ -615,7 +738,8 @@ def _run_ollama_chat_stream_worker(stream_id, req):
                 with _chat_stream_lock:
                     buf = _chat_stream_buffers.get(stream_id)
                     if buf:
-                        buf["chunks"].append(line)
+                        if len(buf["chunks"]) < 50000:
+                            buf["chunks"].append(line)
         with _chat_stream_lock:
             buf = _chat_stream_buffers.get(stream_id)
             if buf:
@@ -1251,6 +1375,8 @@ def fetch_hf_models(query="", model_type="", sort="downloads", limit=40,
     """Search HuggingFace Hub with full configuration support (token, mirror, filters)."""
     base_endpoint = normalize_endpoint(endpoint)
     clean_token = (token or "").strip()
+    if clean_token and not is_trusted_hf_endpoint(base_endpoint):
+        clean_token = ""
     cache_key = f"hf:{base_endpoint}:{query}:{model_type}:{sort}:{limit}:{gguf_only}:{'auth' if clean_token else 'anon'}"
     cached = cache_get(cache_key)
     if cached:
@@ -1397,6 +1523,8 @@ def fetch_hf_model_detail(model_id, token=None, endpoint=None):
     """Fetch detailed info for a specific HuggingFace model."""
     base_endpoint = normalize_endpoint(endpoint)
     clean_token = (token or "").strip()
+    if clean_token and not is_trusted_hf_endpoint(base_endpoint):
+        clean_token = ""
     cache_key = f"hf_detail:{base_endpoint}:{model_id}:{'auth' if clean_token else 'anon'}"
     cached = cache_get(cache_key)
     if cached:
@@ -1481,6 +1609,8 @@ def verify_hf_token(token, endpoint=None):
     clean_token = (token or "").strip()
     if not clean_token:
         return {"valid": False, "error": "No token provided"}
+    if not is_trusted_hf_endpoint(base_endpoint):
+        return {"valid": False, "error": "Refusing to transmit Hugging Face token to unverified third-party endpoint"}
 
     try:
         url = f"{base_endpoint}/api/whoami-v2"
@@ -1731,10 +1861,23 @@ def fetch_civitai_models(query="", model_type="Checkpoint", sort="Highest Rated"
 
 class OllamaProxyHandler(SimpleHTTPRequestHandler):
     def end_headers(self):
-        # Enable CORS for all responses
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, DELETE, PUT")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+        origin = self.headers.get("Origin")
+        host = self.headers.get("Host")
+        if is_allowed_origin(origin, host):
+            if origin:
+                self.send_header("Access-Control-Allow-Origin", origin)
+                self.send_header("Vary", "Origin")
+            else:
+                self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, DELETE, PUT")
+            self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Stream-Id")
+            if self.headers.get("Access-Control-Request-Private-Network") == "true":
+                self.send_header("Access-Control-Allow-Private-Network", "true")
+
+        # Defense-in-depth security headers
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header("X-Frame-Options", "SAMEORIGIN")
+        self.send_header("Referrer-Policy", "strict-origin-when-cross-origin")
         super().end_headers()
 
     def do_OPTIONS(self):
@@ -1742,8 +1885,13 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
         self.end_headers()
 
     def do_HEAD(self):
-        if self.path == "/setup" or self.path == "/setup/":
+        if self.path in ("/setup", "/setup/"):
             self.path = "/setup.html"
+        elif self.path in ("/", "/chat", "/chat/"):
+            self.path = "/index.html"
+        if not is_safe_static_path(self.path):
+            self.send_error(404, "File not found")
+            return
         super().do_HEAD()
 
     def do_GET(self):
@@ -1751,8 +1899,11 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
             self.send_response(204)
             self.end_headers()
             return
-        elif self.path == "/setup" or self.path == "/setup/":
+        elif self.path in ("/setup", "/setup/"):
             self.path = "/setup.html"
+            return super().do_GET()
+        elif self.path in ("/", "/chat", "/chat/"):
+            self.path = "/index.html"
             return super().do_GET()
         elif self.path.startswith("/api/backends"):
             self.handle_backends_request()
@@ -1771,9 +1922,17 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
         elif self.path.startswith("/hub/"):
             self.handle_hub_request()
         else:
+            if not is_safe_static_path(self.path):
+                self.send_error(404, "File not found")
+                return
             super().do_GET()
 
     def do_POST(self):
+        content_length = int(self.headers.get("Content-Length", 0))
+        if content_length > MAX_PAYLOAD_BYTES:
+            self.send_error(413, "Payload Too Large")
+            return
+
         if self.path.startswith("/api/backends"):
             self.handle_backends_request()
         elif self.path.startswith("/api/image/"):
@@ -1835,6 +1994,13 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
             if path == "/api/backends/service/action":
                 name = payload.get("name", "sd_webui")
                 action = payload.get("action", "start")
+                if name not in process_manager.PORT_MAP:
+                    self.send_json_response({"success": False, "error": f"Unknown service: {name}"}, status=400)
+                    return
+                if action not in ("start", "stop", "restart", "install"):
+                    self.send_json_response({"success": False, "error": f"Unknown action: {action}"}, status=400)
+                    return
+
                 if action == "start":
                     res = process_manager.start_service(name)
                 elif action == "stop":
@@ -2806,12 +2972,39 @@ class OllamaProxyHandler(SimpleHTTPRequestHandler):
 
 
 def run():
-    port = int(sys.argv[1]) if len(sys.argv) > 1 else DEFAULT_PORT
+    host = os.environ.get("HOST", "0.0.0.0")
+    port = DEFAULT_PORT
+
+    args = sys.argv[1:]
+    i = 0
+    while i < len(args):
+        arg = args[i]
+        if arg in ("--host", "-h") and i + 1 < len(args):
+            host = args[i + 1]
+            i += 2
+        elif arg in ("--port", "-p") and i + 1 < len(args):
+            try:
+                port = int(args[i + 1])
+            except ValueError:
+                pass
+            i += 2
+        elif arg.isdigit():
+            port = int(arg)
+            i += 1
+        elif arg == "--local":
+            host = "127.0.0.1"
+            i += 1
+        else:
+            i += 1
+
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    os.environ["OLLAMA_ORIGINS"] = "*"
+    if "OLLAMA_ORIGINS" not in os.environ:
+        os.environ["OLLAMA_ORIGINS"] = "http://localhost:*,http://127.0.0.1:*,http://0.0.0.0:*"
+
     ThreadingHTTPServer.allow_reuse_address = True
-    server = ThreadingHTTPServer(("0.0.0.0", port), OllamaProxyHandler)
-    print(f"Local Intelligence Workstation Gateway running on http://0.0.0.0:{port}")
+    server = ThreadingHTTPServer((host, port), OllamaProxyHandler)
+    display_host = "127.0.0.1" if host == "0.0.0.0" else host
+    print(f"Local Intelligence Workstation Gateway running on http://{display_host}:{port} (bound to {host})")
     print(f"Backends: Ollama ({get_backend_url('ollama')}), SD WebUI ({get_backend_url('sd_webui')}), Whisper ({get_backend_url('whisper')}), Piper ({get_backend_url('piper')})")
     print(f"Model Hub API endpoints: /hub/ollama/search, /hub/hf/search, /hub/civitai/search, /hub/categories")
     try:

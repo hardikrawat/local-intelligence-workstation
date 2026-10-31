@@ -15,6 +15,7 @@
   
   
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 
@@ -13188,7 +13189,25 @@ body.eco-mode .video-stage-progress-fill.active {
 
   function escapeHtml(str) {
     if (!str) return '';
-    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function renderSafeMarkdown(content) {
+    if (!content) return '';
+    marked.setOptions({ breaks: true, gfm: true });
+    const rawHtml = marked.parse(content);
+    if (typeof DOMPurify !== 'undefined') {
+      return DOMPurify.sanitize(rawHtml, {
+        ADD_TAGS: ['details', 'summary'],
+        ADD_ATTR: ['open', 'target']
+      });
+    }
+    return rawHtml;
   }
 
   
@@ -13209,8 +13228,6 @@ body.eco-mode .video-stage-progress-fill.active {
   function formatMessageContent(rawText) {
     if (!rawText) return '';
 
-    marked.setOptions({ breaks: true, gfm: true });
-
     let thoughtHtml = '';
     const thinkRegex = /<think>([\s\S]*?)(?:<\/think>|$)/gi;
     const thoughtBlocks = [];
@@ -13225,7 +13242,7 @@ body.eco-mode .video-stage-progress-fill.active {
     if (thoughtBlocks.length > 0) {
       thoughtHtml = thoughtBlocks.map(trimmed => {
         const count = estimateTokens(trimmed).toLocaleString();
-        const parsedThought = marked.parse(trimmed);
+        const parsedThought = renderSafeMarkdown(trimmed);
         return `
           <details class="reasoning-box" ${config.expandThinking ? 'open' : ''}>
             <summary>
@@ -13246,7 +13263,7 @@ body.eco-mode .video-stage-progress-fill.active {
 
     let answerHtml = '';
     if (strippedText.trim()) {
-      answerHtml = marked.parse(strippedText.trim());
+      answerHtml = renderSafeMarkdown(strippedText.trim());
     }
 
     const tempDiv = document.createElement('div');
@@ -13799,7 +13816,7 @@ body.eco-mode .video-stage-progress-fill.active {
       WorkstationAudio.throttledTick('streamRelayTick', 120);
       if (accumulatedThought) {
         reasoningBox.style.display = 'block';
-        thoughtBody.innerHTML = marked.parse(accumulatedThought);
+        thoughtBody.innerHTML = renderSafeMarkdown(accumulatedThought);
         updateLiveThoughtTimer();
         if (!config.expandThinking && !reasoningBox.dataset.userToggled) {
           reasoningBox.removeAttribute('open');
@@ -13811,7 +13828,7 @@ body.eco-mode .video-stage-progress-fill.active {
 
       if (accumulatedAnswer) {
         if (streamLoader) streamLoader.style.display = 'none';
-        answerBody.innerHTML = marked.parse(accumulatedAnswer) + '<span class="typing-cursor"></span>';
+        answerBody.innerHTML = renderSafeMarkdown(accumulatedAnswer) + '<span class="typing-cursor"></span>';
       }
 
       if (firstTokenTime) {
@@ -16266,7 +16283,7 @@ body.eco-mode .video-stage-progress-fill.active {
 
       // Type badges
       let typeBadgesHtml = types.map(t =>
-        `<span class="hub-type-badge ${t}">${t}</span>`
+        `<span class="hub-type-badge ${escapeHtml(t)}">${escapeHtml(t)}</span>`
       ).join('');
 
       if (isDiffusion) {
@@ -16277,7 +16294,7 @@ body.eco-mode .video-stage-progress-fill.active {
       let statsHtml = '';
       if (currentSource === 'ollama') {
         if (pulls) statsHtml += `<span class="hub-model-stat">↓ ${escapeHtml(String(pulls))}</span>`;
-        if (sizes.length > 0) statsHtml += `<span class="hub-model-stat">Sizes: ${sizes.join(', ')}</span>`;
+        if (sizes.length > 0) statsHtml += `<span class="hub-model-stat">Sizes: ${escapeHtml(sizes.join(', '))}</span>`;
       } else {
         if (downloads) statsHtml += `<span class="hub-model-stat">↓ ${Number(downloads).toLocaleString()}</span>`;
         if (likes) statsHtml += `<span class="hub-model-stat">♥ ${Number(likes).toLocaleString()}</span>`;
@@ -16290,6 +16307,10 @@ body.eco-mode .video-stage-progress-fill.active {
       // Download progress
       const dlState = activeDownloads[displayName];
       const dlHtml = dlState ? renderDownloadProgress(dlState) : '';
+
+      const safeModelUrl = (model.url && (model.url.startsWith('http://') || model.url.startsWith('https://')))
+        ? escapeHtml(model.url)
+        : `https://huggingface.co/${escapeHtml(displayName)}`;
 
       return `
         <div class="hub-model-card ${isExpanded ? 'expanded' : ''}" data-model="${escapeHtml(displayName)}" data-idx="${idx}">
@@ -16314,14 +16335,14 @@ body.eco-mode .video-stage-progress-fill.active {
                       <button type="button" class="hub-pull-btn hub-hf-expand-diffusion-btn" title="View GGUF files to download for ComfyUI / Forge / sd.cpp (Not Ollama)">
                         ⬇ ComfyUI / Forge GGUF
                       </button>
-                      <a href="${model.url || `https://huggingface.co/${escapeHtml(displayName)}`}" target="_blank" class="top-btn" style="text-decoration:none; padding:2px 6px;" title="Open repository on Hugging Face">HF ↗</a>
+                      <a href="${safeModelUrl}" target="_blank" class="top-btn" style="text-decoration:none; padding:2px 6px;" title="Open repository on Hugging Face">HF ↗</a>
                      </div>`
                   : `<div style="display:flex; gap:4px; align-items:center;">
                       <button type="button" class="hub-pull-btn hub-hf-pull-quick-btn" data-hf-pull-tag="hf.co/${escapeHtml(displayName)}:${escapeHtml(hfConfig.defaultQuant || 'Q4_K_M')}" title="1-Click Pull to Ollama (hf.co/${displayName}:${hfConfig.defaultQuant || 'Q4_K_M'})">
                         ${installed ? '✓ Installed' : '↓ Pull to Ollama'}
                       </button>
                       <button type="button" class="top-btn hub-hf-mf-btn" data-model-id="${escapeHtml(displayName)}" title="Build Ollama Modelfile">Modelfile</button>
-                      <a href="${model.url || '#'}" target="_blank" class="top-btn" style="text-decoration:none; padding:2px 6px;" title="Open on Hugging Face">HF ↗</a>
+                      <a href="${safeModelUrl}" target="_blank" class="top-btn" style="text-decoration:none; padding:2px 6px;" title="Open on Hugging Face">HF ↗</a>
                      </div>`
               }
             </div>
